@@ -1,0 +1,10 @@
+# Build output
+bin/
+obj/
+out/
+*.user
+.vs/
+tests-run*.txt
+# Release packages are attached to GitHub releases, not committed
+*.zip
+*.exe

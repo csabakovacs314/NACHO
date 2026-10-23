@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Product>NACHO</Product>
+    <Company>NACHO</Company>
+    <Copyright>Idea: Csaba Kovacs</Copyright>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+</Project>
