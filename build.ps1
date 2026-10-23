@@ -1,6 +1,6 @@
 # Builds a NACHO release into a NEW folder: Downloads\NACHO\NACHO-<version>
 # Steps: icon, unit tests, two exe flavours, self-test of both, source zip, package zip.
-param([string]$Version = "0.1.0")
+param([string]$Version = "0.1.1")
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
 $release = Join-Path $env:USERPROFILE "Downloads\NACHO\NACHO-$Version"

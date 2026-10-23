@@ -43,6 +43,9 @@
             <TextBlock Style="{StaticResource Step}"><Run Text="3. " /><Run Text="{l:L About.Way3}" /></TextBlock>
             <TextBlock Style="{StaticResource Step}"><Run Text="4. " /><Run Text="{l:L About.Way4}" /></TextBlock>
 
+            <TextBlock Text="{l:L About.Replace}" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,8" />
+            <TextBlock Text="{l:L About.ReplaceBody}" TextWrapping="Wrap" />
+
             <TextBlock Text="{l:L About.Keys}" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,8" />
             <TextBlock Text="{l:L About.KeysList}" TextWrapping="Wrap" FontSize="13" />
 

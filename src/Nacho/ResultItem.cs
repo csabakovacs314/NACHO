@@ -33,7 +33,8 @@ public sealed class ResultItem : INotifyPropertyChanged
     public string SmallerText => IsOk ? Loc.F("Tile.Smaller", Result!.PercentSmaller) : "";
 
     public string PxText => IsOk
-        ? Loc.F("Tile.PxLine", Dim(Result!.OriginalWidth, Result.OriginalHeight), Dim(Result.OutputWidth, Result.OutputHeight), Result.OutputFormat)
+        ? Loc.F("Tile.PxLine", Dim(Result!.OriginalWidth, Result.OriginalHeight), Dim(Result.OutputWidth, Result.OutputHeight),
+            ShapeLabel(Result.OriginalWidth, Result.OriginalHeight), Result.OutputFormat)
         : "";
 
     public string KeptBody => IsKept
@@ -71,6 +72,17 @@ public sealed class ResultItem : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public static string Dim(int w, int h) => $"{w} × {h}";
+
+    public static string ShapeLabel(int w, int h) => Shape.Label(w, h, Loc.Instance.Culture);
+
+    /// <summary>"3:4, exact", or "16:9, within 0.04%" when whole pixels can't hit the ratio exactly.</summary>
+    public static string ShapeDescription(ShrinkResult r)
+    {
+        string label = ShapeLabel(r.OriginalWidth, r.OriginalHeight);
+        if (r.ShapeExact) return Loc.F("Shape.Exact", label);
+        double pct = Math.Max(0.01, Math.Round(r.ShapeErrorPercent, 2));
+        return Loc.F("Shape.Within", label, pct.ToString("0.##", Loc.Instance.Culture));
+    }
 }
 
 public static class Images

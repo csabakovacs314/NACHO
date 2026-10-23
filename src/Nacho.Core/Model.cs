@@ -63,6 +63,12 @@ public sealed class ShrinkResult
     public List<Badge> Badges { get; } = new();
     public string? ErrorDetail { get; set; }
 
+    /// <summary>True when the copy has exactly the original's width-to-height ratio.</summary>
+    public bool ShapeExact => OutputWidth > 0 && Shape.Same(OriginalWidth, OriginalHeight, OutputWidth, OutputHeight);
+
+    /// <summary>How far the copy's shape is from the original's, in percent (0 when exact).</summary>
+    public double ShapeErrorPercent => 100 * Shape.Error(OriginalWidth, OriginalHeight, OutputWidth, OutputHeight);
+
     /// <summary>The file to hand over: the new copy, or the original when it was kept.</summary>
     public string? DeliverPath => Kind switch
     {

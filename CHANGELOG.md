@@ -2,6 +2,29 @@
 
 Versions: MAJOR.MINOR.PATCH. Minor for a feature, patch for a fix.
 
+## 0.1.1 (2026-10-23)
+
+**Asked for:** keep the ratio, because the image will be re-inserted into the document.
+
+**Changed**
+- Every size is now worked out from the original's exact shape. Common shapes (4:3, 3:2, 16:9, 16:10 and most camera sizes) come out exact, for example 4032 × 3024 to 1280 × 960 and 6000 × 4000 to 1278 × 852. Other shapes stay within 0.1%; very thin strips within 1%, or keep their full size.
+- Over-budget photos: the extra shrinking step now renders again from the full-size picture at the original's shape. Before, it shrank the already shrunk copy by 85% on each side separately, so the short side could drift by up to a pixel on each step.
+- The 25-megapixel limit no longer rounds both sides down separately.
+
+**Added**
+- Tile line shows the shape: "2250 × 3000 to 960 × 1280 px · shape 3:4 kept · JPEG".
+- Page-fit preview has a Shape row ("3:4, exact" or "16:9, within 0.04%") and a note that Replace image in Google Docs fits a same-shape copy into the old frame without stretching.
+- Right-click a tile > Copy path, to paste into the File name box of Docs' Replace image > Upload from computer.
+- About explains how to replace an image already in a Doc.
+- English and Spanish for all of the above.
+
+**Fixed**
+- The over-budget step could report the size of a picture it had not saved (it resized once more after the last try).
+
+**Tests:** 63 unit tests, all passing (39 new: 16 awkward sizes at 6 target sizes, exact results for common shapes, a 30 KB budget that forces the extra shrinking step, shape names in English and Spanish). 57 self-test checks, passed by both exes from the release folder on the real window (new: shape of every copy, the Shape row in English and Spanish, the tile line).
+
+**Not checked here:** Replace image in a live Google Doc; whether Google Docs shows phone photos upright (if one of yours shows sideways in the Doc today, the upright copy would not match its frame).
+
 ## 0.1.0 (2026-10-23)
 
 **Asked for:** a Windows program that shrinks an image to an acceptable size before it goes into a Google Doc, so the small file is uploaded instead of the big one. English and Spanish UI, switchable. A full name for the NACHO abbreviation.

@@ -1,4 +1,4 @@
-NACHO 0.1.0
+NACHO 0.1.1
 Normalise, Adjust, Compress, Hand Over
 (Spanish: Normaliza, Ajusta, Comprime y Honra el Original)
 
@@ -8,8 +8,8 @@ Your original file is never changed. The copy goes to Pictures\Docs-Ready.
 FILES
   NACHO.exe                  Portable. Runs on Windows 10 or 11 (x64) with nothing to install.
   Small\NACHO.exe            Same app, much smaller, needs the .NET 10 Desktop Runtime.
-  NACHO-0.1.0-source.zip     Source, unit tests and build.ps1.
-  NACHO-0.1.0.zip            Everything above in one package.
+  NACHO-0.1.1-source.zip     Source, unit tests and build.ps1.
+  NACHO-0.1.1.zip            Everything above in one package.
 
 FIRST RUN
   The exe is not code-signed, so Windows SmartScreen may say "Windows protected your PC".
@@ -28,6 +28,17 @@ PRESETS
   Balanced  1280 px long edge, up to 300 KB (default)
   Sharp     1920 px long edge, up to 600 KB
   Changing the preset redoes the images in the list. Images are never made bigger.
+
+SHAPE (ASPECT RATIO)
+  A copy always has the same shape as its original: never cropped, never stretched.
+  Common shapes (4:3, 3:2, 16:9 and most camera sizes) come out exact. Other shapes stay within
+  0.1%, very thin strips within 1%. The tile and the page-fit preview show the shape.
+  This matters when you swap an image that is already in a Doc: click it in the Doc, choose
+  Replace image > Upload from computer, and pick the copy. Docs fits the new image into the old
+  image's frame, so a same-shape copy takes its place without stretching.
+  Quicker: right-click the tile in NACHO > Copy path, then press Ctrl+V in the File name box of
+  that dialog and Enter.
+  Phone photos are turned upright first, so the copy has the shape you see on screen.
 
 LANGUAGE
   EN | ES buttons in the command bar switch the whole window at once.

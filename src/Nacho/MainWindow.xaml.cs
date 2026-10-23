@@ -368,6 +368,7 @@ public partial class MainWindow : Window
     private void Remove_Click(object sender, RoutedEventArgs e) { if (ItemOf(sender) is { } i) RemoveItem(i); }
     private void CtxCopyFile_Click(object sender, RoutedEventArgs e) => CopyFile(ItemOf(sender));
     private void CtxCopyPicture_Click(object sender, RoutedEventArgs e) => CopyPicture(ItemOf(sender));
+    private void CtxCopyPath_Click(object sender, RoutedEventArgs e) => CopyPath(ItemOf(sender));
     private void CtxShowFolder_Click(object sender, RoutedEventArgs e) => ShowInFolder(ItemOf(sender));
     private void CtxRemove_Click(object sender, RoutedEventArgs e) { if (ItemOf(sender) is { } i) RemoveItem(i); }
 
@@ -395,6 +396,15 @@ public partial class MainWindow : Window
         var data = new DataObject();
         data.SetImage(bmp);
         if (TrySetClipboard(data)) SetStatus(() => Loc.F("Status.CopiedPicture", Path.GetFileName(path)));
+    }
+
+    /// <summary>The full path as text, for the File name box of Docs' Replace image > Upload from computer.</summary>
+    private void CopyPath(ResultItem? item)
+    {
+        if (item?.DeliverPath is not { } path || !File.Exists(path)) return;
+        var data = new DataObject();
+        data.SetText(path, TextDataFormat.UnicodeText);
+        if (TrySetClipboard(data)) SetStatus(() => Loc.F("Status.CopiedPath", Path.GetFileName(path)));
     }
 
     private bool TrySetClipboard(DataObject data)
@@ -501,7 +511,7 @@ public partial class MainWindow : Window
 
     private void ShowDropHighlight(bool on)
     {
-        DropRect.SetResourceReference(Shape.StrokeProperty, on ? "AccentFillColorDefaultBrush" : "ControlStrongStrokeColorDefaultBrush");
+        DropRect.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, on ? "AccentFillColorDefaultBrush" : "ControlStrongStrokeColorDefaultBrush");
         DropTitle.Visibility = on ? Visibility.Collapsed : Visibility.Visible;
         DropRelease.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
     }
@@ -620,6 +630,9 @@ public partial class MainWindow : Window
         CmpSizeB.Text = Loc.Bytes(r.OutputBytes);
         CmpPxA.Text = ResultItem.Dim(r.OriginalWidth, r.OriginalHeight);
         CmpPxB.Text = ResultItem.Dim(r.OutputWidth, r.OutputHeight);
+        CmpShapeA.Text = ResultItem.ShapeLabel(r.OriginalWidth, r.OriginalHeight);
+        CmpShapeB.Text = ResultItem.ShapeDescription(r);
+        PreviewShapeNote.Text = Loc.T("Preview.ShapeNote");
         CmpFmtA.Text = r.SourceFormat;
         CmpFmtB.Text = r.OutputFormat;
         CmpLocA.Text = Loc.T(r.OriginalHadLocation ? "Loc.Present" : "Loc.None");

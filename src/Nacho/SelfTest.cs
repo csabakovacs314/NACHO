@@ -83,8 +83,13 @@ public static class SelfTest
         Check(w.StatusMessage.Contains("shrunk", StringComparison.Ordinal), "status bar shows the summary: " + w.StatusMessage);
         Check(w.Items.Count(i => i.IsOk && File.Exists(i.Result!.OutputPath)) == 6, "6 new copies in Docs-Ready");
 
+        Check(w.Items.Where(i => i.IsOk).All(i => i.Result!.ShapeErrorPercent <= 0.1), "every copy keeps the original shape");
+        Check(Get(samples.Photo).Result!.ShapeExact, "phone photo shape exact: " + ResultItem.Dim(Get(samples.Photo).Result!.OutputWidth, Get(samples.Photo).Result!.OutputHeight));
+
         w.Select(Get(samples.Photo));
         await Settle();
+        Check(w.CmpShapeB.Text == "3:4, exact", "preview shows the shape: " + w.CmpShapeB.Text);
+        Check(Get(samples.Photo).PxText.Contains("shape 3:4 kept", StringComparison.Ordinal), "tile shows the shape: " + Get(samples.Photo).PxText);
         Shot(w, Path.Combine(outDir, "main-en-light.png"), dark: false);
 
         Loc.Instance.Set("es");
@@ -92,6 +97,7 @@ public static class SelfTest
         Check(w.Title.Contains("Normaliza", StringComparison.Ordinal), "title switches to Spanish");
         Check(Get(samples.Photo).SizeText.Contains(" a ", StringComparison.Ordinal), "tile text switches to Spanish: " + Get(samples.Photo).SizeText);
         Check(w.StatusMessage.Contains("reducidas", StringComparison.Ordinal), "status line follows the language: " + w.StatusMessage);
+        Check(w.CmpShapeB.Text == "3:4, exacta", "shape row follows the language: " + w.CmpShapeB.Text);
         Shot(w, Path.Combine(outDir, "main-es-light.png"), dark: false);
 
         w.Select(Get(samples.Screenshot));

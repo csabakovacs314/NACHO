@@ -3,37 +3,15 @@ using ImageMagick;
 
 namespace Nacho.Core;
 
-public static class Limits
-{
-    /// <summary>Google Docs refuses images above 25 megapixels.</summary>
-    public const long MaxPixels = 25_000_000;
-
-    /// <summary>The formats Google Docs accepts as they are.</summary>
-    public static bool IsDocsFormat(string format) => format is "JPEG" or "PNG" or "GIF";
-
-    /// <summary>Fits width x height inside the long edge without upscaling, and under 25 megapixels.</summary>
-    public static (int Width, int Height) FitWithin(int width, int height, int longEdge)
-    {
-        if (width <= 0 || height <= 0) return (width, height);
-        double scale = Math.Min(1.0, (double)longEdge / Math.Max(width, height));
-        double pixels = (double)width * height * scale * scale;
-        bool capped = false;
-        if (pixels > MaxPixels)
-        {
-            scale *= Math.Sqrt(MaxPixels / pixels);
-            capped = true;
-        }
-        int w = capped ? (int)Math.Floor(width * scale) : (int)Math.Round(width * scale);
-        int h = capped ? (int)Math.Floor(height * scale) : (int)Math.Round(height * scale);
-        return (Math.Max(1, w), Math.Max(1, h));
-    }
-}
-
-/// <summary>Makes a Docs-ready copy of one image. Never writes to the original file.</summary>
+/// <summary>
+/// Makes a Docs-ready copy of one image. Never writes to the original file, never crops or stretches:
+/// every size is worked out from the original's shape (see <see cref="Limits.FitWithin"/>).
+/// </summary>
 public sealed class ImageShrinker
 {
     private static readonly int[] JpegQualities = { 82, 76, 70, 64, 60 };
     private const uint GraphicColourLimit = 8000;
+    private const int BudgetRounds = 5;
 
     private static readonly HashSet<string> ReadableFormats = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -137,17 +115,16 @@ public sealed class ImageShrinker
     private static Encoded EncodeStill(IMagickImage<byte> source, int tw, int th, ShrinkResult r, Preset preset,
         ShrinkOptions opt, bool hasCamera, bool hasGps, bool needsRotate)
     {
-        using var img = source.Clone();
+        // The basis is the upright, stripped, full-size picture. Every size is rendered from it,
+        // so a second or third resize never builds on a rounded one.
+        using var basis = source.Clone();
         if (needsRotate)
         {
-            img.AutoOrient();
+            basis.AutoOrient();
             r.Badges.Add(Badge.RotatedUpright);
         }
-        StripMetadata(img, opt, hasCamera, hasGps, r);
-        if ((int)img.Width != tw || (int)img.Height != th)
-        {
-            img.Resize(new MagickGeometry((uint)tw, (uint)th) { IgnoreAspectRatio = true });
-        }
+        StripMetadata(basis, opt, hasCamera, hasGps, r);
+        using var img = Render(basis, tw, th);
 
         bool alphaUsed = img.HasAlpha && !img.IsOpaque;
         bool graphic = CountColours(img) <= GraphicColourLimit;
@@ -160,11 +137,64 @@ public sealed class ImageShrinker
         };
         if (format == "PNG" && alphaUsed) r.Badges.Add(Badge.Transparency);
         return format == "JPEG"
-            ? EncodeJpeg(img, preset, r)
+            ? EncodeJpeg(basis, img, preset, r)
             : EncodePng(img, preset, r, graphic, opt.Format == FormatMode.Auto && !alphaUsed);
     }
 
-    private static Encoded EncodeJpeg(IMagickImage<byte> img, Preset preset, ShrinkResult r)
+    /// <summary>
+    /// A copy of the basis at exactly width x height. The size already has the original's shape;
+    /// forcing it stops ImageMagick from rounding the short side its own way.
+    /// </summary>
+    private static IMagickImage<byte> Render(IMagickImage<byte> basis, int width, int height)
+    {
+        var img = basis.Clone();
+        if ((int)img.Width != width || (int)img.Height != height)
+        {
+            img.Resize(new MagickGeometry((uint)width, (uint)height) { IgnoreAspectRatio = true });
+        }
+        return img;
+    }
+
+    private static Encoded EncodeJpeg(IMagickImage<byte> basis, IMagickImage<byte> first, Preset preset, ShrinkResult r)
+    {
+        IMagickImage<byte> img = first;
+        IMagickImage<byte>? owned = null;
+        try
+        {
+            byte[] bytes = Array.Empty<byte>();
+            int longEdge = (int)Math.Max(img.Width, img.Height);
+            for (int round = 0; round < BudgetRounds; round++)
+            {
+                PrepareJpeg(img);
+                foreach (int q in round == 0 ? JpegQualities : JpegQualities.Skip(2))
+                {
+                    img.Quality = (uint)q;
+                    bytes = img.ToByteArray();
+                    if (bytes.LongLength <= preset.BudgetBytes)
+                    {
+                        return new Encoded(bytes, "JPEG", ".jpg", (int)img.Width, (int)img.Height);
+                    }
+                }
+                if (round == BudgetRounds - 1 || longEdge <= 320) break;
+
+                // Over budget: 15% smaller, worked out again from the full-size picture and its shape.
+                longEdge = longEdge * 85 / 100;
+                var (w, h) = Limits.FitWithin((int)basis.Width, (int)basis.Height, longEdge);
+                if (w == (int)img.Width && h == (int)img.Height) break;
+                owned?.Dispose();
+                owned = Render(basis, w, h);
+                img = owned;
+            }
+            r.Badges.Add(Badge.OverBudget);
+            return new Encoded(bytes, "JPEG", ".jpg", (int)img.Width, (int)img.Height);
+        }
+        finally
+        {
+            owned?.Dispose();
+        }
+    }
+
+    private static void PrepareJpeg(IMagickImage<byte> img)
     {
         if (img.HasAlpha)
         {
@@ -174,25 +204,6 @@ public sealed class ImageShrinker
         img.Format = MagickFormat.Jpeg;
         img.Settings.Interlace = Interlace.Jpeg;
         img.Settings.SetDefine(MagickFormat.Jpeg, "sampling-factor", "4:2:0");
-
-        byte[] bytes = Array.Empty<byte>();
-        for (int round = 0; round < 5; round++)
-        {
-            foreach (int q in round == 0 ? JpegQualities : JpegQualities.Skip(2))
-            {
-                img.Quality = (uint)q;
-                bytes = img.ToByteArray();
-                if (bytes.LongLength <= preset.BudgetBytes)
-                {
-                    return new Encoded(bytes, "JPEG", ".jpg", (int)img.Width, (int)img.Height);
-                }
-            }
-            if (Math.Max(img.Width, img.Height) <= 320) break;
-            uint nw = Math.Max(1u, img.Width * 85 / 100), nh = Math.Max(1u, img.Height * 85 / 100);
-            img.Resize(new MagickGeometry(nw, nh) { IgnoreAspectRatio = true });
-        }
-        r.Badges.Add(Badge.OverBudget);
-        return new Encoded(bytes, "JPEG", ".jpg", (int)img.Width, (int)img.Height);
     }
 
     private static Encoded EncodePng(IMagickImage<byte> img, Preset preset, ShrinkResult r, bool graphic, bool textBadge)

@@ -146,6 +146,8 @@
                                                       Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
                                             <MenuItem Header="{l:L Tile.CopyPicture}" Click="CtxCopyPicture_Click"
                                                       Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
+                                            <MenuItem Header="{l:L Tile.CopyPath}" Click="CtxCopyPath_Click"
+                                                      Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
                                             <MenuItem Header="{l:L Tile.ShowFolder}" Click="CtxShowFolder_Click"
                                                       Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
                                             <MenuItem Header="{l:L Tile.OpenOriginal}" Click="CtxOpenOriginal_Click" />
@@ -301,6 +303,7 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="{l:L Preview.ColDetail}" Style="{StaticResource Secondary}" FontSize="13" FontWeight="SemiBold" Margin="0,0,12,6" />
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{l:L Preview.ColOriginal}" Style="{StaticResource Secondary}" FontSize="13" FontWeight="SemiBold" Margin="0,0,8,6" />
@@ -311,14 +314,18 @@
                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="{l:L Preview.RowPixels}" FontSize="13" Margin="0,0,12,6" />
                                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="CmpPxA" FontSize="13" Margin="0,0,8,6" />
                                 <TextBlock Grid.Row="2" Grid.Column="2" x:Name="CmpPxB" FontSize="13" Margin="0,0,0,6" />
-                                <TextBlock Grid.Row="3" Grid.Column="0" Text="{l:L Preview.RowFormat}" FontSize="13" Margin="0,0,12,6" />
-                                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="CmpFmtA" FontSize="13" Margin="0,0,8,6" />
-                                <TextBlock Grid.Row="3" Grid.Column="2" x:Name="CmpFmtB" FontSize="13" Margin="0,0,0,6" />
-                                <TextBlock Grid.Row="4" Grid.Column="0" Text="{l:L Preview.RowLocation}" FontSize="13" Margin="0,0,12,0" TextWrapping="Wrap" MaxWidth="120" />
-                                <TextBlock Grid.Row="4" Grid.Column="1" x:Name="CmpLocA" FontSize="13" Margin="0,0,8,0" />
-                                <TextBlock Grid.Row="4" Grid.Column="2" x:Name="CmpLocB" FontSize="13" />
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="{l:L Preview.RowShape}" FontSize="13" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="CmpShapeA" FontSize="13" Margin="0,0,8,6" />
+                                <TextBlock Grid.Row="3" Grid.Column="2" x:Name="CmpShapeB" FontSize="13" Margin="0,0,0,6" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="{l:L Preview.RowFormat}" FontSize="13" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="4" Grid.Column="1" x:Name="CmpFmtA" FontSize="13" Margin="0,0,8,6" />
+                                <TextBlock Grid.Row="4" Grid.Column="2" x:Name="CmpFmtB" FontSize="13" Margin="0,0,0,6" />
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="{l:L Preview.RowLocation}" FontSize="13" Margin="0,0,12,0" TextWrapping="Wrap" MaxWidth="120" />
+                                <TextBlock Grid.Row="5" Grid.Column="1" x:Name="CmpLocA" FontSize="13" Margin="0,0,8,0" />
+                                <TextBlock Grid.Row="5" Grid.Column="2" x:Name="CmpLocB" FontSize="13" />
                             </Grid>
-                            <TextBlock Text="{l:L Preview.Untouched}" Style="{StaticResource Secondary}" FontSize="12" TextWrapping="Wrap" Margin="0,12,0,0" />
+                            <TextBlock x:Name="PreviewShapeNote" FontSize="13" TextWrapping="Wrap" Margin="0,12,0,0" LineHeight="19" />
+                            <TextBlock Text="{l:L Preview.Untouched}" Style="{StaticResource Secondary}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" />
                         </StackPanel>
 
                         <Border x:Name="PreviewKept" Visibility="Collapsed" Padding="16" CornerRadius="6"
