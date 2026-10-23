@@ -2,6 +2,25 @@
 
 Versions: MAJOR.MINOR.PATCH. Minor for a feature, patch for a fix.
 
+## 0.2.0 (2026-10-23)
+
+**Asked for:** a Windows installer.
+
+**Added**
+- `NACHO-0.2.0-setup.exe`, built with Inno Setup 6.7. English or Spanish setup; "for me only" (default, no admin rights, %LOCALAPPDATA%\Programs\NACHO) or "for all users" (Program Files).
+- Setup options: the right-click entry "Make Docs-ready" / "Preparar para Docs" (on by default), Send to, a desktop shortcut. Start menu entry and an entry in Settings > Apps.
+- Uninstall removes the program, its shortcuts, the right-click entry and Send to, whoever turned them on (setup or More options). Settings and Docs-Ready pictures stay.
+- A newer setup installs over an older one (same app ID) and keeps settings and chosen options.
+- The installed copy runs from a normal folder rather than a single packed exe, so it starts faster.
+
+**Changed**
+- NACHO's first run uses the language picked in setup.
+- More options shows the right-click and Send to state as Windows has it, so it agrees with what setup did.
+
+**Tests:** 63 unit tests. 57 self-test checks for the portable and small exes; 58 for the installed copy, which also checks that it starts in the setup language. Installer round trip on this PC: silent install in Spanish with the right-click and Send to options, every file, shortcut and registry entry checked, self-test run from the installed copy, silent uninstall, and a check that nothing was left behind.
+
+**Not checked here:** the setup wizard clicked through by hand, an "all users" install (needs admin), installing over 0.2.0 with a later version.
+
 ## 0.1.1 (2026-10-23)
 
 **Asked for:** keep the ratio, because the image will be re-inserted into the document.

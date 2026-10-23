@@ -40,6 +40,9 @@ public partial class App : Application
 
         ApplyTheme("System");
         var settings = AppSettings.Load();
+        // The installer can add or remove these too, so Windows is the source of truth.
+        settings.ContextMenu = ShellIntegration.IsContextMenuOn();
+        settings.SendTo = ShellIntegration.IsSendToOn();
         Loc.Instance.Set(settings.Language);
         var window = new MainWindow(settings);
         MainWindow = window;

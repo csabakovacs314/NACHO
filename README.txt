@@ -1,4 +1,4 @@
-NACHO 0.1.1
+NACHO 0.2.0
 Normalise, Adjust, Compress, Hand Over
 (Spanish: Normaliza, Ajusta, Comprime y Honra el Original)
 
@@ -6,10 +6,23 @@ NACHO makes a small, Docs-ready copy of an image before it goes into a Google Do
 Your original file is never changed. The copy goes to Pictures\Docs-Ready.
 
 FILES
+  NACHO-0.2.0-setup.exe      Installer (recommended). English or Spanish, no admin rights needed.
   NACHO.exe                  Portable. Runs on Windows 10 or 11 (x64) with nothing to install.
   Small\NACHO.exe            Same app, much smaller, needs the .NET 10 Desktop Runtime.
-  NACHO-0.1.1-source.zip     Source, unit tests and build.ps1.
-  NACHO-0.1.1.zip            Everything above in one package.
+  NACHO-0.2.0-source.zip     Source, unit tests and build.ps1.
+  NACHO-0.2.0.zip            Everything above in one package.
+
+INSTALLER
+  Run NACHO-0.2.0-setup.exe, pick English or Español, then "Install for me only" (no admin
+  rights; goes to %LOCALAPPDATA%\Programs\NACHO) or "Install for all users" (Program Files).
+  Options on the way: the right-click entry (on by default), Send to, a desktop shortcut.
+  NACHO then starts in the language you picked. You get a Start menu entry, and NACHO appears
+  in Settings > Apps, where you can uninstall it.
+  Uninstall removes the program, its Start menu entry, the right-click entry and Send to.
+  It keeps your settings (%APPDATA%\NACHO) and your Docs-Ready pictures.
+  A newer setup installs over an older one and keeps your settings.
+  If you used the portable NACHO.exe before with the right-click entry on, the installer
+  points that entry at the installed copy.
 
 FIRST RUN
   The exe is not code-signed, so Windows SmartScreen may say "Windows protected your PC".
@@ -19,8 +32,8 @@ FIRST RUN
 FOUR WAYS IN
   1. Drop images on the window, or press Ctrl+O.
   2. Copy an image or a snip (Win+Shift+S), then press Ctrl+V in NACHO.
-  3. Right-click an image in Explorer > Make Docs-ready (turn it on in More options).
-  4. Send to > NACHO (turn it on in More options).
+  3. Right-click an image in Explorer > Make Docs-ready (setup offers it, or turn it on in More options).
+  4. Send to > NACHO (setup offers it, or turn it on in More options).
   Then drag the thumbnail into your Google Doc, or press Copy file and Ctrl+V in the Doc.
 
 PRESETS
@@ -65,7 +78,8 @@ SELF-TEST
   screenshots. It uses its own settings and never touches the registry.
 
 UNINSTALL
-  Untick the right-click menu and Send to in More options, close NACHO, then delete its folder
-  and %APPDATA%\NACHO.
+  Installed: Settings > Apps > NACHO > Uninstall.
+  Portable: untick the right-click menu and Send to in More options, close NACHO, then delete
+  its folder and %APPDATA%\NACHO.
 
 Idea: Csaba Kovacs. Built with Claude.

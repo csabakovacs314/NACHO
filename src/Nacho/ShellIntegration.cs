@@ -20,6 +20,23 @@ public static class ShellIntegration
     public static string SendToShortcut => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.SendTo), "NACHO.lnk");
 
+    /// <summary>True when the right-click entry exists, whoever made it (NACHO's options or the installer).</summary>
+    public static bool IsContextMenuOn()
+    {
+        try
+        {
+            using var k = Registry.CurrentUser.OpenSubKey($@"Software\Classes\{Bases[0]}\shell\{Verb}\command");
+            return k?.GetValue("") is string;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>True when the Send to shortcut exists (the installer and NACHO use the same name).</summary>
+    public static bool IsSendToOn() => File.Exists(SendToShortcut);
+
     public static void Apply(bool contextMenu, bool sendTo, string menuText)
     {
         string exe = Environment.ProcessPath ?? throw new InvalidOperationException("Can't tell where NACHO.exe is.");

@@ -70,7 +70,8 @@ public sealed class AppSettings
     {
         if (Language is not ("en" or "es"))
         {
-            Language = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "es" ? "es" : "en";
+            Language = InstallerLanguage()
+                ?? (CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "es" ? "es" : "en");
         }
         var ids = new[] { "small", "balanced", "sharp" };
         if (Presets is null || Presets.Count != 3 || !ids.All(id => Presets.Any(p => p.Id == id)))
@@ -87,6 +88,20 @@ public sealed class AppSettings
         if (string.IsNullOrWhiteSpace(OutputFolder)) OutputFolder = DefaultFolder;
         if (string.IsNullOrWhiteSpace(Suffix) || Suffix.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) Suffix = "-docs";
         if (PageSize is not ("A4" or "Letter")) PageSize = RegionInfo.CurrentRegion.IsMetric ? "A4" : "Letter";
+    }
+
+    /// <summary>The language picked in the installer (HKCU\Software\NACHO, value Language), used on first run.</summary>
+    public static string? InstallerLanguage()
+    {
+        try
+        {
+            using var k = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\NACHO");
+            return k?.GetValue("Language") is string s && (s is "en" or "es") ? s : null;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     public Preset GetPreset() => Presets.First(p => p.Id == CurrentPreset);

@@ -38,6 +38,13 @@ public static class SelfTest
         AppSettings.PathOverride = Path.Combine(outDir, "settings.json");
         if (File.Exists(AppSettings.PathOverride)) File.Delete(AppSettings.PathOverride);
         var settings = AppSettings.Load();
+        string? installerLanguage = AppSettings.InstallerLanguage();
+        if (installerLanguage != null)
+        {
+            Check(settings.Language == installerLanguage, "first run uses the installer's language: " + settings.Language);
+        }
+        log.AppendLine($"INFO  exe: {Environment.ProcessPath}");
+        log.AppendLine($"INFO  right-click menu on: {ShellIntegration.IsContextMenuOn()}, Send to on: {ShellIntegration.IsSendToOn()}");
         settings.Language = "en";
         settings.PageSize = "A4";
         settings.OutputFolder = Path.Combine(outDir, "Docs-Ready");
