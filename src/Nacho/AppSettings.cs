@@ -68,10 +68,9 @@ public sealed class AppSettings
 
     public void Normalise()
     {
-        if (Language is not ("en" or "es"))
+        if (!Strings.Languages.Contains(Language))
         {
-            Language = InstallerLanguage()
-                ?? (CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "es" ? "es" : "en");
+            Language = InstallerLanguage() ?? Strings.Normalise(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
         }
         var ids = new[] { "small", "balanced", "sharp" };
         if (Presets is null || Presets.Count != 3 || !ids.All(id => Presets.Any(p => p.Id == id)))
@@ -96,7 +95,7 @@ public sealed class AppSettings
         try
         {
             using var k = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\NACHO");
-            return k?.GetValue("Language") is string s && (s is "en" or "es") ? s : null;
+            return k?.GetValue("Language") is string s && Strings.Languages.Contains(s) ? s : null;
         }
         catch
         {

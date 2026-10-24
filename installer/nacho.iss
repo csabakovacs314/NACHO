@@ -1,8 +1,8 @@
 ﻿; NACHO installer, built with Inno Setup 6.7.
 ; Installs for the current user by default (no admin rights); "all users" can be chosen in the first dialog.
-; English and Spanish. Compile: ISCC.exe installer\nacho.iss (after publishing the payload, see build.ps1).
+; English, Spanish and Hungarian. Compile: ISCC.exe installer\nacho.iss (after publishing the payload, see build.ps1).
 
-#define AppVersion "0.2.0"
+#define AppVersion "0.3.0"
 #ifndef Payload
   #define Payload "..\out\installer-payload"
 #endif
@@ -42,18 +42,24 @@ SetupLogging=yes
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl"
 Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"
+Name: "hu"; MessagesFile: "compiler:Languages\Hungarian.isl"
 
 [CustomMessages]
 en.GroupShell=Windows integration:
 es.GroupShell=Integración con Windows:
+hu.GroupShell=Windows-integráció:
 en.TaskContextMenu=Add "Make Docs-ready" to the right-click menu of images
 es.TaskContextMenu=Añadir "Preparar para Docs" al menú del clic derecho de las imágenes
+hu.TaskContextMenu=A „Docs-kész másolat készítése” parancs hozzáadása a képek jobb gombos menüjéhez
 en.TaskSendTo=Add NACHO to the Send to menu
 es.TaskSendTo=Añadir NACHO al menú Enviar a
+hu.TaskSendTo=A NACHO hozzáadása a Küldés menühöz
 en.MenuText=Make Docs-ready
 es.MenuText=Preparar para Docs
+hu.MenuText=Docs-kész másolat készítése
 en.AppComment=Docs-ready images: Normalise, Adjust, Compress, Hand Over
 es.AppComment=Imágenes listas para Docs: Normaliza, Ajusta, Comprime y Honra el Original
+hu.AppComment=Docs-kész képek: Normalizál, Arányt tart, Csökkent és Hűen Odaad
 
 [Tasks]
 Name: "contextmenu"; Description: "{cm:TaskContextMenu}"; GroupDescription: "{cm:GroupShell}"

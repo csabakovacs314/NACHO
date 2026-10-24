@@ -107,6 +107,17 @@ public static class SelfTest
         Check(w.CmpShapeB.Text == "3:4, exacta", "shape row follows the language: " + w.CmpShapeB.Text);
         Shot(w, Path.Combine(outDir, "main-es-light.png"), dark: false);
 
+        Loc.Instance.Set("hu");
+        await Settle();
+        Check(w.Title.Contains("Normalizál", StringComparison.Ordinal), "title switches to Hungarian");
+        Check(w.StatusMessage.Contains("kicsinyítve", StringComparison.Ordinal), "Hungarian status line: " + w.StatusMessage);
+        Check(w.CmpShapeB.Text == "3:4, pontos", "Hungarian shape row: " + w.CmpShapeB.Text);
+        Check(Get(samples.Photo).PxText.Contains("3:4 arány megtartva", StringComparison.Ordinal), "Hungarian tile line: " + Get(samples.Photo).PxText);
+        Check(Get(samples.Photo).SizeText.Contains(",", StringComparison.Ordinal), "Hungarian decimal comma: " + Get(samples.Photo).SizeText);
+        Shot(w, Path.Combine(outDir, "main-hu-light.png"), dark: false);
+        Loc.Instance.Set("es");
+        await Settle();
+
         w.Select(Get(samples.Screenshot));
         App.ApplyTheme("Dark");
         await Settle();
@@ -121,7 +132,7 @@ public static class SelfTest
         w.Width = 1240;
         await Settle();
 
-        foreach (string lang in new[] { "en", "es" })
+        foreach (string lang in Strings.Languages)
         {
             Loc.Instance.Set(lang);
             var o = new OptionsWindow(settings) { ShowActivated = false, ShowInTaskbar = false, WindowStartupLocation = WindowStartupLocation.Manual, Left = -20000, Top = 0 };
@@ -130,15 +141,19 @@ public static class SelfTest
             Shot(o, Path.Combine(outDir, $"options-{lang}.png"), dark: false);
             o.Close();
         }
-        var about = new AboutWindow(settings) { ShowActivated = false, ShowInTaskbar = false, WindowStartupLocation = WindowStartupLocation.Manual, Left = -20000, Top = 0 };
-        about.Show();
-        await Settle();
-        Shot(about, Path.Combine(outDir, "about-es.png"), dark: false);
-        about.Close();
+        foreach (string lang in new[] { "es", "hu" })
+        {
+            Loc.Instance.Set(lang);
+            var about = new AboutWindow(settings) { ShowActivated = false, ShowInTaskbar = false, WindowStartupLocation = WindowStartupLocation.Manual, Left = -20000, Top = 0 };
+            about.Show();
+            await Settle();
+            Shot(about, Path.Combine(outDir, $"about-{lang}.png"), dark: false);
+            about.Close();
+        }
         Loc.Instance.Set("en");
 
         w.Close();
-        foreach (string shot in new[] { "main-en-light", "main-es-light", "main-es-dark", "main-en-narrow", "options-en", "options-es", "about-es" })
+        foreach (string shot in new[] { "main-en-light", "main-es-light", "main-hu-light", "main-es-dark", "main-en-narrow", "options-en", "options-es", "options-hu", "about-es", "about-hu" })
         {
             var f = new FileInfo(Path.Combine(outDir, shot + ".png"));
             Check(f.Exists && f.Length > 10_000, $"screenshot {shot}.png saved");

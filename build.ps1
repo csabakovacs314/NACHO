@@ -1,7 +1,7 @@
 # Builds a NACHO release into a NEW folder: Downloads\NACHO\NACHO-<version>
 # Steps: icon, unit tests, portable and small exe, installer, self-test, source zip, package zip.
 # Needs: .NET 10 SDK, Inno Setup 6 (winget install JRSoftware.InnoSetup --scope user).
-param([string]$Version = "0.2.0")
+param([string]$Version = "0.3.0")
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
 $release = Join-Path $env:USERPROFILE "Downloads\NACHO\NACHO-$Version"

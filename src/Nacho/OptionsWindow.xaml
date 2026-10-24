@@ -121,6 +121,7 @@
                         <ComboBox x:Name="LangBox" Width="180" HorizontalAlignment="Left">
                             <ComboBoxItem Tag="en" Content="English" />
                             <ComboBoxItem Tag="es" Content="Español" />
+                            <ComboBoxItem Tag="hu" Content="Magyar" />
                         </ComboBox>
                     </StackPanel>
                 </Border>

@@ -529,7 +529,7 @@ public partial class MainWindow : Window
     {
         bool wasLoading = _loading;
         _loading = true;
-        (Loc.Instance.Language == "es" ? LangEs : LangEn).IsChecked = true;
+        (Loc.Instance.Language switch { "es" => LangEs, "hu" => LangHu, _ => LangEn }).IsChecked = true;
         _loading = wasLoading;
     }
 

@@ -77,6 +77,9 @@
                              MinHeight="32" MinWidth="44" Padding="10,4" Margin="0,0,2,0" />
                 <RadioButton x:Name="LangEs" Tag="es" GroupName="Lang" Content="ES" Checked="Language_Checked"
                              AutomationProperties.Name="Español" Style="{DynamicResource {x:Type ToggleButton}}"
+                             MinHeight="32" MinWidth="44" Padding="10,4" Margin="0,0,2,0" />
+                <RadioButton x:Name="LangHu" Tag="hu" GroupName="Lang" Content="HU" Checked="Language_Checked"
+                             AutomationProperties.Name="Magyar" Style="{DynamicResource {x:Type ToggleButton}}"
                              MinHeight="32" MinWidth="44" Padding="10,4" />
             </StackPanel>
         </WrapPanel>

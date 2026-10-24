@@ -29,7 +29,7 @@ public sealed class Loc : INotifyPropertyChanged
 
     public void Set(string language)
     {
-        Language = language == "es" ? "es" : "en";
+        Language = Strings.Normalise(language);
         _dict = Strings.For(Language);
         Culture = Strings.CultureFor(Language);
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(Binding.IndexerName));

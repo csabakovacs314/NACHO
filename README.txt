@@ -1,19 +1,20 @@
-NACHO 0.2.0
+NACHO 0.3.0
 Normalise, Adjust, Compress, Hand Over
 (Spanish: Normaliza, Ajusta, Comprime y Honra el Original)
+(Hungarian: Normalizál, Arányt tart, Csökkent és Hűen Odaad)
 
 NACHO makes a small, Docs-ready copy of an image before it goes into a Google Doc.
 Your original file is never changed. The copy goes to Pictures\Docs-Ready.
 
 FILES
-  NACHO-0.2.0-setup.exe      Installer (recommended). English or Spanish, no admin rights needed.
+  NACHO-0.3.0-setup.exe      Installer (recommended). English, Spanish or Hungarian, no admin rights needed.
   NACHO.exe                  Portable. Runs on Windows 10 or 11 (x64) with nothing to install.
   Small\NACHO.exe            Same app, much smaller, needs the .NET 10 Desktop Runtime.
-  NACHO-0.2.0-source.zip     Source, unit tests and build.ps1.
-  NACHO-0.2.0.zip            Everything above in one package.
+  NACHO-0.3.0-source.zip     Source, unit tests and build.ps1.
+  NACHO-0.3.0.zip            Everything above in one package.
 
 INSTALLER
-  Run NACHO-0.2.0-setup.exe, pick English or Español, then "Install for me only" (no admin
+  Run NACHO-0.3.0-setup.exe, pick English, Español or Magyar, then "Install for me only" (no admin
   rights; goes to %LOCALAPPDATA%\Programs\NACHO) or "Install for all users" (Program Files).
   Options on the way: the right-click entry (on by default), Send to, a desktop shortcut.
   NACHO then starts in the language you picked. You get a Start menu entry, and NACHO appears
@@ -54,7 +55,11 @@ SHAPE (ASPECT RATIO)
   Phone photos are turned upright first, so the copy has the shape you see on screen.
 
 LANGUAGE
-  EN | ES buttons in the command bar switch the whole window at once.
+  EN | ES | HU buttons in the command bar switch the whole window at once (English, Spanish,
+  Hungarian). More options has the same choice. Sizes follow the language: 4.8 MB in English,
+  4,8 MB in Spanish and Hungarian.
+  The first start uses the language picked in setup; without setup, the Windows display
+  language if it is one of the three, otherwise English.
 
 WHAT IT DOES TO EACH IMAGE
   Turns phone photos upright, resizes to the preset, removes location and camera details,

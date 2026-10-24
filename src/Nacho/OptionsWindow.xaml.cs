@@ -43,7 +43,7 @@ public partial class OptionsWindow : Window
         SuffixBox.Text = s.Suffix;
         CtxMenu.IsChecked = s.ContextMenu;
         SendToBox.IsChecked = s.SendTo;
-        LangBox.SelectedIndex = s.Language == "es" ? 1 : 0;
+        LangBox.SelectedIndex = Math.Max(0, Array.IndexOf(Strings.Languages, s.Language));
     }
 
     private void LabelPresets()

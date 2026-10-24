@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace Nacho.Core;
 
-/// <summary>All UI text in English (Irish spelling) and Spanish. Keys must match in both.</summary>
+/// <summary>All UI text in English (Irish spelling), Spanish and Hungarian. Keys must match in all three.</summary>
 public static class Strings
 {
     public static readonly IReadOnlyDictionary<string, string> En = new Dictionary<string, string>
@@ -337,10 +337,195 @@ public static class Strings
         ["About.Close"] = "Cerrar",
     };
 
-    public static IReadOnlyDictionary<string, string> For(string language) => language == "es" ? Es : En;
+    public static readonly IReadOnlyDictionary<string, string> Hu = new Dictionary<string, string>
+    {
+        ["App.Expansion"] = "Normalizál, Arányt tart, Csökkent és Hűen Odaad",
+        ["App.Tagline"] = "Docs-kész képek",
 
-    public static CultureInfo CultureFor(string language) =>
-        CultureInfo.GetCultureInfo(language == "es" ? "es-ES" : "en-IE");
+        ["Cmd.Add"] = "Képek hozzáadása",
+        ["Cmd.Paste"] = "Beillesztés",
+        ["Cmd.Preset"] = "Profil",
+        ["Cmd.Options"] = "Beállítások",
+        ["Cmd.Undo"] = "Visszavonás",
+        ["Cmd.Help"] = "Súgó",
+        ["Cmd.Language"] = "Nyelv",
+
+        ["Preset.small"] = "Kicsi",
+        ["Preset.balanced"] = "Közepes",
+        ["Preset.sharp"] = "Éles",
+        ["Preset.Label"] = "{0} · {1} px",
+
+        ["Drop.Title"] = "Húzz ide képeket, vagy nyomj Ctrl + V-t",
+        ["Drop.Sub"] = "Vagy kattints jobb gombbal egy képre a Fájlkezelőben, és válaszd a Docs-kész másolat készítése parancsot.",
+        ["Drop.Release"] = "Engedd el, és elkészülnek a Docs-kész másolatok",
+
+        ["List.Header"] = "Legutóbbi eredmények",
+        ["List.Count1"] = "1 kép",
+        ["List.CountN"] = "{0} kép",
+        ["Empty.Title"] = "Még nincs kép",
+        ["Empty.Body"] = "Az eredeti képeid sosem változnak. A kis másolatok a Docs-Ready mappába kerülnek.",
+
+        ["Tile.Working"] = "Kicsinyítés…",
+        ["Tile.SizeLine"] = "{0} helyett {1}",
+        ["Tile.Smaller"] = "{0}%-kal kisebb",
+        ["Tile.PxLine"] = "{0} helyett {1} px · {2} arány megtartva · {3}",
+        ["Tile.KeptTitle"] = "Az eredeti marad",
+        ["Tile.KeptBody"] = "Már Docs-kész ({0}, {1}, {2} px). Új másolat nem lenne kisebb.",
+        ["Tile.DragHint"] = "Húzd a Docs-ba",
+        ["Tile.DragName"] = "{0}, húzd a dokumentumodba",
+        ["Tile.CopyFile"] = "Fájl másolása",
+        ["Tile.ShowFolder"] = "Megjelenítés mappában",
+        ["Tile.Remove"] = "Eltávolítás a listából",
+        ["Tile.CopyPicture"] = "Másolás képként",
+        ["Tile.CopyPath"] = "Elérési út másolása (a Kép cseréjéhez)",
+        ["Tile.OpenOriginal"] = "Eredeti megnyitása",
+
+        ["Badge.FromFormat"] = "{0} formátumból",
+        ["Badge.LocationRemoved"] = "Helyadatok törölve",
+        ["Badge.CameraRemoved"] = "Kameraadatok törölve",
+        ["Badge.RotatedUpright"] = "Tájolás javítva",
+        ["Badge.TextKeptSharp"] = "Éles szöveg",
+        ["Badge.Colours256"] = "256 szín",
+        ["Badge.OverBudget"] = "Méretkeret felett",
+        ["Badge.Animated"] = "Animált",
+        ["Badge.Transparency"] = "Átlátszóság megtartva",
+
+        ["Err.Title"] = "Ez a fájl nem kicsinyíthető",
+        ["Err.Pdf"] = "Ez PDF, nem kép. Nyisd meg, mentsd az oldalt PNG-ként, és azt a fájlt húzd ide.",
+        ["Err.NotAnImage"] = "Ezt a fájlt a NACHO nem tudja képként beolvasni. Mentsd JPEG vagy PNG formátumban, és azt húzd ide.",
+        ["Err.Damaged"] = "A fájl sérültnek vagy hiányosnak tűnik. Másold át újra onnan, ahonnan származik, és húzd ide.",
+        ["Err.NotFound"] = "A fájl már nincs meg: áthelyezték vagy törölték, mielőtt a NACHO beolvashatta volna.",
+
+        ["Preview.Title"] = "Előnézet az oldalon",
+        ["Preview.PageSize"] = "Papírméret",
+        ["Page.A4"] = "A4",
+        ["Page.Letter"] = "Letter",
+        ["Preview.PageName"] = "{0} méretű oldal a képpel, a Docs-beli szélességében",
+        ["Preview.Caption"] = "{1} oldalon, 2,54 cm-es margókkal {0} px szélesen jelenik meg. A másolatod {2} px széles: {3}",
+        ["Preview.Narrow"] = "{2} oldalon a szövegsáv {1} px széles. A másolatod csak {0} px, ezért a Docs a saját méretében mutatja.",
+        ["Sharp.Any"] = "bármilyen nagyításnál éles. A Közepes profil is elég lenne, kisebb fájllal.",
+        ["Sharp.2x"] = "200%-os nagyításnál és HiDPI kijelzőn is éles.",
+        ["Sharp.1x"] = "100%-on éles, 200%-on kissé lágy.",
+        ["Preview.TableCaption"] = "Eredeti és Docs-kész másolat",
+        ["Preview.ColDetail"] = "Jellemző",
+        ["Preview.ColOriginal"] = "Eredeti",
+        ["Preview.ColCopy"] = "Docs-kész",
+        ["Preview.RowSize"] = "Méret",
+        ["Preview.RowPixels"] = "Képpontok",
+        ["Preview.RowShape"] = "Arány",
+        ["Preview.RowFormat"] = "Formátum",
+        ["Preview.RowLocation"] = "Helyadatok",
+        ["Loc.Present"] = "Vannak",
+        ["Loc.Removed"] = "Törölve",
+        ["Loc.None"] = "Nincsenek",
+        ["Preview.Untouched"] = "Az eredeti érintetlenül marad a helyén. A másolat a Docs-Ready mappába kerül.",
+        ["Preview.ShapeNote"] = "Az aránya megegyezik az eredetiével, ezért a Google Docs Kép cseréje funkciója torzítás nélkül illeszti a régi kép keretébe.",
+        ["Shape.Exact"] = "{0}, pontos",
+        ["Shape.Within"] = "{0}, {1}% eltérés",
+        ["Preview.KeptTitle"] = "Nincs mit kicsinyíteni",
+        ["Preview.KeptBody"] = "{0}: már Docs-kész. Húzd a dokumentumodba úgy, ahogy van.",
+        ["Preview.Empty"] = "Válassz ki egy eredményt, hogy lásd, hogyan fér el az oldalon.",
+        ["Preview.Working"] = "A kép kicsinyítése folyamatban…",
+
+        ["Status.Ready"] = "Kész. Az eredeti képeid sosem változnak.",
+        ["Status.Summary"] = "{0} kicsinyítve, {1} változatlanul hagyva, {2} figyelmet igényel.",
+        ["Status.Working"] = "Kicsinyítés: {0} / {1}…",
+        ["Status.Copied"] = "{0} fájlként a vágólapra került. Nyomj Ctrl+V-t a dokumentumban, vagy húzd be a bélyegképet.",
+        ["Status.CopiedPicture"] = "{0} képként a vágólapra került. A Chrome a beillesztett képet nagyobb PNG-vé alakíthatja vissza.",
+        ["Status.CopiedPath"] = "{0} elérési útja a vágólapon. A Google Docsban: Kép cseréje > Feltöltés a számítógépről, majd a Fájlnév mezőben Ctrl+V és Enter.",
+        ["Status.CopyFailed"] = "A vágólap nem használható: egy másik alkalmazás foglalja. Próbáld újra egy pillanat múlva.",
+        ["Status.Opened"] = "A mappa megnyílt a Fájlkezelőben.",
+        ["Status.Removed"] = "{0} lekerült a listáról. Maga a fájl érintetlen.",
+        ["Status.Undone"] = "Az utolsó köteg visszavonva: {0} másolat törölve. Az eredetiek érintetlenek maradtak.",
+        ["Status.NothingToUndo"] = "Nincs mit visszavonni.",
+        ["Status.PresetSet"] = "Profil: {0}, hosszabbik oldal {1} px, legfeljebb {2} KB.",
+        ["Status.Redone"] = "{0} újra elkészítve.",
+        ["Status.ClipboardEmpty"] = "A vágólapon nincs kép vagy képfájl.",
+        ["Status.PageSet"] = "Papírméret: {0}.",
+        ["Status.Language"] = "Nyelv: magyar.",
+        ["Status.OptionsSaved"] = "Beállítások mentve.",
+        ["Status.ShellFailed"] = "Nem sikerült frissíteni a jobb gombos menüt vagy a Küldés menüt: {0}",
+        ["Footer.Savings"] = "Ebben a hónapban megtakarítva: {0}",
+
+        ["Dlg.OpenTitle"] = "Válaszd ki a kicsinyítendő képeket",
+        ["Dlg.OpenFilter"] = "Képek|*.jpg;*.jpeg;*.jfif;*.png;*.gif;*.heic;*.heif;*.webp;*.avif;*.tif;*.tiff;*.bmp|Minden fájl|*.*",
+        ["Dlg.FolderTitle"] = "Válaszd ki, hová kerüljenek a Docs-kész másolatok",
+
+        ["Opt.Title"] = "Beállítások",
+        ["Opt.Presets"] = "Profilok",
+        ["Opt.PresetsHint"] = "A képek sosem lesznek nagyobbak. A méretkeret azt adja meg, legfeljebb mekkora lehet egy másolat.",
+        ["Opt.ColDefault"] = "Alapértelmezett",
+        ["Opt.ColPreset"] = "Profil",
+        ["Opt.ColEdge"] = "Hosszabbik oldal (px)",
+        ["Opt.ColBudget"] = "Méretkeret (KB)",
+        ["Opt.EdgeName"] = "{0}, hosszabbik oldal pixelben",
+        ["Opt.BudgetName"] = "{0}, méretkeret kilobájtban",
+        ["Opt.DefaultName"] = "{0} legyen az alapértelmezett",
+        ["Opt.Format"] = "Kimeneti formátum",
+        ["Opt.FormatAuto"] = "Automatikus: fotó JPEG-be, képernyőkép PNG-be (ajánlott)",
+        ["Opt.FormatJpeg"] = "Mindig JPEG",
+        ["Opt.FormatPng"] = "Mindig PNG",
+        ["Opt.Privacy"] = "Adatvédelem",
+        ["Opt.PrivacyLocation"] = "Helyadatok (GPS) törlése",
+        ["Opt.PrivacyCamera"] = "Kamera-, tulajdonos- és szoftveradatok törlése",
+        ["Opt.PrivacyHint"] = "A fotók előbb álló helyzetbe fordulnak, így az adatok törlése után sem dőlnek oldalra.",
+        ["Opt.Where"] = "Hová kerülnek a másolatok",
+        ["Opt.Folder"] = "A Docs-kész másolatok mentési helye",
+        ["Opt.ChangeFolder"] = "Mappa módosítása",
+        ["Opt.Suffix"] = "Hozzáfűzés a fájlnévhez",
+        ["Opt.Shell"] = "Windows-integráció",
+        ["Opt.ContextMenu"] = "Docs-kész másolat készítése a jobb gombos menüben",
+        ["Opt.ContextMenuHint"] = "Windows 11-en a bővített helyi menüben jelenik meg. Ennek a NACHO.exe-nek a helyére mutat.",
+        ["Opt.SendTo"] = "A NACHO hozzáadása a Küldés menühöz",
+        ["Opt.Language"] = "Nyelv",
+        ["Opt.Reset"] = "Alapértékek visszaállítása",
+        ["Opt.Cancel"] = "Mégse",
+        ["Opt.Save"] = "Beállítások mentése",
+        ["Opt.ErrEdge"] = "{0}: a hosszabbik oldal 320 és 8000 közötti egész szám lehet.",
+        ["Opt.ErrBudget"] = "{0}: a méretkeret 30 és 20000 közötti egész szám lehet.",
+        ["Opt.ErrSuffix"] = "A fájlnévhez fűzött rész nem lehet üres, és nem tartalmazhatja ezeket: \\ / : * ? \" < > |",
+        ["Opt.ErrFolder"] = "Válassz mappát a másolatoknak.",
+        ["Shell.MenuText"] = "Docs-kész másolat készítése",
+
+        ["About.Title"] = "A NACHO névjegye",
+        ["About.Version"] = "Verzió: {0}",
+        ["About.How"] = "Négyféleképpen kezdhetsz",
+        ["About.Way1"] = "Húzz képeket az ablakra, vagy nyomj Ctrl+O-t a kiválasztásukhoz.",
+        ["About.Way2"] = "Másolj egy képet vagy képernyőrészletet (Win+Shift+S), majd nyomj Ctrl+V-t a NACHO-ban.",
+        ["About.Way3"] = "Kattints jobb gombbal egy képre a Fájlkezelőben, és válaszd a Docs-kész másolat készítése parancsot (a Beállításokban kapcsolhatod be).",
+        ["About.Way4"] = "Ezután húzd a bélyegképet a Google Docs-dokumentumodba, vagy nyomd meg a Fájl másolása gombot, és ott Ctrl+V.",
+        ["About.Replace"] = "Egy dokumentumban lévő kép cseréje",
+        ["About.ReplaceBody"] = "Kattints a képre a dokumentumban, válaszd a Kép cseréje > Feltöltés a számítógépről lehetőséget, és válaszd ki a másolatot a Docs-Ready mappából. Gyorsabban: kattints jobb gombbal a csempéjére a NACHO-ban, válaszd az Elérési út másolása parancsot, és illeszd be a Fájlnév mezőbe. A másolat aránya megegyezik az eredetiével, ezért torzítás nélkül kerül a régi kép helyére.",
+        ["About.Keys"] = "Billentyűparancsok",
+        ["About.KeysList"] = "Ctrl+O hozzáadás · Ctrl+V beillesztés · Ctrl+Shift+C fájl másolása · Ctrl+Z köteg visszavonása · Delete eltávolítás a listából · Ctrl+, beállítások · F1 súgó",
+        ["About.Credits"] = "Ötlet: Kovács Csaba · Claude-dal készült",
+        ["About.OpenFolder"] = "A Docs-Ready mappa megnyitása",
+        ["About.Close"] = "Bezárás",
+    };
+
+    /// <summary>The UI languages, in the order the language buttons show them.</summary>
+    public static readonly string[] Languages = { "en", "es", "hu" };
+
+    public static string Normalise(string? language) => language switch
+    {
+        "es" => "es",
+        "hu" => "hu",
+        _ => "en",
+    };
+
+    public static IReadOnlyDictionary<string, string> For(string language) => Normalise(language) switch
+    {
+        "es" => Es,
+        "hu" => Hu,
+        _ => En,
+    };
+
+    public static CultureInfo CultureFor(string language) => CultureInfo.GetCultureInfo(Normalise(language) switch
+    {
+        "es" => "es-ES",
+        "hu" => "hu-HU",
+        _ => "en-IE",
+    });
 
     /// <summary>Formats a byte count the way the tiles show it: KB under 1 MB, MB with one decimal above.</summary>
     public static string Bytes(long bytes, CultureInfo culture)

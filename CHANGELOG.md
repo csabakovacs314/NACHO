@@ -2,6 +2,22 @@
 
 Versions: MAJOR.MINOR.PATCH. Minor for a feature, patch for a fix.
 
+## 0.3.0 (2026-10-24)
+
+**Asked for:** a Hungarian UI.
+
+**Added**
+- Hungarian (Magyar) throughout: main window, tiles, status line, page-fit preview, More options, About, error messages, the right-click entry ("Docs-kész másolat készítése").
+- HU button next to EN | ES in the command bar, and Magyar in More options. Switching is live, like the other two.
+- NACHO in Hungarian: Normalizál, Arányt tart, Csökkent és Hűen Odaad. About shows the other two expansions.
+- Hungarian number format: 4,8 MB, "1,82:1", "97%-kal kisebb".
+- Setup in Hungarian (Inno Setup's own Hungarian wizard plus NACHO's task texts). Picking Magyar in setup starts NACHO in Hungarian.
+- A Windows display language of Hungarian starts NACHO in Hungarian when there was no setup.
+
+**Tests:** 78 unit tests (15 new: every language has every key, matching placeholders, no long dashes, Hungarian number format). 65 self-test checks for the portable and small exes (8 new: Hungarian title, status line, tile and shape texts, the decimal comma, and screenshots of the main window, More options and About in Hungarian); 66 for the installed copy. Installer round trip on this PC: silent install in Hungarian with the right-click and Send to options, the right-click text "Docs-kész másolat készítése" and the Language=hu setting checked, self-test from the installed copy (starts in Hungarian), silent uninstall, nothing left behind. Upgrade: 0.2.0 installed in Spanish, then 0.3.0 over it in Hungarian: same folder, one Apps entry at 0.3.0, the right-click text switched to Hungarian, then uninstalled cleanly.
+
+**Not checked here:** the Hungarian setup wizard clicked through by hand; the Hungarian wording by a native speaker.
+
 ## 0.2.0 (2026-10-23)
 
 **Asked for:** a Windows installer.

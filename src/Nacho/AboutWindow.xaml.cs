@@ -14,7 +14,9 @@ public partial class AboutWindow : Window
         InitializeComponent();
         var v = typeof(AboutWindow).Assembly.GetName().Version ?? new Version(0, 1, 0);
         VersionText.Text = Loc.F("About.Version", $"{v.Major}.{v.Minor}.{v.Build}");
-        OtherExpansion.Text = (Loc.Instance.Language == "es" ? Strings.En : Strings.Es)["App.Expansion"];
+        OtherExpansion.Text = string.Join(Environment.NewLine, Strings.Languages
+            .Where(l => l != Loc.Instance.Language)
+            .Select(l => Strings.For(l)["App.Expansion"]));
     }
 
     private void OpenFolder_Click(object sender, RoutedEventArgs e)
