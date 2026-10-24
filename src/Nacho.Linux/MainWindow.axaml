@@ -1,0 +1,303 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="using:Nacho.Linux"
+        x:Class="Nacho.Linux.MainWindow"
+        x:DataType="l:MainWindow"
+        Title="NACHO" Width="1240" Height="800" MinWidth="420" MinHeight="560"
+        WindowStartupLocation="CenterScreen"
+        DragDrop.AllowDrop="True">
+    <Window.Styles>
+        <!-- Tile buttons sit at the right, or under the text when the window is narrow (below 900 px). -->
+        <Style Selector="StackPanel.actions">
+            <Setter Property="Grid.Row" Value="0" />
+            <Setter Property="Grid.Column" Value="2" />
+            <Setter Property="Orientation" Value="Vertical" />
+            <Setter Property="Width" Value="196" />
+            <Setter Property="Margin" Value="12,0,0,0" />
+        </Style>
+        <Style Selector="Window.narrow StackPanel.actions">
+            <Setter Property="Grid.Row" Value="1" />
+            <Setter Property="Grid.Column" Value="1" />
+            <Setter Property="Orientation" Value="Horizontal" />
+            <Setter Property="Width" Value="NaN" />
+            <Setter Property="Margin" Value="0,8,0,0" />
+        </Style>
+        <Style Selector="StackPanel.actions > Button">
+            <Setter Property="Margin" Value="0,0,6,6" />
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Window.narrow StackPanel.actions > Button">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+        <Style Selector="RadioButton.segment">
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="Margin" Value="0,0,2,0" />
+        </Style>
+        <Style Selector="TextBlock.cmp">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,8,6" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="Rectangle.line">
+            <Setter Property="Height" Value="5" />
+            <Setter Property="Fill" Value="#D6D6D6" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="Margin" Value="0,0,0,5" />
+        </Style>
+    </Window.Styles>
+
+    <Grid x:Name="Root" RowDefinitions="Auto,*,Auto">
+        <!-- Command bar -->
+        <WrapPanel Grid.Row="0" Margin="12,10,12,4" Orientation="Horizontal" ItemSpacing="0">
+            <Button x:Name="AddButton" Classes="accent" Click="Add_Click" Margin="3" Padding="12,5"
+                    ToolTip.Tip="Ctrl+O" AutomationProperties.Name="{l:L Cmd.Add}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <l:StrokeIcon Data="{StaticResource Icon.Add}" />
+                    <TextBlock x:Name="AddText" Text="{l:L Cmd.Add}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Click="Paste_Click" Margin="3" Padding="10,5" ToolTip.Tip="Ctrl+V" AutomationProperties.Name="{l:L Cmd.Paste}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <l:StrokeIcon Data="{StaticResource Icon.Paste}" />
+                    <TextBlock Text="{l:L Cmd.Paste}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Border Width="1" Height="24" Margin="6,0" VerticalAlignment="Center" Background="{DynamicResource N.Divider}" />
+            <TextBlock Text="{l:L Cmd.Preset}" Classes="secondary" VerticalAlignment="Center" Margin="4,0,6,0" />
+            <StackPanel x:Name="PresetGroup" Orientation="Horizontal" Margin="0,4,4,4" AutomationProperties.Name="{l:L Cmd.Preset}">
+                <RadioButton x:Name="PresetSmall" Tag="small" GroupName="Preset" Classes="segment"
+                             Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Preset_Changed" />
+                <RadioButton x:Name="PresetBalanced" Tag="balanced" GroupName="Preset" Classes="segment"
+                             Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Preset_Changed" />
+                <RadioButton x:Name="PresetSharp" Tag="sharp" GroupName="Preset" Classes="segment"
+                             Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Preset_Changed" />
+            </StackPanel>
+            <Button Click="Options_Click" Margin="3" Padding="10,5" ToolTip.Tip="Ctrl+," AutomationProperties.Name="{l:L Cmd.Options}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <l:StrokeIcon Data="{StaticResource Icon.Options}" />
+                    <TextBlock Text="{l:L Cmd.Options}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Click="Undo_Click" Margin="3" Padding="10,5" ToolTip.Tip="Ctrl+Z" AutomationProperties.Name="{l:L Cmd.Undo}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <l:StrokeIcon Data="{StaticResource Icon.Undo}" />
+                    <TextBlock Text="{l:L Cmd.Undo}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Click="Help_Click" Margin="3" Padding="8,5" MinWidth="32" ToolTip.Tip="F1" AutomationProperties.Name="{l:L Cmd.Help}">
+                <l:StrokeIcon Data="{StaticResource Icon.Help}" />
+            </Button>
+            <StackPanel Orientation="Horizontal" Margin="6,3,3,3" AutomationProperties.Name="{l:L Cmd.Language}" ToolTip.Tip="{l:L Cmd.Language}">
+                <l:StrokeIcon Data="{StaticResource Icon.Globe}" Foreground="{DynamicResource N.TextSecondary}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                <RadioButton x:Name="LangEn" Tag="en" GroupName="Lang" Content="EN" Classes="segment" MinWidth="40"
+                             AutomationProperties.Name="English" Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Language_Changed" />
+                <RadioButton x:Name="LangEs" Tag="es" GroupName="Lang" Content="ES" Classes="segment" MinWidth="40"
+                             AutomationProperties.Name="Español" Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Language_Changed" />
+                <RadioButton x:Name="LangHu" Tag="hu" GroupName="Lang" Content="HU" Classes="segment" MinWidth="40"
+                             AutomationProperties.Name="Magyar" Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Language_Changed" />
+            </StackPanel>
+        </WrapPanel>
+
+        <!-- Content -->
+        <Grid x:Name="ContentGrid" Grid.Row="1" Margin="16,4,16,12" ColumnDefinitions="*,Auto" RowDefinitions="*,Auto">
+            <Grid x:Name="LeftPane" RowDefinitions="Auto,Auto,*">
+                <Grid x:Name="DropZone" Margin="0,0,0,12" MinHeight="64">
+                    <Rectangle x:Name="DropRect" RadiusX="8" RadiusY="8" StrokeThickness="2" StrokeDashArray="4,3"
+                               Stroke="{DynamicResource N.StrongStroke}" Fill="{DynamicResource N.Card}" />
+                    <DockPanel Margin="16,10">
+                        <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Drop}" Width="26" Height="26" Thickness="1.75"
+                                      Foreground="{DynamicResource N.Accent}" Margin="0,0,14,0" VerticalAlignment="Center" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock x:Name="DropTitle" Text="{l:L Drop.Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <TextBlock x:Name="DropRelease" Text="{l:L Drop.Release}" FontWeight="SemiBold" TextWrapping="Wrap" IsVisible="False" />
+                            <TextBlock x:Name="DropSub" Text="{l:L Drop.Sub}" Classes="secondary" FontSize="13" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </DockPanel>
+                </Grid>
+
+                <DockPanel Grid.Row="1" Margin="0,0,0,8">
+                    <ToggleButton x:Name="PreviewToggle" DockPanel.Dock="Right" Content="{l:L Preview.Title}" IsVisible="False"
+                                  IsCheckedChanged="PreviewToggle_Changed" MinHeight="32" Padding="10,4" />
+                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold">
+                        <Run Text="{l:L List.Header}" /><Run x:Name="CountRun" Text="" FontWeight="Normal" Foreground="{DynamicResource N.TextSecondary}" />
+                    </TextBlock>
+                </DockPanel>
+
+                <Grid Grid.Row="2">
+                    <ListBox x:Name="Results" Background="Transparent" BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionMode="Single"
+                             SelectionChanged="Results_SelectionChanged" KeyDown="Results_KeyDown"
+                             AutomationProperties.Name="{l:L List.Header}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="l:ResultItem">
+                                <Grid Margin="0,4" ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" Background="Transparent">
+                                    <Grid.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="{l:L Tile.CopyFile}" InputGesture="Ctrl+Shift+C" Click="CtxCopyFile_Click" IsVisible="{Binding CanDeliver}" />
+                                            <MenuItem Header="{l:L Tile.CopyPicture}" Click="CtxCopyPicture_Click" IsVisible="{Binding CanDeliver}" />
+                                            <MenuItem Header="{l:L Tile.CopyPath}" Click="CtxCopyPath_Click" IsVisible="{Binding CanDeliver}" />
+                                            <MenuItem Header="{l:L Tile.ShowFolder}" Click="CtxShowFolder_Click" IsVisible="{Binding CanDeliver}" />
+                                            <MenuItem Header="{l:L Tile.OpenOriginal}" Click="CtxOpenOriginal_Click" />
+                                            <Separator />
+                                            <MenuItem Header="{l:L Tile.Remove}" InputGesture="Delete" Click="CtxRemove_Click" />
+                                        </ContextMenu>
+                                    </Grid.ContextMenu>
+
+                                    <StackPanel Grid.Column="0" Grid.RowSpan="2" Margin="0,0,12,0" VerticalAlignment="Center">
+                                        <Border Width="96" Height="72" CornerRadius="6" BorderThickness="1" ClipToBounds="True" Cursor="Hand"
+                                                BorderBrush="{DynamicResource N.CardStroke}" Background="{DynamicResource N.Subtle}"
+                                                ToolTip.Tip="{l:L Tile.DragHint}" AutomationProperties.Name="{Binding DragName}"
+                                                PointerPressed="Thumb_PointerPressed" PointerMoved="Thumb_PointerMoved" PointerReleased="Thumb_PointerReleased">
+                                            <Grid>
+                                                <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" />
+                                                <ProgressBar IsIndeterminate="True" Width="60" MinWidth="0" VerticalAlignment="Center" IsVisible="{Binding IsWorking}" />
+                                                <l:StrokeIcon Data="{StaticResource Icon.Error}" Width="28" Height="28" Thickness="1.5"
+                                                              Foreground="{DynamicResource N.Critical}" IsVisible="{Binding IsError}" />
+                                            </Grid>
+                                        </Border>
+                                        <TextBlock Text="{l:L Tile.DragHint}" FontSize="12" Classes="secondary" HorizontalAlignment="Center"
+                                                   Margin="0,4,0,0" IsVisible="{Binding CanDeliver}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{l:L Tile.Working}" Classes="secondary" IsVisible="{Binding IsWorking}" />
+                                        <StackPanel IsVisible="{Binding IsOk}">
+                                            <TextBlock TextWrapping="Wrap">
+                                                <Run Text="{Binding SizeText}" /><Run Text=" · " /><Run Text="{Binding SmallerText}" FontWeight="SemiBold"
+                                                                                                     Foreground="{DynamicResource N.Success}" />
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding PxText}" FontSize="12" Classes="secondary" TextWrapping="Wrap" />
+                                            <ItemsControl ItemsSource="{Binding Badges}" Margin="0,4,0,0">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="x:String">
+                                                        <Border CornerRadius="10" Padding="8,1" Margin="0,0,6,4" BorderThickness="1"
+                                                                BorderBrush="{DynamicResource N.CardStroke}" Background="{DynamicResource N.Subtle}">
+                                                            <TextBlock Text="{Binding}" FontSize="12" />
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                        <StackPanel IsVisible="{Binding IsKept}">
+                                            <TextBlock Text="{l:L Tile.KeptTitle}" FontWeight="SemiBold" FontSize="13" />
+                                            <TextBlock Text="{Binding KeptBody}" TextWrapping="Wrap" FontSize="13" />
+                                        </StackPanel>
+                                        <StackPanel IsVisible="{Binding IsError}">
+                                            <TextBlock Text="{l:L Err.Title}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource N.Critical}" />
+                                            <TextBlock Text="{Binding ErrorBody}" TextWrapping="Wrap" FontSize="13" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Classes="actions" VerticalAlignment="Center">
+                                        <Button Content="{l:L Tile.CopyFile}" Click="CopyFile_Click" ToolTip.Tip="Ctrl+Shift+C" IsVisible="{Binding CanDeliver}" />
+                                        <Button Content="{l:L Tile.ShowFolder}" Click="ShowFolder_Click" IsVisible="{Binding CanDeliver}" />
+                                        <Button Content="{l:L Tile.Remove}" Click="Remove_Click" IsVisible="{Binding IsError}" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <StackPanel x:Name="EmptyState" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="440" Margin="16">
+                        <TextBlock Text="{l:L Empty.Title}" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                        <TextBlock Text="{l:L Empty.Body}" Classes="secondary" TextWrapping="Wrap" TextAlignment="Center" Margin="0,6,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+
+            <!-- Page-fit preview -->
+            <Border x:Name="PreviewPanel" Grid.Column="1" Width="380" Margin="16,0,0,0" Classes="card">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,12">
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" AutomationProperties.Name="{l:L Preview.PageSize}">
+                                <RadioButton x:Name="PageA4" Tag="A4" GroupName="Page" Content="{l:L Page.A4}" Classes="segment" MinWidth="60"
+                                             Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Page_Changed" />
+                                <RadioButton x:Name="PageLetter" Tag="Letter" GroupName="Page" Content="{l:L Page.Letter}" Classes="segment" MinWidth="60"
+                                             Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Page_Changed" />
+                            </StackPanel>
+                            <TextBlock Text="{l:L Preview.Title}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap" />
+                        </DockPanel>
+
+                        <StackPanel x:Name="PreviewOk" IsVisible="False">
+                            <Border Padding="16" CornerRadius="6" Background="{DynamicResource N.Subtle}">
+                                <Border x:Name="PageSheet" Width="200" Height="283" Padding="24" Background="White"
+                                        BorderBrush="#C8C8C8" BorderThickness="1" HorizontalAlignment="Center">
+                                    <StackPanel>
+                                        <Rectangle Classes="line" Height="7" Width="105" Fill="#8A8A8A" />
+                                        <Rectangle Classes="line" Width="150" />
+                                        <Rectangle Classes="line" Width="138" />
+                                        <Image x:Name="PageImage" HorizontalAlignment="Left" Stretch="Fill" Margin="0,0,0,5" />
+                                        <Rectangle Classes="line" Width="150" />
+                                        <Rectangle Classes="line" Width="144" />
+                                        <Rectangle Classes="line" Width="150" />
+                                        <Rectangle Classes="line" Width="81" Margin="0" />
+                                    </StackPanel>
+                                </Border>
+                            </Border>
+                            <TextBlock x:Name="PreviewCaption" TextWrapping="Wrap" Margin="0,12,0,0" FontSize="13" LineHeight="19" />
+                            <TextBlock Text="{l:L Preview.TableCaption}" FontWeight="SemiBold" FontSize="13" Margin="0,14,0,6" />
+                            <Grid x:Name="Compare" ColumnDefinitions="Auto,*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{l:L Preview.ColDetail}" Classes="cmp secondary" FontWeight="SemiBold" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{l:L Preview.ColOriginal}" Classes="cmp secondary" FontWeight="SemiBold" />
+                                <TextBlock Grid.Row="0" Grid.Column="2" Text="{l:L Preview.ColCopy}" Classes="cmp secondary" FontWeight="SemiBold" Margin="0,0,0,6" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{l:L Preview.RowSize}" Classes="cmp" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="CmpSizeA" Classes="cmp" />
+                                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="CmpSizeB" Classes="cmp" FontWeight="SemiBold" Margin="0,0,0,6" />
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{l:L Preview.RowPixels}" Classes="cmp" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="CmpPxA" Classes="cmp" />
+                                <TextBlock Grid.Row="2" Grid.Column="2" x:Name="CmpPxB" Classes="cmp" Margin="0,0,0,6" />
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="{l:L Preview.RowShape}" Classes="cmp" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="CmpShapeA" Classes="cmp" />
+                                <TextBlock Grid.Row="3" Grid.Column="2" x:Name="CmpShapeB" Classes="cmp" FontWeight="SemiBold" Margin="0,0,0,6" />
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="{l:L Preview.RowFormat}" Classes="cmp" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="4" Grid.Column="1" x:Name="CmpFmtA" Classes="cmp" />
+                                <TextBlock Grid.Row="4" Grid.Column="2" x:Name="CmpFmtB" Classes="cmp" Margin="0,0,0,6" />
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="{l:L Preview.RowLocation}" Classes="cmp" Margin="0,0,12,0" MaxWidth="120" />
+                                <TextBlock Grid.Row="5" Grid.Column="1" x:Name="CmpLocA" Classes="cmp" Margin="0,0,8,0" />
+                                <TextBlock Grid.Row="5" Grid.Column="2" x:Name="CmpLocB" Classes="cmp" Margin="0" />
+                            </Grid>
+                            <TextBlock x:Name="PreviewShapeNote" FontSize="13" TextWrapping="Wrap" Margin="0,12,0,0" LineHeight="19" />
+                            <TextBlock Text="{l:L Preview.Untouched}" Classes="secondary" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" />
+                        </StackPanel>
+
+                        <Border x:Name="PreviewKept" IsVisible="False" Padding="16" CornerRadius="6" Background="{DynamicResource N.Subtle}">
+                            <StackPanel>
+                                <TextBlock Text="{l:L Preview.KeptTitle}" FontWeight="SemiBold" />
+                                <TextBlock x:Name="PreviewKeptBody" TextWrapping="Wrap" FontSize="13" Margin="0,6,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border x:Name="PreviewError" IsVisible="False" Padding="16" CornerRadius="6" Background="{DynamicResource N.Subtle}">
+                            <StackPanel>
+                                <TextBlock Text="{l:L Err.Title}" FontWeight="SemiBold" Foreground="{DynamicResource N.Critical}" TextWrapping="Wrap" />
+                                <TextBlock x:Name="PreviewErrorBody" TextWrapping="Wrap" FontSize="13" Margin="0,6,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock x:Name="PreviewEmpty" Classes="secondary" TextWrapping="Wrap" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- Status bar -->
+        <Border Grid.Row="2" BorderThickness="0,1,0,0" Padding="16,8"
+                BorderBrush="{DynamicResource N.Divider}" Background="{DynamicResource N.Layer}">
+            <DockPanel>
+                <TextBlock x:Name="SavingsText" DockPanel.Dock="Right" Classes="secondary" FontSize="13" Margin="16,0,0,0" VerticalAlignment="Center" />
+                <TextBlock x:Name="StatusText" FontSize="13" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                           AutomationProperties.LiveSetting="Polite" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

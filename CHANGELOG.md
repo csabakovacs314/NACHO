@@ -2,6 +2,32 @@
 
 Versions: MAJOR.MINOR.PATCH. Minor for a feature, patch for a fix.
 
+## 0.4.0 (2026-10-25)
+
+**Asked for:** a Linux version.
+
+**Added: NACHO for Linux**
+- A Linux app with the same window, engine and texts as the Windows one: drop, paste, presets, page-fit preview, Copy file, Show in folder, Undo, More options and About; English, Spanish and Hungarian, switched live; light and dark following the desktop; the compact layout below 900 px.
+- Built with Avalonia 12.1 on .NET 10. The image engine is shared with Windows unchanged; all 78 engine tests pass on Linux too.
+- Two downloads: `NACHO-0.4.0-x86_64.AppImage` (one file: make it executable and run it) and `nacho-0.4.0-linux-x64.tar.gz` with `install.sh` (for your user only, no root: app menu, Open With and the right-click entry) and `uninstall.sh`.
+- Right-click entry "Make Docs-ready" for Files (under Scripts), Nemo, Caja and Dolphin, plus Open With > NACHO in every file manager. On and off in More options, like on Windows; it follows the language.
+- Drag a tile into a Google Doc (X11 drag and drop, which Avalonia 12.1 added). Copy file offers the copy to file managers (text/uri-list and the GNOME file list). Copy path works with Ctrl+L in the Upload from computer dialog.
+- A second launch, for example Open With on more images, hands the files to the open window.
+- Linux wording where the Windows texts name Explorer, Win+Shift+S, Send to or the File name box (13 texts in each language).
+- Settings in ~/.config/nacho; copies in Pictures/Docs-Ready, also when the Pictures folder has a translated name.
+- Colours checked against WCAG 2.2 AA in light and dark: every text pair is at least 4.7:1.
+
+**Changed**
+- Windows: no visible change; built from the same 0.4.0 source.
+- Builds no longer record the folder they were built in, so no local path ends up in the published files.
+
+**Fixed**
+- The source and package zips made by build.ps1 stored paths with backslashes, so on Linux and macOS they unpacked as flat files named like `src\Nacho\App.xaml`. build.ps1 now writes standard zips.
+
+**Tests:** 110 unit tests, on Linux and Windows (32 new: Linux texts, XDG folders, desktop files). Linux self-test: 81 checks on a virtual X display, including the clipboard as another program sees it, the desktop files, and a language switch renaming the Files script. Linux packages, in a throwaway home folder: install.sh in Hungarian, a second launch handing a photo to the open window, uninstall.sh leaving nothing behind, and the AppImage's own self-test (81 checks, menus pointing at the .AppImage file). Windows: 65 self-test checks for the portable and small exes.
+
+**Not checked here:** NACHO on a real Linux desktop (GNOME, KDE, Cinnamon) with its real file manager; dragging into Google Docs in a real browser; Wayland sessions (NACHO runs through XWayland there); the AppImage mounted through FUSE (tested by extracting it); the Windows installer (only its version number changed since 0.3.0).
+
 ## 0.3.0 (2026-10-24)
 
 **Asked for:** a Hungarian UI.

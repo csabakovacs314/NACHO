@@ -1,6 +1,6 @@
 # NACHO pictures
 
-Two sets: the mockup NACHO was designed from, and screenshots of the app as built.
+Three sets: the mockup NACHO was designed from, and screenshots of the app as built on Windows and on Linux.
 
 ## Mockup (23 Oct 2026)
 
@@ -33,7 +33,9 @@ Feedback when the window is closed, with Undo.
 
 <img src="mockup/5-notifications.png" width="315" alt="Mockup of two NACHO tray notifications">
 
-## The app, version 0.3.0
+## The Windows app, version 0.3.0
+
+The Windows window did not change in 0.4.0.
 
 Taken by NACHO's own self-test (`NACHO.exe --selftest <folder>`) on Windows 11, from the sample images it generates.
 
@@ -58,3 +60,29 @@ Taken by NACHO's own self-test (`NACHO.exe --selftest <folder>`) on Windows 11, 
 ### About: Spanish, Hungarian
 
 <img src="screenshots/about-es.png" width="420" alt="About window in Spanish"> <img src="screenshots/about-hu.png" width="420" alt="About window in Hungarian">
+
+## The Linux app, version 0.4.0
+
+The same window on Linux (Avalonia), taken by its own self-test (`nacho --selftest <folder>`) on a virtual X display. The font is Inter, which ships with NACHO so every distro shows the same window.
+
+### Main window: English, Spanish, Hungarian
+
+<img src="screenshots-linux/main-en-light.png" width="900" alt="NACHO for Linux, main window in English">
+
+<img src="screenshots-linux/main-es-light.png" width="900" alt="NACHO for Linux, main window in Spanish">
+
+<img src="screenshots-linux/main-hu-light.png" width="900" alt="NACHO for Linux, main window in Hungarian">
+
+### Dark theme and compact layout
+
+<img src="screenshots-linux/main-es-dark.png" width="900" alt="NACHO for Linux in Spanish, dark theme">
+
+<img src="screenshots-linux/main-en-narrow.png" width="300" alt="NACHO for Linux at 420 pixels wide">
+
+### More options: English, Spanish, Hungarian
+
+<img src="screenshots-linux/options-en.png" width="300" alt="More options in English, Linux"> <img src="screenshots-linux/options-es.png" width="300" alt="More options in Spanish, Linux"> <img src="screenshots-linux/options-hu.png" width="300" alt="More options in Hungarian, Linux">
+
+### About: Spanish, Hungarian
+
+<img src="screenshots-linux/about-es.png" width="420" alt="About window in Spanish, Linux"> <img src="screenshots-linux/about-hu.png" width="420" alt="About window in Hungarian, Linux">

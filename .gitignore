@@ -5,6 +5,9 @@ out/
 *.user
 .vs/
 tests-run*.txt
+build-log.txt
 # Release packages are attached to GitHub releases, not committed
 *.zip
 *.exe
+*.AppImage
+*.tar.gz

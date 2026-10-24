@@ -1,0 +1,4 @@
+#!/bin/sh
+# AppImage entry point. $APPIMAGE (set by the AppImage runtime) is the file the menus point at.
+HERE="$(dirname "$(readlink -f "$0")")"
+exec "$HERE/usr/lib/nacho/nacho" "$@"

@@ -1,0 +1,59 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="using:Nacho.Linux"
+        x:Class="Nacho.Linux.AboutWindow"
+        Title="{l:L About.Title}" Width="580" SizeToContent="Height" MinWidth="420"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" CanResize="False">
+    <Window.Styles>
+        <Style Selector="TextBlock.step">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+        </Style>
+        <Style Selector="TextBlock.h">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,12,0,8" />
+        </Style>
+    </Window.Styles>
+
+    <Grid x:Name="Root" RowDefinitions="Auto,Auto">
+        <StackPanel Margin="24,20,24,16">
+            <DockPanel>
+                <Viewbox DockPanel.Dock="Left" Width="56" Height="56" VerticalAlignment="Top">
+                    <Canvas Width="20" Height="20">
+                        <Polygon Points="10,2 19,17 1,17" Fill="#E8A33D" Stroke="#8A5000" StrokeThickness="1.5" StrokeJoin="Round" />
+                        <Polygon Points="10,9 13.5,15 6.5,15" Fill="White" />
+                    </Canvas>
+                </Viewbox>
+                <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="NACHO" FontSize="26" FontWeight="SemiBold" />
+                    <TextBlock Text="{l:L App.Expansion}" FontSize="15" TextWrapping="Wrap" />
+                    <TextBlock x:Name="OtherExpansion" Classes="secondary" FontStyle="Italic" FontSize="13" TextWrapping="Wrap" />
+                </StackPanel>
+            </DockPanel>
+            <TextBlock x:Name="VersionText" Classes="secondary" FontSize="13" Margin="0,12,0,6" />
+
+            <TextBlock Text="{l:L About.How}" Classes="h" />
+            <TextBlock Classes="step"><Run Text="1. " /><Run Text="{l:L About.Way1}" /></TextBlock>
+            <TextBlock Classes="step"><Run Text="2. " /><Run Text="{l:L About.Way2}" /></TextBlock>
+            <TextBlock Classes="step"><Run Text="3. " /><Run Text="{l:L About.Way3}" /></TextBlock>
+            <TextBlock Classes="step"><Run Text="4. " /><Run Text="{l:L About.Way4}" /></TextBlock>
+
+            <TextBlock Text="{l:L About.Replace}" Classes="h" />
+            <TextBlock Text="{l:L About.ReplaceBody}" TextWrapping="Wrap" />
+
+            <TextBlock Text="{l:L About.Keys}" Classes="h" />
+            <TextBlock Text="{l:L About.KeysList}" TextWrapping="Wrap" FontSize="13" />
+
+            <TextBlock Text="{l:L About.Credits}" Classes="secondary" FontSize="13" Margin="0,18,0,0" />
+        </StackPanel>
+
+        <Border Grid.Row="1" Padding="24,12" BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource N.Divider}" Background="{DynamicResource N.Layer}">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Content="{l:L About.OpenFolder}" Click="OpenFolder_Click" Padding="12,4" />
+                <Button Content="{l:L About.Close}" IsDefault="True" IsCancel="True" Click="Close_Click" MinWidth="96" Padding="12,4" Classes="accent" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

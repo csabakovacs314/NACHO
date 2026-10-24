@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 20 20">
+  <title>NACHO</title>
+  <polygon points="10,2 19,17 1,17" fill="#E8A33D" stroke="#8A5000" stroke-width="1.5" stroke-linejoin="round"/>
+  <polygon points="10,9 13.5,15 6.5,15" fill="#FFFFFF"/>
+</svg>

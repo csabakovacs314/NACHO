@@ -3,7 +3,7 @@ using System.Globalization;
 namespace Nacho.Core;
 
 /// <summary>All UI text in English (Irish spelling), Spanish and Hungarian. Keys must match in all three.</summary>
-public static class Strings
+public static partial class Strings
 {
     public static readonly IReadOnlyDictionary<string, string> En = new Dictionary<string, string>
     {

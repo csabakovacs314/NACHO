@@ -1,20 +1,24 @@
-NACHO 0.3.0
+NACHO 0.4.0
 Normalise, Adjust, Compress, Hand Over
 (Spanish: Normaliza, Ajusta, Comprime y Honra el Original)
 (Hungarian: Normalizál, Arányt tart, Csökkent és Hűen Odaad)
 
 NACHO makes a small, Docs-ready copy of an image before it goes into a Google Doc.
 Your original file is never changed. The copy goes to Pictures\Docs-Ready.
+NACHO runs on Windows 10 and 11, and on 64-bit Linux (see LINUX below).
 
 FILES
-  NACHO-0.3.0-setup.exe      Installer (recommended). English, Spanish or Hungarian, no admin rights needed.
-  NACHO.exe                  Portable. Runs on Windows 10 or 11 (x64) with nothing to install.
-  Small\NACHO.exe            Same app, much smaller, needs the .NET 10 Desktop Runtime.
-  NACHO-0.3.0-source.zip     Source, unit tests and build.ps1.
-  NACHO-0.3.0.zip            Everything above in one package.
+  NACHO-0.4.0-setup.exe      Windows installer (recommended). English, Spanish or Hungarian, no admin rights needed.
+  NACHO.exe                  Windows portable. Runs on Windows 10 or 11 (x64) with nothing to install.
+  Small\NACHO.exe            Same Windows app, much smaller, needs the .NET 10 Desktop Runtime.
+  Linux\NACHO-0.4.0-x86_64.AppImage     Linux, one file: make it executable and run it.
+  Linux\nacho-0.4.0-linux-x64.tar.gz    Linux, with install.sh (app menu, Open With, right-click entries).
+  Linux\SHA256SUMS.txt                  Checksums for the two Linux files.
+  NACHO-0.4.0-source.zip     Source, unit tests, build.ps1 (Windows) and build-linux.sh (Linux).
+  NACHO-0.4.0.zip            Everything above in one package.
 
 INSTALLER
-  Run NACHO-0.3.0-setup.exe, pick English, Español or Magyar, then "Install for me only" (no admin
+  Run NACHO-0.4.0-setup.exe, pick English, Español or Magyar, then "Install for me only" (no admin
   rights; goes to %LOCALAPPDATA%\Programs\NACHO) or "Install for all users" (Program Files).
   Options on the way: the right-click entry (on by default), Send to, a desktop shortcut.
   NACHO then starts in the language you picked. You get a Start menu entry, and NACHO appears
@@ -25,7 +29,36 @@ INSTALLER
   If you used the portable NACHO.exe before with the right-click entry on, the installer
   points that entry at the installed copy.
 
-FIRST RUN
+LINUX
+  Works on 64-bit PCs with any common distro: Ubuntu, Debian, Mint, Fedora, AlmaLinux, openSUSE,
+  Arch and others, on GNOME, KDE Plasma, Cinnamon, MATE or Xfce. Nothing needs root.
+  The window, presets, languages, preview and buttons are the same as on Windows.
+
+  AppImage (quickest):
+    chmod +x NACHO-0.4.0-x86_64.AppImage
+    ./NACHO-0.4.0-x86_64.AppImage
+  In More options you can add it to the app menu, to Open With and to the right-click menu.
+  Those point at the AppImage file, so put it where it will live first.
+
+  Install (adds NACHO to the app menu, Open With and the right-click menu at once):
+    tar xzf nacho-0.4.0-linux-x64.tar.gz
+    cd nacho-0.4.0-linux-x64
+    ./install.sh                 (or ./install.sh --lang hu, --lang es)
+  It goes to ~/.local/share/nacho, with the command ~/.local/bin/nacho.
+  Remove it with ~/.local/share/nacho/uninstall.sh (settings and Docs-Ready pictures stay).
+
+  Right-click menu: Files (GNOME) shows Make Docs-ready under Scripts; Nemo, Caja and Dolphin show it
+  directly. Every file manager also has Open With > NACHO.
+  Into Google Docs: drag the thumbnail into the Doc. Copy file is for pasting into a file manager.
+  For Replace image > Upload from computer: right-click the tile > Copy path, then in the file dialog
+  press Ctrl+L, Ctrl+V and Enter.
+  Settings: ~/.config/nacho/settings.json. Copies: Pictures/Docs-Ready (also when Pictures has a
+  translated name). Problems are logged in ~/.config/nacho/nacho.log.
+  Needs the ICU library (libicu), which desktop distros have. If NACHO does not start, install it:
+  Ubuntu, Debian, Mint: sudo apt install libicu-dev     Fedora, AlmaLinux: sudo dnf install libicu
+  Self-test: nacho --selftest /tmp/nacho-test   (or ./NACHO-0.4.0-x86_64.AppImage --selftest ...)
+
+FIRST RUN (WINDOWS)
   The exe is not code-signed, so Windows SmartScreen may say "Windows protected your PC".
   Choose More info, then Run anyway. If you copied the zip from a download, right-click it,
   choose Properties, tick Unblock, then extract.

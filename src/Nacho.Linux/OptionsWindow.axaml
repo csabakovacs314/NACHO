@@ -1,0 +1,129 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="using:Nacho.Linux"
+        x:Class="Nacho.Linux.OptionsWindow"
+        Title="{l:L Opt.Title}" Width="660" Height="800" MinWidth="440" MinHeight="420"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Window.Styles>
+        <Style Selector="TextBlock.hint">
+            <Setter Property="Foreground" Value="{DynamicResource N.TextSecondary}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="TextBlock.heading">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style Selector="Border.card">
+            <Setter Property="Margin" Value="0,0,0,16" />
+        </Style>
+        <Style Selector="TextBox.num">
+            <Setter Property="MinWidth" Value="100" />
+            <Setter Property="MaxWidth" Value="130" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+    </Window.Styles>
+
+    <Grid x:Name="Root" RowDefinitions="*,Auto">
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="24,16,24,8">
+                <TextBlock Text="{l:L Opt.Title}" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,16" />
+
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Text="{l:L Opt.Presets}" Classes="heading" />
+                        <TextBlock Text="{l:L Opt.PresetsHint}" Classes="hint" Margin="0,0,0,12" />
+                        <Grid ColumnDefinitions="Auto,Auto,*,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                            <TextBlock Grid.Column="0" Text="{l:L Opt.ColDefault}" Classes="hint" FontWeight="SemiBold" Margin="0,0,16,8" />
+                            <TextBlock Grid.Column="1" Text="{l:L Opt.ColPreset}" Classes="hint" FontWeight="SemiBold" Margin="0,0,16,8" />
+                            <TextBlock Grid.Column="2" Text="{l:L Opt.ColEdge}" Classes="hint" FontWeight="SemiBold" Margin="0,0,12,8" />
+                            <TextBlock Grid.Column="3" Text="{l:L Opt.ColBudget}" Classes="hint" FontWeight="SemiBold" Margin="0,0,0,8" />
+
+                            <RadioButton x:Name="DefSmall" Grid.Row="1" GroupName="Default" VerticalAlignment="Center" Margin="0,0,16,8" />
+                            <TextBlock x:Name="NameSmall" Grid.Row="1" Grid.Column="1" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,8" />
+                            <TextBox x:Name="EdgeSmall" Grid.Row="1" Grid.Column="2" Classes="num" Margin="0,0,12,8" />
+                            <TextBox x:Name="BudgetSmall" Grid.Row="1" Grid.Column="3" Classes="num" Margin="0,0,0,8" />
+
+                            <RadioButton x:Name="DefBalanced" Grid.Row="2" GroupName="Default" VerticalAlignment="Center" Margin="0,0,16,8" />
+                            <TextBlock x:Name="NameBalanced" Grid.Row="2" Grid.Column="1" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,8" />
+                            <TextBox x:Name="EdgeBalanced" Grid.Row="2" Grid.Column="2" Classes="num" Margin="0,0,12,8" />
+                            <TextBox x:Name="BudgetBalanced" Grid.Row="2" Grid.Column="3" Classes="num" Margin="0,0,0,8" />
+
+                            <RadioButton x:Name="DefSharp" Grid.Row="3" GroupName="Default" VerticalAlignment="Center" Margin="0,0,16,0" />
+                            <TextBlock x:Name="NameSharp" Grid.Row="3" Grid.Column="1" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,0" />
+                            <TextBox x:Name="EdgeSharp" Grid.Row="3" Grid.Column="2" Classes="num" Margin="0,0,12,0" />
+                            <TextBox x:Name="BudgetSharp" Grid.Row="3" Grid.Column="3" Classes="num" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel AutomationProperties.Name="{l:L Opt.Format}">
+                        <TextBlock Text="{l:L Opt.Format}" Classes="heading" />
+                        <RadioButton x:Name="FmtAuto" GroupName="Format" Content="{l:L Opt.FormatAuto}" Margin="0,0,0,4" />
+                        <RadioButton x:Name="FmtJpeg" GroupName="Format" Content="{l:L Opt.FormatJpeg}" Margin="0,0,0,4" />
+                        <RadioButton x:Name="FmtPng" GroupName="Format" Content="{l:L Opt.FormatPng}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Text="{l:L Opt.Privacy}" Classes="heading" />
+                        <CheckBox x:Name="PrivLocation" Content="{l:L Opt.PrivacyLocation}" Margin="0,0,0,4" />
+                        <CheckBox x:Name="PrivCamera" Content="{l:L Opt.PrivacyCamera}" Margin="0,0,0,8" />
+                        <TextBlock Text="{l:L Opt.PrivacyHint}" Classes="hint" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Text="{l:L Opt.Where}" Classes="heading" />
+                        <Label Content="{l:L Opt.Folder}" Target="{Binding #FolderBox}" Padding="0" Margin="0,0,0,6" />
+                        <DockPanel Margin="0,0,0,12">
+                            <Button DockPanel.Dock="Right" Content="{l:L Opt.ChangeFolder}" Click="ChangeFolder_Click" Padding="12,4" Margin="8,0,0,0" />
+                            <TextBox x:Name="FolderBox" IsReadOnly="True" VerticalContentAlignment="Center" />
+                        </DockPanel>
+                        <Label Content="{l:L Opt.Suffix}" Target="{Binding #SuffixBox}" Padding="0" Margin="0,0,0,6" />
+                        <TextBox x:Name="SuffixBox" Width="180" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Text="{l:L Opt.Shell}" Classes="heading" />
+                        <CheckBox x:Name="CtxMenu" Content="{l:L Opt.ContextMenu}" />
+                        <TextBlock Text="{l:L Opt.ContextMenuHint}" Classes="hint" Margin="28,0,0,10" />
+                        <CheckBox x:Name="AppMenuBox" Content="{l:L Opt.SendTo}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel>
+                        <Label Content="{l:L Opt.Language}" Target="{Binding #LangBox}" Padding="0" Margin="0,0,0,6" FontSize="16" FontWeight="SemiBold" />
+                        <ComboBox x:Name="LangBox" Width="180" HorizontalAlignment="Left">
+                            <ComboBoxItem Tag="en" Content="English" />
+                            <ComboBoxItem Tag="es" Content="Español" />
+                            <ComboBoxItem Tag="hu" Content="Magyar" />
+                        </ComboBox>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="1" Padding="24,12" BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource N.Divider}" Background="{DynamicResource N.Layer}">
+            <StackPanel>
+                <TextBlock x:Name="ErrorText" IsVisible="False" TextWrapping="Wrap" Margin="0,0,0,10"
+                           Foreground="{DynamicResource N.Critical}" AutomationProperties.LiveSetting="Assertive" />
+                <DockPanel>
+                    <Button DockPanel.Dock="Left" Content="{l:L Opt.Reset}" Click="Reset_Click" Padding="12,4" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                        <Button Content="{l:L Opt.Cancel}" IsCancel="True" Click="Cancel_Click" MinWidth="96" Padding="12,4" />
+                        <Button Content="{l:L Opt.Save}" IsDefault="True" Click="Save_Click" MinWidth="96" Padding="12,4" Classes="accent" />
+                    </StackPanel>
+                </DockPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

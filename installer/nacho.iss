@@ -2,7 +2,7 @@
 ; Installs for the current user by default (no admin rights); "all users" can be chosen in the first dialog.
 ; English, Spanish and Hungarian. Compile: ISCC.exe installer\nacho.iss (after publishing the payload, see build.ps1).
 
-#define AppVersion "0.3.0"
+#define AppVersion "0.4.0"
 #ifndef Payload
   #define Payload "..\out\installer-payload"
 #endif

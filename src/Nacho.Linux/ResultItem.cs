@@ -1,0 +1,105 @@
+using System.ComponentModel;
+using Avalonia.Media.Imaging;
+using Nacho.Core;
+
+namespace Nacho.Linux;
+
+/// <summary>One tile in the results list. Every text it shows is rebuilt from Loc, so a language switch is live.</summary>
+public sealed class ResultItem : INotifyPropertyChanged
+{
+    public ResultItem(string sourcePath, string displayName)
+    {
+        SourcePath = sourcePath;
+        DisplayName = displayName;
+    }
+
+    public string SourcePath { get; }
+    public string DisplayName { get; }
+    public ShrinkResult? Result { get; private set; }
+    public Bitmap? Thumbnail { get; private set; }
+    public Bitmap? PreviewImage { get; private set; }
+
+    public bool IsWorking => Result is null;
+    public bool IsOk => Result?.Kind == ResultKind.Shrunk;
+    public bool IsKept => Result?.Kind == ResultKind.Kept;
+    public bool IsError => Result?.Kind == ResultKind.Error;
+    public bool CanDeliver => IsOk || IsKept;
+    public string? DeliverPath => Result?.DeliverPath;
+
+    public string SizeText => IsOk
+        ? Loc.F("Tile.SizeLine", Loc.Bytes(Result!.OriginalBytes), Loc.Bytes(Result.OutputBytes)) : "";
+
+    public string SmallerText => IsOk ? Loc.F("Tile.Smaller", Result!.PercentSmaller) : "";
+
+    public string PxText => IsOk
+        ? Loc.F("Tile.PxLine", Dim(Result!.OriginalWidth, Result.OriginalHeight), Dim(Result.OutputWidth, Result.OutputHeight),
+            ShapeLabel(Result.OriginalWidth, Result.OriginalHeight), Result.OutputFormat)
+        : "";
+
+    public string KeptBody => IsKept
+        ? Loc.F("Tile.KeptBody", Loc.Bytes(Result!.OriginalBytes), Result.SourceFormat, Dim(Result.OriginalWidth, Result.OriginalHeight))
+        : "";
+
+    public string ErrorBody => IsError ? Loc.T("Err." + Result!.Error) : "";
+
+    public IReadOnlyList<string> Badges => Result is null
+        ? Array.Empty<string>()
+        : Result.Badges.Select(b => b == Badge.FromFormat ? Loc.F("Badge.FromFormat", Result.SourceFormat) : Loc.T("Badge." + b)).ToList();
+
+    public string DragName => Loc.F("Tile.DragName", DisplayName);
+
+    public void SetResult(ShrinkResult result, Bitmap? thumbnail, Bitmap? preview)
+    {
+        Result = result;
+        Thumbnail = thumbnail;
+        PreviewImage = preview;
+        Refresh();
+    }
+
+    public void Reset()
+    {
+        Result = null;
+        Thumbnail = null;
+        PreviewImage = null;
+        Refresh();
+    }
+
+    public void Refresh() => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
+
+    public override string ToString() => DisplayName;
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public static string Dim(int w, int h) => $"{w} × {h}";
+
+    public static string ShapeLabel(int w, int h) => Shape.Label(w, h, Loc.Instance.Culture);
+
+    /// <summary>"3:4, exact", or "16:9, within 0.04%" when whole pixels can't hit the ratio exactly.</summary>
+    public static string ShapeDescription(ShrinkResult r)
+    {
+        string label = ShapeLabel(r.OriginalWidth, r.OriginalHeight);
+        if (r.ShapeExact) return Loc.F("Shape.Exact", label);
+        double pct = Math.Max(0.01, Math.Round(r.ShapeErrorPercent, 2));
+        return Loc.F("Shape.Within", label, pct.ToString("0.##", Loc.Instance.Culture));
+    }
+}
+
+public static class Images
+{
+    /// <summary>Loads a picture scaled to a width, without keeping the file open, so copies can be deleted or replaced.</summary>
+    public static Bitmap? Load(string path, int decodeWidth)
+    {
+        try
+        {
+            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            using var ms = new MemoryStream();
+            fs.CopyTo(ms);
+            ms.Position = 0;
+            return decodeWidth > 0 ? Bitmap.DecodeToWidth(ms, decodeWidth, BitmapInterpolationMode.HighQuality) : new Bitmap(ms);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+}
