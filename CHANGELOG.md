@@ -2,6 +2,26 @@
 
 Versions: MAJOR.MINOR.PATCH. Minor for a feature, patch for a fix.
 
+## 0.6.0 (2026-10-26)
+
+**Asked for:** two ideas from similar projects: a before/after slider with 100% zoom (from Squoosh and IMGo), and shrinking every picture in a document at once (the idea behind tinyoffice).
+
+**Added: Compare with original**
+- A window with the original left of a divider and the Docs-ready copy right of it. Drag the divider or click where it should go; drag the picture to look around. Fit, 100%, 200% and 400% zoom, where 100% is one picture pixel per screen pixel at any display scaling.
+- The original is turned upright and shown at the copy's size with the same resize the engine uses, so the slider shows only what saving changed.
+- For a screenshot that kept full colour (0.5.0's banding guard), the right side can switch to the 256-colour version NACHO turned down, with its score against the 45 dB limit.
+- Opens from the preview panel, the tile's right-click menu, or Ctrl+D. Keyboard: Left and Right move the divider, 0, 1, 2 and 4 zoom, Esc closes; the divider is also a slider for screen readers. Clicking places the divider, so no dragging is needed (WCAG 2.5.7).
+
+**Added: whole Word documents (.docx)**
+- Drop a .docx (Google Docs: File > Download > Microsoft Word) and every picture inside is shrunk with the current preset and privacy options. The result is a new "<name>-docs.docx" in Docs-Ready; the original is never changed.
+- A PNG photo that becomes a JPEG is renamed inside the document, and every link to it (body, headers, footers) and its content type follow. The text and layout parts are copied byte for byte. EMF, WMF and SVG drawings stay as they are. The new file is checked before anyone sees it (every link, every content type, the part count).
+- The tile shows "3 of 4 pictures made smaller" and the preview panel shows document and picture sizes, the steps back into Google Docs, and a warning that this makes a new Doc with a new link.
+- The right-click entry (Windows and Linux) and the Open dialog now include .docx. Old .doc and password-protected files get a clear message.
+
+**Tests:** 134 unit tests (16 new: the document shrinker on a sample with a renamed picture, shared header picture, absolute and relative links, an Override content type, an EMF and GPS; kept, locked, old and broken documents; link resolution; the comparison pictures). Both self-tests add a document and the compare window, with screenshots. Outside NACHO: LibreOffice and python-docx open the shrunk documents with the same layout, also for .docx files written by LibreOffice and pandoc.
+
+**Not checked yet:** a .docx downloaded from a real Google Doc and uploaded back; Word on Windows opening the result.
+
 ## 0.5.0 (2026-10-26)
 
 **Asked for:** points 1 and 2 of the compression study: fix the banding in 256-colour screenshots, and add oxipng.

@@ -147,8 +147,10 @@
                                         <ContextMenu>
                                             <MenuItem Header="{l:L Tile.CopyFile}" InputGestureText="Ctrl+Shift+C" Click="CtxCopyFile_Click"
                                                       Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
+                                            <MenuItem Header="{l:L Tile.Compare}" InputGestureText="Ctrl+D" Click="CtxCompare_Click"
+                                                      Visibility="{Binding CanCompare, Converter={StaticResource Vis}}" />
                                             <MenuItem Header="{l:L Tile.CopyPicture}" Click="CtxCopyPicture_Click"
-                                                      Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
+                                                      Visibility="{Binding CanCopyPicture, Converter={StaticResource Vis}}" />
                                             <MenuItem Header="{l:L Tile.CopyPath}" Click="CtxCopyPath_Click"
                                                       Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
                                             <MenuItem Header="{l:L Tile.ShowFolder}" Click="CtxShowFolder_Click"
@@ -163,10 +165,13 @@
                                         <Border Width="96" Height="72" CornerRadius="6" BorderThickness="1" ClipToBounds="True" Cursor="Hand"
                                                 BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                                                 Background="{DynamicResource SubtleFillColorSecondaryBrush}"
-                                                ToolTip="{l:L Tile.DragHint}" AutomationProperties.Name="{Binding DragName}"
+                                                ToolTip="{Binding DragHint}" AutomationProperties.Name="{Binding DragName}"
                                                 PreviewMouseLeftButtonDown="Thumb_MouseDown" MouseMove="Thumb_MouseMove">
                                             <Grid>
                                                 <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" />
+                                                <TextBlock Style="{StaticResource Icon}" Margin="0" FontSize="32" Text="&#xE8A5;"
+                                                           HorizontalAlignment="Center" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                                           Visibility="{Binding ShowDocumentIcon, Converter={StaticResource Vis}}" />
                                                 <ProgressBar IsIndeterminate="True" Width="60" VerticalAlignment="Center"
                                                              Visibility="{Binding IsWorking, Converter={StaticResource Vis}}" />
                                                 <TextBlock Style="{StaticResource Icon}" Margin="0" FontSize="28" Text="&#xE783;"
@@ -174,7 +179,7 @@
                                                            Visibility="{Binding IsError, Converter={StaticResource Vis}}" />
                                             </Grid>
                                         </Border>
-                                        <TextBlock Text="{l:L Tile.DragHint}" FontSize="12" Style="{StaticResource Secondary}"
+                                        <TextBlock Text="{Binding DragHint}" FontSize="12" Style="{StaticResource Secondary}"
                                                    HorizontalAlignment="Center" Margin="0,4,0,0"
                                                    Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
                                     </StackPanel>
@@ -267,13 +272,13 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
                     <StackPanel>
                         <DockPanel Margin="0,0,0,12">
-                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" AutomationProperties.Name="{l:L Preview.PageSize}">
+                            <StackPanel x:Name="PageGroup" DockPanel.Dock="Right" Orientation="Horizontal" AutomationProperties.Name="{l:L Preview.PageSize}">
                                 <RadioButton x:Name="PageA4" Tag="A4" GroupName="Page" Content="{l:L Page.A4}" Checked="Page_Checked"
                                              Style="{DynamicResource {x:Type ToggleButton}}" MinWidth="60" MinHeight="28" Padding="10,2" Margin="0,0,2,0" />
                                 <RadioButton x:Name="PageLetter" Tag="Letter" GroupName="Page" Content="{l:L Page.Letter}" Checked="Page_Checked"
                                              Style="{DynamicResource {x:Type ToggleButton}}" MinWidth="60" MinHeight="28" Padding="10,2" />
                             </StackPanel>
-                            <TextBlock Text="{l:L Preview.Title}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap" />
+                            <TextBlock x:Name="PreviewHeading" Text="{l:L Preview.Title}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap" />
                         </DockPanel>
 
                         <StackPanel x:Name="PreviewOk" Visibility="Collapsed">
@@ -293,6 +298,13 @@
                                 </Border>
                             </Border>
                             <TextBlock x:Name="PreviewCaption" TextWrapping="Wrap" Margin="0,12,0,0" FontSize="13" LineHeight="19" />
+                            <Button x:Name="CompareButton" Click="Compare_Click" HorizontalAlignment="Left" Margin="0,12,0,0"
+                                    MinHeight="32" Padding="12,4" ToolTip="Ctrl+D" AutomationProperties.Name="{l:L Tile.Compare}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Icon}" Text="&#xE89F;" />
+                                    <TextBlock Text="{l:L Tile.Compare}" />
+                                </StackPanel>
+                            </Button>
                             <TextBlock Text="{l:L Preview.TableCaption}" FontWeight="SemiBold" FontSize="13" Margin="0,14,0,6" />
                             <Grid x:Name="Compare">
                                 <Grid.ColumnDefinitions>
@@ -329,6 +341,45 @@
                             </Grid>
                             <TextBlock x:Name="PreviewShapeNote" FontSize="13" TextWrapping="Wrap" Margin="0,12,0,0" LineHeight="19" />
                             <TextBlock Text="{l:L Preview.Untouched}" Style="{StaticResource Secondary}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" />
+                        </StackPanel>
+
+                        <StackPanel x:Name="PreviewDoc" Visibility="Collapsed">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{l:L Preview.ColDetail}" Style="{StaticResource Secondary}" FontSize="13" FontWeight="SemiBold" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{l:L Preview.ColOriginal}" Style="{StaticResource Secondary}" FontSize="13" FontWeight="SemiBold" Margin="0,0,8,6" />
+                                <TextBlock Grid.Row="0" Grid.Column="2" Text="{l:L Preview.ColCopy}" Style="{StaticResource Secondary}" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{l:L Doc.RowDocument}" FontSize="13" Margin="0,0,12,6" TextWrapping="Wrap" MaxWidth="130" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="DocSizeA" FontSize="13" Margin="0,0,8,6" />
+                                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="DocSizeB" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6" />
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{l:L Doc.RowPictures}" FontSize="13" Margin="0,0,12,0" TextWrapping="Wrap" MaxWidth="130" />
+                                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="DocPicsA" FontSize="13" Margin="0,0,8,0" />
+                                <TextBlock Grid.Row="2" Grid.Column="2" x:Name="DocPicsB" FontSize="13" />
+                            </Grid>
+                            <TextBlock x:Name="DocCounts" FontSize="13" TextWrapping="Wrap" Margin="0,12,0,0" />
+                            <TextBlock x:Name="DocSkipped" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,0" />
+                            <TextBlock Text="{l:L Doc.Steps}" FontWeight="SemiBold" FontSize="13" Margin="0,14,0,6" />
+                            <TextBlock Text="{l:L Doc.Step1}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4" />
+                            <TextBlock Text="{l:L Doc.Step2}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4" />
+                            <TextBlock Text="{l:L Doc.Step3}" FontSize="13" TextWrapping="Wrap" />
+                            <Border Margin="0,12,0,0" Padding="12,8" CornerRadius="6" BorderThickness="1"
+                                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                    Background="{DynamicResource SubtleFillColorSecondaryBrush}">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Left" Style="{StaticResource Icon}" VerticalAlignment="Top" Margin="0,2,10,0" Text="&#xE946;" />
+                                    <TextBlock Text="{l:L Doc.Warning}" FontSize="13" TextWrapping="Wrap" />
+                                </DockPanel>
+                            </Border>
+                            <TextBlock Text="{l:L Doc.Untouched}" Style="{StaticResource Secondary}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" />
                         </StackPanel>
 
                         <Border x:Name="PreviewKept" Visibility="Collapsed" Padding="16" CornerRadius="6"

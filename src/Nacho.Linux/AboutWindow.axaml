@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:l="using:Nacho.Linux"
         x:Class="Nacho.Linux.AboutWindow"
-        Title="{l:L About.Title}" Width="580" SizeToContent="Height" MinWidth="420"
+        Title="{l:L About.Title}" Width="580" SizeToContent="Height" MinWidth="420" MaxHeight="700"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False" CanResize="False">
     <Window.Styles>
         <Style Selector="TextBlock.step">
@@ -16,7 +16,8 @@
         </Style>
     </Window.Styles>
 
-    <Grid x:Name="Root" RowDefinitions="Auto,Auto">
+    <Grid x:Name="Root" RowDefinitions="*,Auto">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="True">
         <StackPanel Margin="24,20,24,16">
             <DockPanel>
                 <Viewbox DockPanel.Dock="Left" Width="56" Height="56" VerticalAlignment="Top">
@@ -42,11 +43,15 @@
             <TextBlock Text="{l:L About.Replace}" Classes="h" />
             <TextBlock Text="{l:L About.ReplaceBody}" TextWrapping="Wrap" />
 
+            <TextBlock Text="{l:L About.Doc}" Classes="h" />
+            <TextBlock Text="{l:L About.DocBody}" TextWrapping="Wrap" />
+
             <TextBlock Text="{l:L About.Keys}" Classes="h" />
             <TextBlock Text="{l:L About.KeysList}" TextWrapping="Wrap" FontSize="13" />
 
             <TextBlock Text="{l:L About.Credits}" Classes="secondary" FontSize="13" Margin="0,18,0,0" />
         </StackPanel>
+        </ScrollViewer>
 
         <Border Grid.Row="1" Padding="24,12" BorderThickness="0,1,0,0"
                 BorderBrush="{DynamicResource N.Divider}" Background="{DynamicResource N.Layer}">

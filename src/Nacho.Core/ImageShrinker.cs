@@ -21,7 +21,7 @@ public sealed class ImageShrinker
 
     private static readonly HashSet<string> NotImageExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".txt", ".csv", ".log", ".md", ".html", ".htm", ".xml", ".json", ".doc", ".docx", ".xls", ".xlsx",
+        ".txt", ".csv", ".log", ".md", ".html", ".htm", ".xml", ".json", ".xls", ".xlsx",
         ".ppt", ".pptx", ".zip", ".rar", ".7z", ".exe", ".dll", ".msi", ".lnk", ".ps", ".eps", ".ai",
     };
 
@@ -50,6 +50,7 @@ public sealed class ImageShrinker
         if (!File.Exists(path)) return Fail(r, ErrorKind.NotFound, null);
         r.OriginalBytes = new FileInfo(path).Length;
         if (StartsWith(path, "%PDF-")) return Fail(r, ErrorKind.Pdf, null);
+        if (DocxShrinker.IsWordFile(path)) return new DocxShrinker(this).Shrink(path, preset, opt, r);
         if (NotImageExtensions.Contains(Path.GetExtension(path))) return Fail(r, ErrorKind.NotAnImage, null);
 
         using var images = new MagickImageCollection();
@@ -355,7 +356,7 @@ public sealed class ImageShrinker
     }
 
     /// <summary>Writes to a new file only; never replaces an existing one or the source.</summary>
-    private static string WriteNew(string folder, string stem, string ext, byte[] bytes, string source)
+    internal static string WriteNew(string folder, string stem, string ext, byte[] bytes, string source)
     {
         string full = Path.GetFullPath(source);
         for (int i = 1; i < 10_000; i++)
@@ -377,7 +378,7 @@ public sealed class ImageShrinker
         throw new IOException("No free file name in " + folder);
     }
 
-    private static ShrinkResult Keep(ShrinkResult r, bool hasGps)
+    internal static ShrinkResult Keep(ShrinkResult r, bool hasGps)
     {
         r.Badges.Clear();
         r.Kind = ResultKind.Kept;
@@ -390,7 +391,7 @@ public sealed class ImageShrinker
         return r;
     }
 
-    private static ShrinkResult Fail(ShrinkResult r, ErrorKind kind, string? detail)
+    internal static ShrinkResult Fail(ShrinkResult r, ErrorKind kind, string? detail)
     {
         r.Badges.Clear();
         r.Kind = ResultKind.Error;

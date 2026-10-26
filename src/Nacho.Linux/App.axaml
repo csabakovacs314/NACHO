@@ -86,6 +86,10 @@
             <StreamGeometry x:Key="Icon.Help">M5.75,6 A2.25,2.25 0 1 1 8.6,8.2 C8.1,8.45 8,8.8 8,9.6 M8,12.25 V12.5</StreamGeometry>
             <StreamGeometry x:Key="Icon.Globe">M8,1.5 A6.5,6.5 0 1 1 7.99,1.5 Z M1.5,8 H14.5 M8,1.5 C5.5,4 5.5,12 8,14.5 M8,1.5 C10.5,4 10.5,12 8,14.5</StreamGeometry>
             <StreamGeometry x:Key="Icon.Drop">M8,1.5 V9.5 M4.75,6.25 L8,9.5 L11.25,6.25 M2,10.5 V14 H14 V10.5</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Document">M4,1.5 H9.5 L12.5,4.5 V14.5 H4 Z M9.5,1.5 V4.5 H12.5 M6,8 H10.5 M6,10.5 H10.5 M6,13 H9</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Compare">M2.5,3 H13.5 V13 H2.5 Z M8,1.5 V14.5 M4.25,8 H6.25 M9.75,8 H11.75</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Info">M8,1.5 A6.5,6.5 0 1 1 7.99,1.5 Z M8,7.25 V11.5 M8,4.75 V5</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Chevrons">M6,4.5 L2.5,8 L6,11.5 M10,4.5 L13.5,8 L10,11.5</StreamGeometry>
             <StreamGeometry x:Key="Icon.Error">M8,1.5 A6.5,6.5 0 1 1 7.99,1.5 Z M5.75,5.75 L10.25,10.25 M10.25,5.75 L5.75,10.25</StreamGeometry>
         </ResourceDictionary>
     </Application.Resources>

@@ -2,7 +2,7 @@
 ; Installs for the current user by default (no admin rights); "all users" can be chosen in the first dialog.
 ; English, Spanish and Hungarian. Compile: ISCC.exe installer\nacho.iss (after publishing the payload, see build.ps1).
 
-#define AppVersion "0.5.0"
+#define AppVersion "0.6.0"
 #ifndef Payload
   #define Payload "..\out\installer-payload"
 #endif
@@ -108,6 +108,12 @@ Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.avif\shell\NACHO.M
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.avif\shell\NACHO.MakeDocsReady"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Player"; Tasks: contextmenu
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.avif\shell\NACHO.MakeDocsReady\command"; ValueType: string; ValueName: ""; ValueData: """{app}\NACHO.exe"" ""%1"""; Tasks: contextmenu
 
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.docx\shell\NACHO.MakeDocsReady"; ValueType: string; ValueName: ""; ValueData: "{cm:MenuText}"; Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.docx\shell\NACHO.MakeDocsReady"; ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:MenuText}"; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.docx\shell\NACHO.MakeDocsReady"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\NACHO.exe"",0"; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.docx\shell\NACHO.MakeDocsReady"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Player"; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.docx\shell\NACHO.MakeDocsReady\command"; ValueType: string; ValueName: ""; ValueData: """{app}\NACHO.exe"" ""%1"""; Tasks: contextmenu
+
 ; The language picked in setup; NACHO uses it on its first run.
 Root: HKCU; Subkey: "Software\NACHO"; ValueType: string; ValueName: "Language"; ValueData: "{language}"; Flags: uninsdeletekey
 
@@ -136,6 +142,7 @@ begin
   RegDeleteKeyIncludingSubkeys(HKCU, ShellKey('.heif'));
   RegDeleteKeyIncludingSubkeys(HKCU, ShellKey('.webp'));
   RegDeleteKeyIncludingSubkeys(HKCU, ShellKey('.avif'));
+  RegDeleteKeyIncludingSubkeys(HKCU, ShellKey('.docx'));
 end;
 
 procedure RemoveSendTo();

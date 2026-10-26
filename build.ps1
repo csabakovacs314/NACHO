@@ -2,7 +2,7 @@
 # Steps: icon, unit tests, portable and small exe, installer, self-test, source zip, package zip.
 # Needs: .NET 10 SDK, Inno Setup 6 (winget install JRSoftware.InnoSetup --scope user).
 # -LinuxDir: a folder with the Linux packages made by build-linux.sh; they go into the release's Linux folder.
-param([string]$Version = "0.5.0", [string]$LinuxDir = "")
+param([string]$Version = "0.6.0", [string]$LinuxDir = "")
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
 $release = Join-Path $env:USERPROFILE "Downloads\NACHO\NACHO-$Version"

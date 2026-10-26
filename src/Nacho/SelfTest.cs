@@ -161,6 +161,73 @@ public static class SelfTest
         w.Width = 1240;
         await Settle();
 
+        // 0.6.0: a whole Word document, and the before/after slider.
+        string docx = SampleImages.WordDocument(Path.Combine(outDir, "samples", "Team plan.docx"));
+        await w.AddFilesAsync(new[] { docx, banded });
+        await w.WaitIdleAsync();
+        await Settle();
+        var docItem = w.Items.First(i => i.SourcePath == docx);
+        var bandItem = w.Items.First(i => i.SourcePath == banded);
+        Check(docItem.IsOk && docItem.IsDocument && docItem.Result!.OutputFormat == "DOCX", "Word document shrunk to a new .docx: " + docItem.Result?.OutputPath);
+        Check(docItem.Result!.OutputBytes < docItem.Result.OriginalBytes / 4, $"document much smaller: {docItem.Result.OriginalBytes} to {docItem.Result.OutputBytes} bytes");
+        Check(docItem.PxText == "3 of 4 pictures made smaller · DOCX · drawings left as they are: 1", "document tile line: " + docItem.PxText);
+        Check(docItem.DragHint == "Drag into Drive" && !docItem.CanCopyPicture && !docItem.CanCompare, "document tile offers Drive, not picture actions");
+        Check(docItem.Badges.Contains("Location removed"), "document tile shows Location removed");
+        using (var z = System.IO.Compression.ZipFile.OpenRead(docItem.Result.OutputPath!))
+        {
+            Check(z.GetEntry("word/media/image1.jpg") is not null && z.GetEntry("word/media/image1.png") is null, "PNG photo inside the document became a JPEG");
+        }
+        w.Select(docItem);
+        await Settle();
+        Check(w.PreviewDoc.Visibility == Visibility.Visible && w.PreviewOk.Visibility != Visibility.Visible, "preview shows the document panel");
+        Check(w.DocCounts.Text == "Pictures found: 4. Made smaller: 3, already fine: 1.", "document counts: " + w.DocCounts.Text);
+        Check(w.PageGroup.Visibility != Visibility.Visible, "page size buttons hidden for a document");
+        Shot(w, Path.Combine(outDir, "main-en-doc.png"), dark: false);
+
+        w.Select(bandItem);
+        await Settle();
+        Check(w.CompareButton.Visibility == Visibility.Visible, "preview offers Compare with original");
+        var cmp = w.OpenCompare(bandItem, activate: false);
+        Check(cmp is not null, "compare window opens");
+        if (cmp is not null)
+        {
+            cmp.Left = -20000;
+            cmp.Top = 0;
+            for (int i = 0; i < 40 && !cmp.IsReady; i++) await Task.Delay(100);
+            await Settle();
+            Check(cmp.IsReady && cmp.Pictures!.Width == bandItem.Result!.OutputWidth, "compare window shows the pictures");
+            Check(cmp.PaletteOffered, "the 256-colour version is offered for the banded screenshot");
+            Check(cmp.RightLabel.StartsWith("Copy · PNG · ", StringComparison.Ordinal), "right side is the copy: " + cmp.RightLabel);
+            Check(Math.Abs(cmp.DividerPercent - 50) < 0.01, "divider starts in the middle");
+            Shot(cmp, Path.Combine(outDir, "compare-en-copy.png"), dark: false);
+            cmp.ShowPaletteSide(true);
+            await Settle();
+            Check(cmp.RightLabel == "256 colours · not used", "right side switches to the 256-colour version: " + cmp.RightLabel);
+            Shot(cmp, Path.Combine(outDir, "compare-en-256.png"), dark: false);
+            Loc.Instance.Set("hu");
+            await Settle();
+            Check(cmp.RightLabel == "256 szín · nem használt", "compare window follows the language: " + cmp.RightLabel);
+            Shot(cmp, Path.Combine(outDir, "compare-hu-256.png"), dark: false);
+            Loc.Instance.Set("en");
+            cmp.Close();
+        }
+        var photoCmp = w.OpenCompare(Get(samples.Photo), activate: false);
+        if (photoCmp is not null)
+        {
+            photoCmp.Left = -20000;
+            photoCmp.Top = 0;
+            for (int i = 0; i < 40 && !photoCmp.IsReady; i++) await Task.Delay(100);
+            photoCmp.SetZoom(0);
+            App.ApplyTheme("Dark");
+            await Settle();
+            Check(photoCmp.IsReady && photoCmp.Pictures!.OriginalResized && !photoCmp.PaletteOffered, "photo compare: original resized to the copy, no 256-colour option");
+            Shot(photoCmp, Path.Combine(outDir, "compare-en-photo-dark.png"), dark: true);
+            App.ApplyTheme("Light");
+            photoCmp.Close();
+        }
+        Check(w.OpenCompare(Get(samples.Logo)) is null && w.OpenCompare(docItem) is null, "nothing to compare for a kept image or a document");
+        await Settle();
+
         foreach (string lang in Strings.Languages)
         {
             Loc.Instance.Set(lang);
@@ -182,7 +249,7 @@ public static class SelfTest
         Loc.Instance.Set("en");
 
         w.Close();
-        foreach (string shot in new[] { "main-en-light", "main-es-light", "main-hu-light", "main-es-dark", "main-en-narrow", "options-en", "options-es", "options-hu", "about-es", "about-hu" })
+        foreach (string shot in new[] { "main-en-light", "main-es-light", "main-hu-light", "main-es-dark", "main-en-narrow", "main-en-doc", "compare-en-copy", "compare-en-256", "compare-hu-256", "compare-en-photo-dark", "options-en", "options-es", "options-hu", "about-es", "about-hu" })
         {
             var f = new FileInfo(Path.Combine(outDir, shot + ".png"));
             Check(f.Exists && f.Length > 10_000, $"screenshot {shot}.png saved");

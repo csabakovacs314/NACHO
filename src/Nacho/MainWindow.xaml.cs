@@ -149,7 +149,7 @@ public partial class MainWindow : Window
                 var (result, thumb, preview) = await Task.Run(() =>
                 {
                     var r = _shrinker.Shrink(item.SourcePath, preset, options);
-                    string? path = r.DeliverPath;
+                    string? path = r.IsDocument ? null : r.DeliverPath;
                     return (r, path is null ? null : Images.Load(path, 192), path is null ? null : Images.Load(path, 600));
                 });
                 item.SetResult(result, thumb, preview);
@@ -346,6 +346,7 @@ public partial class MainWindow : Window
         else if (mods == ModifierKeys.Control && e.Key == Key.V) { Paste(); e.Handled = true; }
         else if (mods == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.C) { CopyFile(Results.SelectedItem as ResultItem); e.Handled = true; }
         else if (mods == ModifierKeys.Control && e.Key == Key.Z) { Undo(); e.Handled = true; }
+        else if (mods == ModifierKeys.Control && e.Key == Key.D) { OpenCompare(Results.SelectedItem as ResultItem); e.Handled = true; }
         else if (mods == ModifierKeys.Control && e.Key == Key.OemComma) { OpenOptions(); e.Handled = true; }
         else if (mods == ModifierKeys.None && e.Key == Key.F1) { OpenAbout(); e.Handled = true; }
     }
@@ -368,6 +369,17 @@ public partial class MainWindow : Window
     private void Remove_Click(object sender, RoutedEventArgs e) { if (ItemOf(sender) is { } i) RemoveItem(i); }
     private void CtxCopyFile_Click(object sender, RoutedEventArgs e) => CopyFile(ItemOf(sender));
     private void CtxCopyPicture_Click(object sender, RoutedEventArgs e) => CopyPicture(ItemOf(sender));
+    private void CtxCompare_Click(object sender, RoutedEventArgs e) => OpenCompare(ItemOf(sender));
+    private void Compare_Click(object sender, RoutedEventArgs e) => OpenCompare(Results.SelectedItem as ResultItem);
+
+    /// <summary>Opens the before/after slider for a shrunk picture; returns the window (the self-test drives it).</summary>
+    public CompareWindow? OpenCompare(ResultItem? item, bool activate = true)
+    {
+        if (item is null || !item.CanCompare) return null;
+        var w = new CompareWindow(item.Result!, item.DisplayName) { Owner = this, ShowActivated = activate };
+        w.Show();
+        return w;
+    }
     private void CtxCopyPath_Click(object sender, RoutedEventArgs e) => CopyPath(ItemOf(sender));
     private void CtxShowFolder_Click(object sender, RoutedEventArgs e) => ShowInFolder(ItemOf(sender));
     private void CtxRemove_Click(object sender, RoutedEventArgs e) { if (ItemOf(sender) is { } i) RemoveItem(i); }
@@ -579,6 +591,10 @@ public partial class MainWindow : Window
         PreviewKept.Visibility = Visibility.Collapsed;
         PreviewError.Visibility = Visibility.Collapsed;
         PreviewEmpty.Visibility = Visibility.Collapsed;
+        PreviewDoc.Visibility = Visibility.Collapsed;
+        bool doc = Results.SelectedItem is ResultItem { IsDocument: true };
+        PreviewHeading.Text = Loc.T(doc ? "Doc.Title" : "Preview.Title");
+        PageGroup.Visibility = doc ? Visibility.Collapsed : Visibility.Visible;
 
         if (Results.SelectedItem is not ResultItem item || item.IsWorking)
         {
@@ -594,12 +610,25 @@ public partial class MainWindow : Window
         }
         if (item.IsKept)
         {
-            PreviewKeptBody.Text = Loc.F("Preview.KeptBody", item.DisplayName);
+            PreviewKeptBody.Text = item.IsDocument ? item.KeptBody : Loc.F("Preview.KeptBody", item.DisplayName);
             PreviewKept.Visibility = Visibility.Visible;
             return;
         }
 
         var r = item.Result!;
+        if (r.Document is { } d)
+        {
+            DocSizeA.Text = Loc.Bytes(r.OriginalBytes);
+            DocSizeB.Text = Loc.Bytes(r.OutputBytes);
+            DocPicsA.Text = Loc.Bytes(d.PicturesBefore);
+            DocPicsB.Text = Loc.Bytes(d.PicturesAfter);
+            DocCounts.Text = Loc.F("Doc.Counts", d.Pictures, d.Shrunk, d.Kept);
+            DocSkipped.Text = d.Skipped > 0 ? Loc.F("Doc.Skipped", d.Skipped) : "";
+            DocSkipped.Visibility = d.Skipped > 0 ? Visibility.Visible : Visibility.Collapsed;
+            PreviewDoc.Visibility = Visibility.Visible;
+            return;
+        }
+        CompareButton.Visibility = item.CanCompare ? Visibility.Visible : Visibility.Collapsed;
         bool a4 = _s.PageSize != "Letter";
         double pageHeight = a4 ? 283 : 259;
         int textPx = a4 ? 602 : 624;

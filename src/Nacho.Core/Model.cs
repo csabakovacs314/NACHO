@@ -4,7 +4,7 @@ public enum FormatMode { Auto, Jpeg, Png }
 
 public enum ResultKind { Shrunk, Kept, Error }
 
-public enum ErrorKind { None, NotFound, Pdf, NotAnImage, Damaged }
+public enum ErrorKind { None, NotFound, Pdf, NotAnImage, Damaged, DocLocked }
 
 public enum Badge { FromFormat, LocationRemoved, CameraRemoved, RotatedUpright, TextKeptSharp, Colours256, OverBudget, Animated, Transparency, FullColour }
 
@@ -69,6 +69,11 @@ public sealed class ShrinkResult
     /// <summary>The PNG's size before oxipng, when oxipng made it smaller.</summary>
     public long? PngOptimisedFrom { get; set; }
 
+    /// <summary>Set for a Word document (.docx): what happened to the pictures inside it.</summary>
+    public DocumentReport? Document { get; set; }
+
+    public bool IsDocument => Document is not null;
+
     /// <summary>True when the copy has exactly the original's width-to-height ratio.</summary>
     public bool ShapeExact => OutputWidth > 0 && Shape.Same(OriginalWidth, OriginalHeight, OutputWidth, OutputHeight);
 
@@ -86,4 +91,27 @@ public sealed class ShrinkResult
     public int PercentSmaller => OriginalBytes <= 0 || Kind != ResultKind.Shrunk
         ? 0
         : (int)Math.Round(100.0 * (OriginalBytes - OutputBytes) / OriginalBytes);
+}
+
+/// <summary>What NACHO did to the pictures inside one .docx.</summary>
+public sealed class DocumentReport
+{
+    /// <summary>Pictures NACHO could read (photos, screenshots, GIFs).</summary>
+    public int Pictures { get; set; }
+
+    public int Shrunk { get; set; }
+
+    /// <summary>Pictures that were already Docs-ready and stay byte for byte as they were.</summary>
+    public int Kept { get; set; }
+
+    /// <summary>Drawings (EMF, WMF, SVG) and pictures NACHO can't read; they stay as they were.</summary>
+    public int Skipped { get; set; }
+
+    /// <summary>Bytes of the readable pictures before and after.</summary>
+    public long PicturesBefore { get; set; }
+
+    public long PicturesAfter { get; set; }
+
+    /// <summary>Pictures whose location (GPS) data was removed.</summary>
+    public int LocationRemoved { get; set; }
 }

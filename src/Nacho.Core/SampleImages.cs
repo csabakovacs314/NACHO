@@ -4,7 +4,7 @@ using ImageMagick.Drawing;
 namespace Nacho.Core;
 
 /// <summary>Builds the sample images the unit tests and the app self-test feed through NACHO.</summary>
-public static class SampleImages
+public static partial class SampleImages
 {
     public sealed record Set(
         string Photo, string Screenshot, string Logo, string Alpha, string Animated,

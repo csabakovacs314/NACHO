@@ -38,6 +38,7 @@ public static class DesktopFiles
     public static readonly string[] MimeTypes =
     {
         "image/jpeg", "image/png", "image/gif", "image/heic", "image/heif", "image/webp", "image/avif", "image/tiff", "image/bmp",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     };
 
     private const UnixFileMode Executable =

@@ -7,7 +7,7 @@
 # Needs: .NET 10 SDK, xvfb-run, curl (the first run downloads appimagetool into out/tools).
 set -euo pipefail
 
-VERSION="${1:-0.5.0}"
+VERSION="${1:-0.6.0}"
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 OUT="$ROOT/out/linux"
 REL="$ROOT/out/linux-release"

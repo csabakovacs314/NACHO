@@ -1,4 +1,4 @@
-NACHO 0.5.0
+NACHO 0.6.0
 Normalise, Adjust, Compress, Hand Over
 (Spanish: Normaliza, Ajusta, Comprime y Honra el Original)
 (Hungarian: Normalizál, Arányt tart, Csökkent és Hűen Odaad)
@@ -8,17 +8,17 @@ Your original file is never changed. The copy goes to Pictures\Docs-Ready.
 NACHO runs on Windows 10 and 11, and on 64-bit Linux (see LINUX below).
 
 FILES
-  NACHO-0.5.0-setup.exe      Windows installer (recommended). English, Spanish or Hungarian, no admin rights needed.
+  NACHO-0.6.0-setup.exe      Windows installer (recommended). English, Spanish or Hungarian, no admin rights needed.
   NACHO.exe                  Windows portable. Runs on Windows 10 or 11 (x64) with nothing to install.
   Small\NACHO.exe            Same Windows app, much smaller, needs the .NET 10 Desktop Runtime.
-  Linux\NACHO-0.5.0-x86_64.AppImage     Linux, one file: make it executable and run it.
-  Linux\nacho-0.5.0-linux-x64.tar.gz    Linux, with install.sh (app menu, Open With, right-click entries).
+  Linux\NACHO-0.6.0-x86_64.AppImage     Linux, one file: make it executable and run it.
+  Linux\nacho-0.6.0-linux-x64.tar.gz    Linux, with install.sh (app menu, Open With, right-click entries).
   Linux\SHA256SUMS.txt                  Checksums for the two Linux files.
-  NACHO-0.5.0-source.zip     Source, unit tests, build.ps1 (Windows) and build-linux.sh (Linux).
-  NACHO-0.5.0.zip            Everything above in one package.
+  NACHO-0.6.0-source.zip     Source, unit tests, build.ps1 (Windows) and build-linux.sh (Linux).
+  NACHO-0.6.0.zip            Everything above in one package.
 
 INSTALLER
-  Run NACHO-0.5.0-setup.exe, pick English, Español or Magyar, then "Install for me only" (no admin
+  Run NACHO-0.6.0-setup.exe, pick English, Español or Magyar, then "Install for me only" (no admin
   rights; goes to %LOCALAPPDATA%\Programs\NACHO) or "Install for all users" (Program Files).
   Options on the way: the right-click entry (on by default), Send to, a desktop shortcut.
   NACHO then starts in the language you picked. You get a Start menu entry, and NACHO appears
@@ -36,14 +36,14 @@ LINUX
   The window, presets, languages, preview and buttons are the same as on Windows.
 
   AppImage (quickest):
-    chmod +x NACHO-0.5.0-x86_64.AppImage
-    ./NACHO-0.5.0-x86_64.AppImage
+    chmod +x NACHO-0.6.0-x86_64.AppImage
+    ./NACHO-0.6.0-x86_64.AppImage
   In More options you can add it to the app menu, to Open With and to the right-click menu.
   Those point at the AppImage file, so put it where it will live first.
 
   Install (adds NACHO to the app menu, Open With and the right-click menu at once):
-    tar xzf nacho-0.5.0-linux-x64.tar.gz
-    cd nacho-0.5.0-linux-x64
+    tar xzf nacho-0.6.0-linux-x64.tar.gz
+    cd nacho-0.6.0-linux-x64
     ./install.sh                 (or ./install.sh --lang hu, --lang es)
   It goes to ~/.local/share/nacho, with the command ~/.local/bin/nacho.
   Remove it with ~/.local/share/nacho/uninstall.sh (settings and Docs-Ready pictures stay; the oxipng
@@ -58,7 +58,7 @@ LINUX
   translated name). Problems are logged in ~/.config/nacho/nacho.log.
   Needs the ICU library (libicu), which desktop distros have. If NACHO does not start, install it:
   Ubuntu, Debian, Mint: sudo apt install libicu-dev     Fedora, AlmaLinux: sudo dnf install libicu
-  Self-test: nacho --selftest /tmp/nacho-test   (or ./NACHO-0.5.0-x86_64.AppImage --selftest ...)
+  Self-test: nacho --selftest /tmp/nacho-test   (or ./NACHO-0.6.0-x86_64.AppImage --selftest ...)
 
 FIRST RUN (WINDOWS)
   The exe is not code-signed, so Windows SmartScreen may say "Windows protected your PC".
@@ -70,6 +70,7 @@ FOUR WAYS IN
   2. Copy an image or a snip (Win+Shift+S), then press Ctrl+V in NACHO.
   3. Right-click an image in Explorer > Make Docs-ready (setup offers it, or turn it on in More options).
   4. Send to > NACHO (setup offers it, or turn it on in More options).
+  A Word document (.docx) works the same way: see A WHOLE DOC AT ONCE below.
   Then drag the thumbnail into your Google Doc, or press Copy file and Ctrl+V in the Doc.
 
 PRESETS
@@ -106,6 +107,29 @@ WHAT IT DOES TO EACH IMAGE
   in it, the copy keeps all its colours (badge "Full colour, no banding").
   Every PNG copy then goes through oxipng: the same pixels in about 5% fewer bytes (more for
   full-colour copies). It adds well under a second per screenshot.
+
+COMPARE WITH ORIGINAL
+  Select a shrunk image and press Compare with original (or Ctrl+D, or right-click the tile).
+  A window shows the original left of a divider and the copy right of it. Drag the divider, or
+  click where it should go; drag the picture to look around. Zoom: Fit, 100% (one picture pixel
+  per screen pixel), 200% and 400%; keys 0, 1, 2 and 4, Ctrl+wheel, Esc closes. Left and Right
+  move the divider; the slider under the picture does the same for keyboards and screen readers.
+  The original is shown at the copy's size, so you see only what saving changed: JPEG blocks,
+  banding, softer text. For a screenshot that kept full colour, the right side can switch to the
+  256-colour version NACHO turned down, so you can see the banding it avoided.
+
+A WHOLE DOC AT ONCE (.docx)
+  In Google Docs choose File > Download > Microsoft Word (.docx), then drop the file on NACHO
+  (or right-click it > Make Docs-ready). Every picture inside goes through the same steps as a
+  dropped image, and a new "<name>-docs.docx" goes to Docs-Ready. The text and layout are copied
+  untouched; pictures keep their place and size on the page. Drawings (EMF, WMF, SVG) stay as
+  they are. Location data is removed from photos inside, like for single images.
+  Back into Google Docs: in Google Drive choose New > File upload (or drag the tile into Drive),
+  then right-click the file > Open with > Google Docs. That makes a NEW Google Doc with a new
+  link. Comments and suggestions may not all come back, and version history and sharing stay with
+  the old Doc, so check the new one before you retire the old one.
+  Old .doc files and password-protected .docx files can't be opened; save them as .docx without a
+  password first.
 
 RIGHT-CLICK MENU AND SEND TO
   Both are off until you tick them in More options. They are added for your user only
