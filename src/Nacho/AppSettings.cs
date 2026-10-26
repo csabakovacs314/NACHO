@@ -17,6 +17,8 @@ public sealed class AppSettings
     public string Suffix { get; set; } = "-docs";
     public bool ContextMenu { get; set; }
     public bool SendTo { get; set; }
+    public bool CheckUpdates { get; set; } = true;
+    public DateTime? LastUpdateCheckUtc { get; set; }
     public string PageSize { get; set; } = "";
     public string SavingsMonth { get; set; } = "";
     public long SavingsBytes { get; set; }

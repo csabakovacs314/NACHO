@@ -2,8 +2,13 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Nacho.Core</RootNamespace>
+    <!-- PDFium is called through a few unmanaged functions (Pdf/Pdfium.cs). -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q8-x64" Version="15.0.0" />
+    <!-- PDFium (BSD-3-Clause), prebuilt by bblanchon/pdfium-binaries; licences in licenses/pdfium. -->
+    <PackageReference Include="bblanchon.PDFium.Win32" Version="158.0.8111" />
+    <PackageReference Include="bblanchon.PDFium.Linux" Version="158.0.8111" />
   </ItemGroup>
 </Project>

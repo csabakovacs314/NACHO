@@ -2,7 +2,7 @@
 # Steps: icon, unit tests, portable and small exe, installer, self-test, source zip, package zip.
 # Needs: .NET 10 SDK, Inno Setup 6 (winget install JRSoftware.InnoSetup --scope user).
 # -LinuxDir: a folder with the Linux packages made by build-linux.sh; they go into the release's Linux folder.
-param([string]$Version = "0.6.0", [string]$LinuxDir = "")
+param([string]$Version = "0.7.0", [string]$LinuxDir = "")
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
 $release = Join-Path $env:USERPROFILE "Downloads\NACHO\NACHO-$Version"
@@ -67,6 +67,7 @@ Copy-Item (Join-Path $out "installer\NACHO-$Version-setup.exe") $release
 Copy-Item (Join-Path $out "portable\NACHO.exe") $release
 Copy-Item (Join-Path $out "small\NACHO.exe") (Join-Path $release "Small")
 Copy-Item (Join-Path $root "README.txt"), (Join-Path $root "CHANGELOG.md") $release
+Copy-Item (Join-Path $root "licenses") (Join-Path $release "licenses") -Recurse
 if ($LinuxDir) {
     $linux = Join-Path $release "Linux"
     New-Item -ItemType Directory -Path $linux -Force | Out-Null
@@ -84,7 +85,7 @@ Write-Host "7/7 Zips"
 $stage = Join-Path $out "source-stage"
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 New-Item -ItemType Directory -Path $stage | Out-Null
-foreach ($item in "src", "tests", "tools", "installer", "packaging", "Directory.Build.props", "build.ps1", "build-linux.sh", "README.txt", "CHANGELOG.md") {
+foreach ($item in "src", "tests", "tools", "installer", "packaging", "licenses", "Directory.Build.props", "build.ps1", "build-linux.sh", "README.txt", "CHANGELOG.md") {
     Copy-Item (Join-Path $root $item) $stage -Recurse
 }
 Get-ChildItem $stage -Recurse -Directory | Where-Object { $_.Name -in "bin", "obj" } | Remove-Item -Recurse -Force

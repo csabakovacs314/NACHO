@@ -45,6 +45,7 @@ public partial class OptionsWindow : Window
         SuffixBox.Text = s.Suffix;
         CtxMenu.IsChecked = s.ContextMenu;
         AppMenuBox.IsChecked = s.AppMenu;
+        UpdatesBox.IsChecked = s.CheckUpdates;
         LangBox.SelectedIndex = Math.Max(0, Array.IndexOf(Strings.Languages, s.Language));
     }
 
@@ -115,6 +116,7 @@ public partial class OptionsWindow : Window
         _s.Suffix = suffix;
         _s.ContextMenu = CtxMenu.IsChecked == true;
         _s.AppMenu = AppMenuBox.IsChecked == true;
+        _s.CheckUpdates = UpdatesBox.IsChecked == true;
         if (LangBox.SelectedItem is ComboBoxItem { Tag: string lang }) _s.Language = lang;
         Close(true);
     }

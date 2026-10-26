@@ -1,24 +1,26 @@
-NACHO 0.6.0
+NACHO 0.7.0
 Normalise, Adjust, Compress, Hand Over
 (Spanish: Normaliza, Ajusta, Comprime y Honra el Original)
 (Hungarian: Normalizál, Arányt tart, Csökkent és Hűen Odaad)
 
-NACHO makes a small, Docs-ready copy of an image before it goes into a Google Doc.
+NACHO makes a small, Docs-ready copy of an image before it goes into a Google Doc. It also
+shrinks every picture in a Word document (.docx) at once, and makes smaller PDFs.
 Your original file is never changed. The copy goes to Pictures\Docs-Ready.
 NACHO runs on Windows 10 and 11, and on 64-bit Linux (see LINUX below).
 
 FILES
-  NACHO-0.6.0-setup.exe      Windows installer (recommended). English, Spanish or Hungarian, no admin rights needed.
+  NACHO-0.7.0-setup.exe      Windows installer (recommended). English, Spanish or Hungarian, no admin rights needed.
   NACHO.exe                  Windows portable. Runs on Windows 10 or 11 (x64) with nothing to install.
   Small\NACHO.exe            Same Windows app, much smaller, needs the .NET 10 Desktop Runtime.
-  Linux\NACHO-0.6.0-x86_64.AppImage     Linux, one file: make it executable and run it.
-  Linux\nacho-0.6.0-linux-x64.tar.gz    Linux, with install.sh (app menu, Open With, right-click entries).
+  Linux\NACHO-0.7.0-x86_64.AppImage     Linux, one file: make it executable and run it.
+  Linux\nacho-0.7.0-linux-x64.tar.gz    Linux, with install.sh (app menu, Open With, right-click entries).
   Linux\SHA256SUMS.txt                  Checksums for the two Linux files.
-  NACHO-0.6.0-source.zip     Source, unit tests, build.ps1 (Windows) and build-linux.sh (Linux).
-  NACHO-0.6.0.zip            Everything above in one package.
+  NACHO-0.7.0-source.zip     Source, unit tests, build.ps1 (Windows) and build-linux.sh (Linux).
+  NACHO-0.7.0.zip            Everything above in one package.
+  licenses\                  Licences of the software NACHO includes (PDFium and its parts).
 
 INSTALLER
-  Run NACHO-0.6.0-setup.exe, pick English, Español or Magyar, then "Install for me only" (no admin
+  Run NACHO-0.7.0-setup.exe, pick English, Español or Magyar, then "Install for me only" (no admin
   rights; goes to %LOCALAPPDATA%\Programs\NACHO) or "Install for all users" (Program Files).
   Options on the way: the right-click entry (on by default), Send to, a desktop shortcut.
   NACHO then starts in the language you picked. You get a Start menu entry, and NACHO appears
@@ -36,14 +38,14 @@ LINUX
   The window, presets, languages, preview and buttons are the same as on Windows.
 
   AppImage (quickest):
-    chmod +x NACHO-0.6.0-x86_64.AppImage
-    ./NACHO-0.6.0-x86_64.AppImage
+    chmod +x NACHO-0.7.0-x86_64.AppImage
+    ./NACHO-0.7.0-x86_64.AppImage
   In More options you can add it to the app menu, to Open With and to the right-click menu.
   Those point at the AppImage file, so put it where it will live first.
 
   Install (adds NACHO to the app menu, Open With and the right-click menu at once):
-    tar xzf nacho-0.6.0-linux-x64.tar.gz
-    cd nacho-0.6.0-linux-x64
+    tar xzf nacho-0.7.0-linux-x64.tar.gz
+    cd nacho-0.7.0-linux-x64
     ./install.sh                 (or ./install.sh --lang hu, --lang es)
   It goes to ~/.local/share/nacho, with the command ~/.local/bin/nacho.
   Remove it with ~/.local/share/nacho/uninstall.sh (settings and Docs-Ready pictures stay; the oxipng
@@ -58,7 +60,7 @@ LINUX
   translated name). Problems are logged in ~/.config/nacho/nacho.log.
   Needs the ICU library (libicu), which desktop distros have. If NACHO does not start, install it:
   Ubuntu, Debian, Mint: sudo apt install libicu-dev     Fedora, AlmaLinux: sudo dnf install libicu
-  Self-test: nacho --selftest /tmp/nacho-test   (or ./NACHO-0.6.0-x86_64.AppImage --selftest ...)
+  Self-test: nacho --selftest /tmp/nacho-test   (or ./NACHO-0.7.0-x86_64.AppImage --selftest ...)
 
 FIRST RUN (WINDOWS)
   The exe is not code-signed, so Windows SmartScreen may say "Windows protected your PC".
@@ -66,7 +68,7 @@ FIRST RUN (WINDOWS)
   choose Properties, tick Unblock, then extract.
 
 FOUR WAYS IN
-  1. Drop images on the window, or press Ctrl+O.
+  1. Drop images, .docx or PDF files on the window, or press Ctrl+O.
   2. Copy an image or a snip (Win+Shift+S), then press Ctrl+V in NACHO.
   3. Right-click an image in Explorer > Make Docs-ready (setup offers it, or turn it on in More options).
   4. Send to > NACHO (setup offers it, or turn it on in More options).
@@ -131,6 +133,26 @@ A WHOLE DOC AT ONCE (.docx)
   Old .doc files and password-protected .docx files can't be opened; save them as .docx without a
   password first.
 
+A SMALLER PDF
+  Drop a PDF (or right-click it > Make Docs-ready). Pictures printed sharper than the preset needs
+  are scaled down: Small 100 dpi, Balanced 150 dpi, Sharp 220 dpi. Photos are saved as JPEG,
+  graphics without loss. A smaller "<name>-docs.pdf" goes to Docs-Ready.
+  Text, fonts, links, form fields and bookmarks stay as they are. Before the copy is kept, every
+  page is drawn from both files and compared: same pages, same sizes, same text, and the pages
+  must look the same. If anything else changed, or the copy is not at least 2% smaller, NACHO
+  keeps your PDF and says why.
+  Left as they are: pictures with transparency, print colours (CMYK), black-and-white scans, and
+  pictures inside drawing groups (form XObjects). Password-protected and digitally signed PDFs are
+  not changed at all: a new file would remove the protection or break the signature.
+  Compare with original (Ctrl+D) shows each page of the original and the smaller copy side by side;
+  Page Up and Page Down move between pages.
+
+UPDATES
+  Once a day NACHO asks GitHub whether a newer release exists (turn it off in More options). It
+  sends nothing about you: GitHub sees an ordinary request from "NACHO/0.7.0". When a newer version
+  is out, a bar says so, with Open release page and Not now. NACHO never downloads or installs
+  anything by itself. About > Check for updates asks straight away.
+
 RIGHT-CLICK MENU AND SEND TO
   Both are off until you tick them in More options. They are added for your user only
   (no admin rights) and point at the NACHO.exe you were running when you saved. Put the exe
@@ -153,6 +175,9 @@ UNINSTALL
 
 INCLUDED SOFTWARE
   NACHO uses Magick.NET (Apache 2.0) for images and, on Linux, Avalonia (MIT) for the window.
+  PDFs are read and written with PDFium (BSD-3-Clause, the PDF engine of Chrome), built by
+  bblanchon/pdfium-binaries 158.0.8111. PDFium includes FreeType, libjpeg-turbo, OpenJPEG,
+  Little CMS, libpng, zlib, ICU and other parts; their licences are in the licenses folder.
   It carries oxipng 10.2.1 (https://github.com/oxipng/oxipng) and unpacks it on first use to
   %LOCALAPPDATA%\NACHO\tools on Windows or ~/.cache/nacho/tools on Linux. oxipng's licence:
 

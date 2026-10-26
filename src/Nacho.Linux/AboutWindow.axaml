@@ -32,7 +32,15 @@
                     <TextBlock x:Name="OtherExpansion" Classes="secondary" FontStyle="Italic" FontSize="13" TextWrapping="Wrap" />
                 </StackPanel>
             </DockPanel>
-            <TextBlock x:Name="VersionText" Classes="secondary" FontSize="13" Margin="0,12,0,6" />
+            <DockPanel Margin="0,12,0,6">
+                <Button x:Name="CheckButton" DockPanel.Dock="Right" Content="{l:L Update.CheckNow}" Click="Check_Click" Padding="12,5" VerticalAlignment="Top" />
+                <StackPanel>
+                    <TextBlock x:Name="VersionText" Classes="secondary" FontSize="13" />
+                    <TextBlock x:Name="CheckText" FontSize="13" TextWrapping="Wrap" Margin="0,4,12,0" IsVisible="False" AutomationProperties.LiveSetting="Polite" />
+                    <Button x:Name="ReleaseButton" Classes="accent" Content="{l:L Update.Open}" Click="Release_Click" Padding="12,5"
+                            Margin="0,6,0,0" IsVisible="False" />
+                </StackPanel>
+            </DockPanel>
 
             <TextBlock Text="{l:L About.How}" Classes="h" />
             <TextBlock Classes="step"><Run Text="1. " /><Run Text="{l:L About.Way1}" /></TextBlock>
@@ -45,6 +53,9 @@
 
             <TextBlock Text="{l:L About.Doc}" Classes="h" />
             <TextBlock Text="{l:L About.DocBody}" TextWrapping="Wrap" />
+
+            <TextBlock Text="{l:L About.Pdf}" Classes="h" />
+            <TextBlock Text="{l:L About.PdfBody}" TextWrapping="Wrap" />
 
             <TextBlock Text="{l:L About.Keys}" Classes="h" />
             <TextBlock Text="{l:L About.KeysList}" TextWrapping="Wrap" FontSize="13" />

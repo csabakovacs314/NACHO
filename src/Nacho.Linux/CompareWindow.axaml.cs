@@ -54,7 +54,7 @@ public partial class CompareWindow : Window
         Stage.SizeChanged += (_, _) => Layout();
         AddHandler(KeyDownEvent, Window_KeyDown, RoutingStrategies.Tunnel);
         ScalingChanged += (_, _) => Layout();
-        Opened += async (_, _) => await LoadAsync();
+        Opened += async (_, _) => await LoadAsync(0);
         Loc.Instance.Changed += ApplyLanguage;
     }
 
@@ -71,22 +71,38 @@ public partial class CompareWindow : Window
 
     public void ShowPaletteSide(bool palette) => (palette ? ShowPalette : ShowCopy).IsChecked = true;
 
+    public int PageIndex => _pics?.Page ?? 0;
+
+    public bool PagesOffered => PageGroup.IsVisible;
+
+    public string PageLabel => PageText.Text ?? "";
+
+    public Task GoToPageAsync(int page) => LoadAsync(page);
+
     public void SetZoom(int factor) => (factor switch { 2 => Zoom200, 4 => Zoom400, 0 => ZoomFit, _ => Zoom100 }).IsChecked = true;
 
-    private async Task LoadAsync()
+    private async Task LoadAsync(int page)
     {
         try
         {
-            var pics = await Task.Run(() => ComparePictures.Load(_r));
+            LoadingText.IsVisible = true;
+            var pics = await Task.Run(() => _r.IsDocument ? ComparePictures.LoadPdfPage(_r, page) : ComparePictures.Load(_r));
+            bool first = _pics is null;
+            bool newSize = first || _pics!.Width != pics.Width || _pics.Height != pics.Height;
             _original = ToBitmap(pics, pics.Original);
             _copy = ToBitmap(pics, pics.Copy);
             _palette = pics.Palette is null ? null : ToBitmap(pics, pics.Palette);
             _pics = pics;
+            if (newSize) _centred = false;
             LoadingText.IsVisible = false;
+            PageGroup.IsVisible = pics.IsPdf && pics.PageCount > 1;
+            PrevPage.IsEnabled = pics.Page > 0;
+            NextPage.IsEnabled = pics.Page < pics.PageCount - 1;
             LeftImage.Source = _original;
             RightGroup.IsVisible = _palette is not null;
             ApplyRight();
-            Viewport.Focus();
+            // Only on opening: a keyboard user paging through stays on the page buttons.
+            if (first) Viewport.Focus();
         }
         catch (Exception ex)
         {
@@ -150,7 +166,10 @@ public partial class CompareWindow : Window
             : Loc.F("Compare.CopyLabel", _r.OutputFormat, Loc.Bytes(_r.OutputBytes));
         RightChipText.Text = right;
         RightName.Text = right;
-        SizeNote.Text = _pics.OriginalResized
+        PageText.Text = Loc.F("Compare.Page", _pics.Page + 1, _pics.PageCount);
+        SizeNote.Text = _pics.IsPdf
+            ? Loc.F("Compare.PdfNote", ResultItem.Dim(_pics.Width, _pics.Height))
+            : _pics.OriginalResized
             ? Loc.F("Compare.Resized", ResultItem.Dim(_pics.Width, _pics.Height))
             : Loc.F("Compare.SameSize", ResultItem.Dim(_pics.Width, _pics.Height));
         if (_pics.PalettePsnr is { } psnr)
@@ -293,6 +312,16 @@ public partial class CompareWindow : Window
 
     private void Close_Click(object? sender, RoutedEventArgs e) => Close();
 
+    private async void PrevPage_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_pics is { IsPdf: true, Page: > 0 }) await LoadAsync(_pics.Page - 1);
+    }
+
+    private async void NextPage_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_pics is { IsPdf: true } p && p.Page < p.PageCount - 1) await LoadAsync(p.Page + 1);
+    }
+
     private void Viewport_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (!e.GetCurrentPoint(Stage).Properties.IsLeftButtonPressed) return;
@@ -407,6 +436,8 @@ public partial class CompareWindow : Window
             case Key.OemPlus or Key.Add: StepZoom(1, Centre); break;
             case Key.OemMinus or Key.Subtract: StepZoom(-1, Centre); break;
             case Key.Escape: Close(); break;
+            case Key.PageUp: PrevPage_Click(this, new RoutedEventArgs()); break;
+            case Key.PageDown: NextPage_Click(this, new RoutedEventArgs()); break;
             default: return;
         }
         e.Handled = true;

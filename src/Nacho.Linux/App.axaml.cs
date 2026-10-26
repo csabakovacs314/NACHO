@@ -71,6 +71,17 @@ public partial class App : Application
         var files = Args.Where(a => !a.StartsWith("--", StringComparison.Ordinal)).ToArray();
         if (files.Length > 0) window.ReceiveExternal(files);
         SingleInstance.StartServer(paths => Dispatcher.UIThread.Post(() => window.ReceiveExternal(paths)));
+        window.Opened += async (_, _) =>
+        {
+            try
+            {
+                await window.CheckForUpdatesAsync();
+            }
+            catch (Exception ex)
+            {
+                Log(ex);
+            }
+        };
     }
 
     /// <summary>Follows the desktop's light or dark setting, or forces one (the self-test does).</summary>

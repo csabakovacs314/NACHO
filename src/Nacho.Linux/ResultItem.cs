@@ -29,10 +29,13 @@ public sealed class ResultItem : INotifyPropertyChanged
     /// <summary>A Word document (.docx): every picture inside was shrunk, so it goes to Drive, not into a Doc.</summary>
     public bool IsDocument => Result?.IsDocument == true;
 
+    /// <summary>A PDF: its pictures were shrunk into a smaller PDF.</summary>
+    public bool IsPdf => Result?.Document?.Format == "PDF";
+
     public bool ShowDocumentIcon => IsDocument;
     public bool CanCopyPicture => CanDeliver && !IsDocument;
     public bool CanCompare => ComparePictures.CanCompare(Result);
-    public string DragHint => Loc.T(IsDocument ? "Tile.DocDragHint" : "Tile.DragHint");
+    public string DragHint => Loc.T(IsPdf ? "Tile.PdfDragHint" : IsDocument ? "Tile.DocDragHint" : "Tile.DragHint");
 
     public string SizeText => IsOk
         ? Loc.F("Tile.SizeLine", Loc.Bytes(Result!.OriginalBytes), Loc.Bytes(Result.OutputBytes)) : "";
@@ -45,7 +48,7 @@ public sealed class ResultItem : INotifyPropertyChanged
         : "";
 
     public string KeptBody => IsKept && IsDocument
-        ? (Result!.Document!.Pictures == 0 ? Loc.T("Tile.DocNoPictures") : Loc.F("Tile.DocKeptBody", Result.Document.Pictures))
+        ? KeptDocumentBody(Result!.Document!)
         : IsKept
         ? Loc.F("Tile.KeptBody", Loc.Bytes(Result!.OriginalBytes), Result.SourceFormat, Dim(Result.OriginalWidth, Result.OriginalHeight))
         : "";
@@ -56,10 +59,19 @@ public sealed class ResultItem : INotifyPropertyChanged
         ? Array.Empty<string>()
         : Result.Badges.Select(b => b == Badge.FromFormat ? Loc.F("Badge.FromFormat", Result.SourceFormat) : Loc.T("Badge." + b)).ToList();
 
-    public string DragName => Loc.F(IsDocument ? "Tile.DocDragName" : "Tile.DragName", DisplayName);
+    public string DragName => Loc.F(IsPdf ? "Tile.PdfDragName" : IsDocument ? "Tile.DocDragName" : "Tile.DragName", DisplayName);
 
-    public static string DocumentLine(DocumentReport d) =>
-        Loc.F("Tile.DocLine", d.Shrunk, d.Pictures) + (d.Skipped > 0 ? " · " + Loc.F("Tile.DocSkipped", d.Skipped) : "");
+    public static string DocumentLine(DocumentReport d) => d.Format == "PDF"
+        ? Loc.F("Tile.PdfLine", d.Shrunk, d.Pictures + d.Skipped, d.Pages) + (d.Skipped > 0 ? " · " + Loc.F("Tile.PdfSkipped", d.Skipped) : "")
+        : Loc.F("Tile.DocLine", d.Shrunk, d.Pictures) + (d.Skipped > 0 ? " · " + Loc.F("Tile.DocSkipped", d.Skipped) : "");
+
+    public static string KeptDocumentBody(DocumentReport d)
+    {
+        if (d.Format != "PDF") return d.Pictures == 0 ? Loc.T("Tile.DocNoPictures") : Loc.F("Tile.DocKeptBody", d.Pictures);
+        if (d.CheckFailed) return Loc.T("Tile.PdfCheckFailed");
+        if (d.Pictures == 0) return Loc.T(d.Skipped > 0 ? "Tile.PdfOnlySkipped" : "Tile.DocNoPictures");
+        return Loc.F("Tile.PdfKeptBody", d.Dpi);
+    }
 
     public void SetResult(ShrinkResult result, Bitmap? thumbnail, Bitmap? preview)
     {

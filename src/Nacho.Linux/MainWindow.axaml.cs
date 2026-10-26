@@ -35,6 +35,7 @@ public partial class MainWindow : Window
     private bool _draggingOut;
     private bool _loading = true;
     private Func<string> _status = () => "";
+    private UpdateInfo? _update;
 
     public ObservableCollection<ResultItem> Items { get; } = new();
 
@@ -96,6 +97,53 @@ public partial class MainWindow : Window
     }
 
     public string StatusMessage => StatusText.Text ?? "";
+
+    // ---------- updates ----------
+
+    /// <summary>Once a day (when turned on), asks GitHub for a newer release and shows the bar if there is one.</summary>
+    public async Task CheckForUpdatesAsync()
+    {
+        if (!_s.CheckUpdates || !UpdateCheck.Due(_s.LastUpdateCheckUtc, DateTime.UtcNow)) return;
+        _s.LastUpdateCheckUtc = DateTime.UtcNow;
+        _s.Save();
+        var result = await UpdateCheck.CheckAsync(UpdateCheck.Current(typeof(App).Assembly));
+        if (result.Outcome == UpdateCheck.Outcome.Newer) ShowUpdate(result.Update!);
+    }
+
+    public void ShowUpdate(UpdateInfo info)
+    {
+        _update = info;
+        RenderUpdate();
+    }
+
+    public bool UpdateBarVisible => UpdateBar.IsVisible;
+
+    public string UpdateMessage => UpdateText.Text ?? "";
+
+    private void RenderUpdate()
+    {
+        UpdateBar.IsVisible = _update is not null;
+        if (_update is null) return;
+        UpdateText.Text = Loc.F("Update.Available", _update.Version.ToString(3), UpdateCheck.Current(typeof(App).Assembly).ToString(3));
+    }
+
+    private void UpdateOpen_Click(object? sender, RoutedEventArgs e)
+    {
+        if (_update is not null) OpenWeb(_update.PageUrl);
+    }
+
+    private void UpdateLater_Click(object? sender, RoutedEventArgs e)
+    {
+        _update = null;
+        RenderUpdate();
+    }
+
+    /// <summary>Opens NACHO's own release page in the browser; any other address is refused.</summary>
+    public static void OpenWeb(string url)
+    {
+        if (!UpdateCheck.IsReleasePage(url) && url != UpdateCheck.ReleasesPage) return;
+        Shell.Open(url);
+    }
 
     public void Select(ResultItem item)
     {
@@ -616,6 +664,7 @@ public partial class MainWindow : Window
         PresetBalanced.Content = PresetLabel(_s.Presets[1]);
         PresetSharp.Content = PresetLabel(_s.Presets[2]);
         foreach (var item in Items) item.Refresh();
+        RenderUpdate();
         UpdateCounts();
         UpdateSavings();
         UpdatePreview();
@@ -653,7 +702,8 @@ public partial class MainWindow : Window
         PreviewEmpty.IsVisible = false;
         PreviewDoc.IsVisible = false;
         bool doc = Results.SelectedItem is ResultItem { IsDocument: true };
-        PreviewHeading.Text = Loc.T(doc ? "Doc.Title" : "Preview.Title");
+        bool pdf = Results.SelectedItem is ResultItem { IsPdf: true };
+        PreviewHeading.Text = Loc.T(pdf ? "Doc.PdfTitle" : doc ? "Doc.Title" : "Preview.Title");
         PageGroup.IsVisible = !doc;
 
         if (Results.SelectedItem is not ResultItem item || item.IsWorking)
@@ -683,8 +733,14 @@ public partial class MainWindow : Window
             DocPicsA.Text = Loc.Bytes(d.PicturesBefore);
             DocPicsB.Text = Loc.Bytes(d.PicturesAfter);
             DocCounts.Text = Loc.F("Doc.Counts", d.Pictures, d.Shrunk, d.Kept);
-            DocSkipped.Text = d.Skipped > 0 ? Loc.F("Doc.Skipped", d.Skipped) : "";
+            DocSkipped.Text = d.Skipped > 0 ? Loc.F(pdf ? "Doc.PdfSkipped" : "Doc.Skipped", d.Skipped) : "";
             DocSkipped.IsVisible = d.Skipped > 0;
+            DocPagesLabel.IsVisible = DocPagesA.IsVisible = DocPagesB.IsVisible = PdfPart.IsVisible = pdf;
+            DocxPart.IsVisible = !pdf;
+            DocPagesA.Text = d.Pages.ToString(Loc.Instance.Culture);
+            DocPagesB.Text = d.Pages.ToString(Loc.Instance.Culture);
+            DocDpiNote.Text = pdf ? Loc.F("Doc.PdfDpi", d.Dpi, Loc.T("Preset." + _s.CurrentPreset)) : "";
+            DocCompareButton.IsVisible = item.CanCompare;
             PreviewDoc.IsVisible = true;
             return;
         }

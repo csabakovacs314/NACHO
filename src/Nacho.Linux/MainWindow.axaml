@@ -49,7 +49,7 @@
         </Style>
     </Window.Styles>
 
-    <Grid x:Name="Root" RowDefinitions="Auto,*,Auto">
+    <Grid x:Name="Root" RowDefinitions="Auto,Auto,*,Auto">
         <!-- Command bar -->
         <WrapPanel Grid.Row="0" Margin="12,10,12,4" Orientation="Horizontal" ItemSpacing="0">
             <Button x:Name="AddButton" Classes="accent" Click="Add_Click" Margin="3" Padding="12,5"
@@ -101,8 +101,21 @@
             </StackPanel>
         </WrapPanel>
 
+        <!-- A newer NACHO on GitHub: a link only, never a download -->
+        <Border x:Name="UpdateBar" Grid.Row="1" IsVisible="False" Margin="16,2,16,6" Padding="12,6" CornerRadius="6" BorderThickness="1"
+                BorderBrush="{DynamicResource N.Accent}" Background="{DynamicResource N.Card}">
+            <DockPanel>
+                <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Info}" Foreground="{DynamicResource N.Accent}" Margin="0,0,10,0" VerticalAlignment="Center" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="UpdateOpenButton" Classes="accent" Content="{l:L Update.Open}" Click="UpdateOpen_Click" Padding="12,5" Margin="8,0,0,0" />
+                    <Button Content="{l:L Update.Later}" Click="UpdateLater_Click" Padding="12,5" Margin="8,0,0,0" />
+                </StackPanel>
+                <TextBlock x:Name="UpdateText" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+            </DockPanel>
+        </Border>
+
         <!-- Content -->
-        <Grid x:Name="ContentGrid" Grid.Row="1" Margin="16,4,16,12" ColumnDefinitions="*,Auto" RowDefinitions="*,Auto">
+        <Grid x:Name="ContentGrid" Grid.Row="2" Margin="16,4,16,12" ColumnDefinitions="*,Auto" RowDefinitions="*,Auto">
             <Grid x:Name="LeftPane" RowDefinitions="Auto,Auto,*">
                 <Grid x:Name="DropZone" Margin="0,0,0,12" MinHeight="64">
                     <Rectangle x:Name="DropRect" RadiusX="8" RadiusY="8" StrokeThickness="2" StrokeDashArray="4,3"
@@ -281,7 +294,7 @@
                         </StackPanel>
 
                         <StackPanel x:Name="PreviewDoc" IsVisible="False">
-                            <Grid ColumnDefinitions="Auto,*,*" RowDefinitions="Auto,Auto,Auto">
+                            <Grid ColumnDefinitions="Auto,*,*" RowDefinitions="Auto,Auto,Auto,Auto">
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="{l:L Preview.ColDetail}" Classes="cmp secondary" FontWeight="SemiBold" Margin="0,0,12,6" />
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{l:L Preview.ColOriginal}" Classes="cmp secondary" FontWeight="SemiBold" />
                                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{l:L Preview.ColCopy}" Classes="cmp secondary" FontWeight="SemiBold" Margin="0,0,0,6" />
@@ -291,9 +304,24 @@
                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="{l:L Doc.RowPictures}" Classes="cmp" Margin="0,0,12,0" MaxWidth="130" />
                                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="DocPicsA" Classes="cmp" Margin="0,0,8,0" />
                                 <TextBlock Grid.Row="2" Grid.Column="2" x:Name="DocPicsB" Classes="cmp" Margin="0" />
+                                <TextBlock Grid.Row="3" Grid.Column="0" x:Name="DocPagesLabel" Text="{l:L Doc.RowPages}" Classes="cmp" Margin="0,6,12,0" />
+                                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="DocPagesA" Classes="cmp" Margin="0,6,8,0" />
+                                <TextBlock Grid.Row="3" Grid.Column="2" x:Name="DocPagesB" Classes="cmp" Margin="0,6,0,0" />
                             </Grid>
                             <TextBlock x:Name="DocCounts" FontSize="13" TextWrapping="Wrap" Margin="0,12,0,0" />
                             <TextBlock x:Name="DocSkipped" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,0" />
+                            <StackPanel x:Name="PdfPart" IsVisible="False">
+                                <TextBlock x:Name="DocDpiNote" FontSize="13" TextWrapping="Wrap" Margin="0,8,0,0" LineHeight="19" />
+                                <Button x:Name="DocCompareButton" Click="Compare_Click" HorizontalAlignment="Left" Margin="0,12,0,0" Padding="12,5"
+                                        ToolTip.Tip="Ctrl+D" AutomationProperties.Name="{l:L Tile.Compare}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <l:StrokeIcon Data="{StaticResource Icon.Compare}" />
+                                        <TextBlock Text="{l:L Tile.Compare}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <TextBlock Text="{l:L Doc.PdfUntouched}" Classes="secondary" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            </StackPanel>
+                            <StackPanel x:Name="DocxPart">
                             <TextBlock Text="{l:L Doc.Steps}" FontWeight="SemiBold" FontSize="13" Margin="0,14,0,6" />
                             <TextBlock Text="{l:L Doc.Step1}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4" />
                             <TextBlock Text="{l:L Doc.Step2}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4" />
@@ -306,6 +334,7 @@
                                 </DockPanel>
                             </Border>
                             <TextBlock Text="{l:L Doc.Untouched}" Classes="secondary" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            </StackPanel>
                         </StackPanel>
 
                         <Border x:Name="PreviewKept" IsVisible="False" Padding="16" CornerRadius="6" Background="{DynamicResource N.Subtle}">
@@ -329,7 +358,7 @@
         </Grid>
 
         <!-- Status bar -->
-        <Border Grid.Row="2" BorderThickness="0,1,0,0" Padding="16,8"
+        <Border Grid.Row="3" BorderThickness="0,1,0,0" Padding="16,8"
                 BorderBrush="{DynamicResource N.Divider}" Background="{DynamicResource N.Layer}">
             <DockPanel>
                 <TextBlock x:Name="SavingsText" DockPanel.Dock="Right" Classes="secondary" FontSize="13" Margin="16,0,0,0" VerticalAlignment="Center" />

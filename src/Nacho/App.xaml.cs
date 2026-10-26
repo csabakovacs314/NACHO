@@ -54,6 +54,14 @@ public partial class App : Application
         var files = args.Where(a => !a.StartsWith("--", StringComparison.Ordinal)).ToArray();
         if (files.Length > 0) window.ReceiveExternal(files);
         SingleInstance.StartServer(paths => Dispatcher.BeginInvoke(() => window.ReceiveExternal(paths)));
+        try
+        {
+            await window.CheckForUpdatesAsync();
+        }
+        catch (Exception ex)
+        {
+            Log(ex);
+        }
     }
 
     /// <summary>Fluent theme that follows Windows; the classic theme when High Contrast is on.</summary>

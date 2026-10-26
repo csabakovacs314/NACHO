@@ -49,7 +49,7 @@ public sealed class ImageShrinker
     {
         if (!File.Exists(path)) return Fail(r, ErrorKind.NotFound, null);
         r.OriginalBytes = new FileInfo(path).Length;
-        if (StartsWith(path, "%PDF-")) return Fail(r, ErrorKind.Pdf, null);
+        if (StartsWith(path, "%PDF-")) return new Pdf.PdfShrinker().Shrink(path, preset, opt, r);
         if (DocxShrinker.IsWordFile(path)) return new DocxShrinker(this).Shrink(path, preset, opt, r);
         if (NotImageExtensions.Contains(Path.GetExtension(path))) return Fail(r, ErrorKind.NotAnImage, null);
 

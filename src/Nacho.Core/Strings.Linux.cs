@@ -8,7 +8,7 @@ public static partial class Strings
 {
     public static readonly IReadOnlyDictionary<string, string> LinuxEn = new Dictionary<string, string>
     {
-        ["Drop.Sub"] = "Or right-click an image in your file manager and choose Open With > NACHO.",
+        ["Drop.Sub"] = "Or right-click a file in your file manager and choose Open With > NACHO.",
         ["Status.Copied"] = "Copied {0} as a file. Paste it in your file manager, or drag the thumbnail into your Doc.",
         ["Status.CopiedPath"] = "Copied the path of {0}. In Google Docs: Replace image > Upload from computer, then press Ctrl+L, Ctrl+V and Enter.",
         ["Status.Opened"] = "Opened the folder in your file manager.",
@@ -25,7 +25,7 @@ public static partial class Strings
 
     public static readonly IReadOnlyDictionary<string, string> LinuxEs = new Dictionary<string, string>
     {
-        ["Drop.Sub"] = "O haz clic derecho en una imagen de tu gestor de archivos y elige Abrir con > NACHO.",
+        ["Drop.Sub"] = "O haz clic derecho en un archivo de tu gestor de archivos y elige Abrir con > NACHO.",
         ["Status.Copied"] = "Se copió {0} como archivo. Pégalo en tu gestor de archivos o arrastra la miniatura a tu Doc.",
         ["Status.CopiedPath"] = "Se copió la ruta de {0}. En Google Docs: Reemplazar imagen > Subir desde el ordenador y luego pulsa Ctrl+L, Ctrl+V e Intro.",
         ["Status.Opened"] = "Se abrió la carpeta en tu gestor de archivos.",
@@ -42,7 +42,7 @@ public static partial class Strings
 
     public static readonly IReadOnlyDictionary<string, string> LinuxHu = new Dictionary<string, string>
     {
-        ["Drop.Sub"] = "Vagy kattints jobb gombbal egy képre a fájlkezelőben, és válaszd a Megnyitás ezzel > NACHO lehetőséget.",
+        ["Drop.Sub"] = "Vagy kattints jobb gombbal egy fájlra a fájlkezelőben, és válaszd a Megnyitás ezzel > NACHO lehetőséget.",
         ["Status.Copied"] = "{0} fájlként a vágólapra került. Illeszd be a fájlkezelőbe, vagy húzd a bélyegképet a dokumentumba.",
         ["Status.CopiedPath"] = "{0} elérési útja a vágólapon. A Google Docsban: Kép cseréje > Feltöltés a számítógépről, majd Ctrl+L, Ctrl+V és Enter.",
         ["Status.Opened"] = "A mappa megnyílt a fájlkezelőben.",

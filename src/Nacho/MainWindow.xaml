@@ -21,6 +21,7 @@
     <Grid x:Name="Root">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -84,8 +85,23 @@
             </StackPanel>
         </WrapPanel>
 
+        <!-- A newer NACHO on GitHub: a link only, never a download -->
+        <Border x:Name="UpdateBar" Grid.Row="1" Visibility="Collapsed" Margin="16,2,16,6" Padding="12,6" CornerRadius="6" BorderThickness="1"
+                BorderBrush="{DynamicResource AccentFillColorDefaultBrush}" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left" Style="{StaticResource Icon}" Text="&#xE946;" Margin="0,0,10,0"
+                           Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="UpdateOpenButton" Content="{l:L Update.Open}" Click="UpdateOpen_Click" Style="{DynamicResource AccentButtonStyle}"
+                            MinHeight="32" Padding="12,4" Margin="8,0,0,0" />
+                    <Button Content="{l:L Update.Later}" Click="UpdateLater_Click" MinHeight="32" Padding="12,4" Margin="8,0,0,0" />
+                </StackPanel>
+                <TextBlock x:Name="UpdateText" VerticalAlignment="Center" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+            </DockPanel>
+        </Border>
+
         <!-- Content -->
-        <Grid x:Name="ContentGrid" Grid.Row="1" Margin="16,4,16,12">
+        <Grid x:Name="ContentGrid" Grid.Row="2" Margin="16,4,16,12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -354,6 +370,7 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="{l:L Preview.ColDetail}" Style="{StaticResource Secondary}" FontSize="13" FontWeight="SemiBold" Margin="0,0,12,6" />
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{l:L Preview.ColOriginal}" Style="{StaticResource Secondary}" FontSize="13" FontWeight="SemiBold" Margin="0,0,8,6" />
@@ -364,9 +381,24 @@
                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="{l:L Doc.RowPictures}" FontSize="13" Margin="0,0,12,0" TextWrapping="Wrap" MaxWidth="130" />
                                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="DocPicsA" FontSize="13" Margin="0,0,8,0" />
                                 <TextBlock Grid.Row="2" Grid.Column="2" x:Name="DocPicsB" FontSize="13" />
+                                <TextBlock Grid.Row="3" Grid.Column="0" x:Name="DocPagesLabel" Text="{l:L Doc.RowPages}" FontSize="13" Margin="0,6,12,0" />
+                                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="DocPagesA" FontSize="13" Margin="0,6,8,0" />
+                                <TextBlock Grid.Row="3" Grid.Column="2" x:Name="DocPagesB" FontSize="13" Margin="0,6,0,0" />
                             </Grid>
                             <TextBlock x:Name="DocCounts" FontSize="13" TextWrapping="Wrap" Margin="0,12,0,0" />
                             <TextBlock x:Name="DocSkipped" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,0" />
+                            <StackPanel x:Name="PdfPart" Visibility="Collapsed">
+                                <TextBlock x:Name="DocDpiNote" FontSize="13" TextWrapping="Wrap" Margin="0,8,0,0" LineHeight="19" />
+                                <Button x:Name="DocCompareButton" Click="Compare_Click" HorizontalAlignment="Left" Margin="0,12,0,0"
+                                        MinHeight="32" Padding="12,4" ToolTip="Ctrl+D" AutomationProperties.Name="{l:L Tile.Compare}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource Icon}" Text="&#xE89F;" />
+                                        <TextBlock Text="{l:L Tile.Compare}" />
+                                    </StackPanel>
+                                </Button>
+                                <TextBlock Text="{l:L Doc.PdfUntouched}" Style="{StaticResource Secondary}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            </StackPanel>
+                            <StackPanel x:Name="DocxPart">
                             <TextBlock Text="{l:L Doc.Steps}" FontWeight="SemiBold" FontSize="13" Margin="0,14,0,6" />
                             <TextBlock Text="{l:L Doc.Step1}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4" />
                             <TextBlock Text="{l:L Doc.Step2}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4" />
@@ -380,6 +412,7 @@
                                 </DockPanel>
                             </Border>
                             <TextBlock Text="{l:L Doc.Untouched}" Style="{StaticResource Secondary}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            </StackPanel>
                         </StackPanel>
 
                         <Border x:Name="PreviewKept" Visibility="Collapsed" Padding="16" CornerRadius="6"
@@ -405,7 +438,7 @@
         </Grid>
 
         <!-- Status bar -->
-        <Border Grid.Row="2" BorderThickness="0,1,0,0" Padding="16,8"
+        <Border Grid.Row="3" BorderThickness="0,1,0,0" Padding="16,8"
                 BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
                 Background="{DynamicResource LayerFillColorDefaultBrush}">
             <DockPanel>

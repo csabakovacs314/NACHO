@@ -40,6 +40,18 @@
                     <RadioButton x:Name="Zoom400" Tag="4" GroupName="Zoom" Content="400%" Classes="segment" ToolTip.Tip="4"
                                  Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Zoom_Changed" />
                 </StackPanel>
+                <StackPanel x:Name="PageGroup" Orientation="Horizontal" Margin="0,4,12,4" IsVisible="False">
+                    <Button x:Name="PrevPage" Click="PrevPage_Click" MinWidth="36" Padding="8,5" ToolTip.Tip="Page Up"
+                            AutomationProperties.Name="{l:L Compare.PrevPage}">
+                        <l:StrokeIcon Data="M10,3.5 L5.5,8 L10,12.5" />
+                    </Button>
+                    <TextBlock x:Name="PageText" VerticalAlignment="Center" Margin="10,0" MinWidth="90" TextAlignment="Center"
+                               AutomationProperties.LiveSetting="Polite" />
+                    <Button x:Name="NextPage" Click="NextPage_Click" MinWidth="36" Padding="8,5" ToolTip.Tip="Page Down"
+                            AutomationProperties.Name="{l:L Compare.NextPage}">
+                        <l:StrokeIcon Data="M6,3.5 L10.5,8 L6,12.5" />
+                    </Button>
+                </StackPanel>
                 <StackPanel x:Name="RightGroup" Orientation="Horizontal" IsVisible="False">
                     <TextBlock Text="{l:L Compare.Right}" Classes="secondary" VerticalAlignment="Center" Margin="4,0,6,0" />
                     <StackPanel Orientation="Horizontal" Margin="0,4,4,4" AutomationProperties.Name="{l:L Compare.Right}">

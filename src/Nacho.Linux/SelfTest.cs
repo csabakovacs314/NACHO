@@ -82,11 +82,11 @@ public static class SelfTest
         Check(Get(samples.Alpha).Result?.OutputFormat == "PNG", "transparent image stays PNG");
         Check(Get(samples.Animated).Result?.OutputFormat == "GIF", "animated GIF stays GIF");
         Check(Get(samples.WebP).IsOk && Limits.IsDocsFormat(Get(samples.WebP).Result!.OutputFormat), "WebP converted");
-        Check(Get(samples.Pdf).Result?.Error == ErrorKind.Pdf, "PDF gets the PDF message");
+        Check(Get(samples.Pdf).IsKept && Get(samples.Pdf).Result?.Document?.Format == "PDF", "text-only PDF read and kept as it was");
         Check(Get(samples.Broken).IsError, "broken file gets an error tile");
         Check(w.StatusMessage.Contains("shrunk", StringComparison.Ordinal), "status bar shows the summary: " + w.StatusMessage);
         Check(w.Items.Count(i => i.IsOk && File.Exists(i.Result!.OutputPath)) == 6, "6 new copies in Docs-Ready");
-        Check(w.Items.Where(i => i.CanDeliver).All(i => i.Thumbnail is not null), "every copy has a thumbnail");
+        Check(w.Items.Where(i => i.CanDeliver && !i.IsDocument).All(i => i.Thumbnail is not null), "every image copy has a thumbnail");
 
         Check(w.Items.Where(i => i.IsOk).All(i => i.Result!.ShapeErrorPercent <= 0.1), "every copy keeps the original shape");
         Check(Get(samples.Photo).Result!.ShapeExact, "phone photo shape exact: " + ResultItem.Dim(Get(samples.Photo).Result!.OutputWidth, Get(samples.Photo).Result!.OutputHeight));
@@ -130,7 +130,7 @@ public static class SelfTest
         Loc.Instance.Set("es");
         await Settle();
         Check(w.Title?.Contains("Normaliza", StringComparison.Ordinal) == true, "title switches to Spanish");
-        Check(w.AddText.Text == "Añadir imágenes", "button text follows the language live: " + w.AddText.Text);
+        Check(w.AddText.Text == "Añadir archivos", "button text follows the language live: " + w.AddText.Text);
         Check(Get(samples.Photo).SizeText.Contains(" a ", StringComparison.Ordinal), "tile text switches to Spanish: " + Get(samples.Photo).SizeText);
         Check(w.StatusMessage.Contains("reducidas", StringComparison.Ordinal), "status line follows the language: " + w.StatusMessage);
         Check(w.CmpShapeB.Text == "3:4, exacta", "shape row follows the language: " + w.CmpShapeB.Text);
@@ -230,6 +230,47 @@ public static class SelfTest
         Check(w.OpenCompare(Get(samples.Logo)) is null && w.OpenCompare(docItem) is null, "nothing to compare for a kept image or a document");
         await Settle();
 
+        // 0.7.0: smaller PDFs, PDF pages in the compare window, and the update bar.
+        string pdfReport = SampleImages.PdfReport(Path.Combine(outDir, "samples", "Quarterly report.pdf"));
+        await w.AddFilesAsync(new[] { pdfReport });
+        await w.WaitIdleAsync();
+        await Settle();
+        var pdfItem = w.Items.First(i => i.SourcePath == pdfReport);
+        Check(pdfItem.IsOk && pdfItem.IsPdf && pdfItem.Result!.OutputFormat == "PDF", "PDF shrunk to a smaller PDF: " + pdfItem.Result?.OutputPath);
+        Check(pdfItem.Result!.OutputBytes < pdfItem.Result.OriginalBytes * 6 / 10, $"PDF much smaller: {pdfItem.Result.OriginalBytes} to {pdfItem.Result.OutputBytes} bytes");
+        Check(pdfItem.PxText == "4 of 9 pictures made smaller · 3 pages · PDF · pictures left as they are: 3", "PDF tile line: " + pdfItem.PxText);
+        Check(pdfItem.DragHint == "Drag the file" && pdfItem.CanCompare && !pdfItem.CanCopyPicture, "PDF tile offers the file and Compare");
+        Check(Nacho.Core.Pdf.PdfPages.Count(pdfItem.Result.OutputPath!) == 3, "the smaller PDF opens with 3 pages");
+        w.Select(pdfItem);
+        await Settle();
+        Check(w.PreviewDoc.IsVisible && w.PdfPart.IsVisible && !w.DocxPart.IsVisible, "preview shows the PDF panel, not the Google Docs steps");
+        Check(w.DocPagesB.Text == "3" && w.PreviewHeading.Text == "Whole PDF", "PDF panel: pages and heading");
+        Shot(w, Path.Combine(outDir, "main-en-pdf.png"));
+        var pcmp = w.OpenCompare(pdfItem, activate: false);
+        Check(pcmp is not null, "compare window opens for a PDF");
+        if (pcmp is not null)
+        {
+            for (int i = 0; i < 80 && !pcmp.IsReady; i++) await Task.Delay(100);
+            await Settle();
+            Check(pcmp.IsReady && pcmp.Pictures!.IsPdf && pcmp.PagesOffered && pcmp.PageLabel == "Page 1 of 3", "PDF compare shows page 1 of 3: " + pcmp.PageLabel);
+            await pcmp.GoToPageAsync(2);
+            await Settle();
+            Check(pcmp.PageIndex == 2 && pcmp.PageLabel == "Page 3 of 3", "PDF compare goes to page 3: " + pcmp.PageLabel);
+            Shot(pcmp, Path.Combine(outDir, "compare-en-pdf.png"));
+            pcmp.Close();
+        }
+
+        string versionNow = UpdateCheck.Current(typeof(App).Assembly).ToString(3);
+        w.ShowUpdate(new UpdateInfo(new Version(9, 9, 0), "v9.9.0", UpdateCheck.ReleasesPage + "/tag/v9.9.0"));
+        await Settle();
+        Check(w.UpdateBarVisible && w.UpdateMessage == $"NACHO 9.9.0 is available. You have {versionNow}.", "update bar: " + w.UpdateMessage);
+        Shot(w, Path.Combine(outDir, "main-en-update.png"));
+        Loc.Instance.Set("hu");
+        await Settle();
+        Check(w.UpdateMessage == $"Elérhető a NACHO 9.9.0. A te verziód: {versionNow}.", "update bar follows the language: " + w.UpdateMessage);
+        Loc.Instance.Set("en");
+        await Settle();
+
         foreach (string lang in Strings.Languages)
         {
             Loc.Instance.Set(lang);
@@ -252,7 +293,7 @@ public static class SelfTest
 
         w.Close();
         await Settle();
-        foreach (string shot in new[] { "main-en-light", "main-es-light", "main-hu-light", "main-es-dark", "main-en-narrow", "main-en-doc", "compare-en-copy", "compare-en-256", "compare-hu-256", "compare-en-photo-dark", "options-en", "options-es", "options-hu", "about-es", "about-hu" })
+        foreach (string shot in new[] { "main-en-light", "main-es-light", "main-hu-light", "main-es-dark", "main-en-narrow", "main-en-doc", "main-en-pdf", "compare-en-pdf", "main-en-update", "compare-en-copy", "compare-en-256", "compare-hu-256", "compare-en-photo-dark", "options-en", "options-es", "options-hu", "about-es", "about-hu" })
         {
             var f = new FileInfo(Path.Combine(outDir, shot + ".png"));
             Check(f.Exists && f.Length > 10_000, $"screenshot {shot}.png saved");

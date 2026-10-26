@@ -2,7 +2,7 @@
 ; Installs for the current user by default (no admin rights); "all users" can be chosen in the first dialog.
 ; English, Spanish and Hungarian. Compile: ISCC.exe installer\nacho.iss (after publishing the payload, see build.ps1).
 
-#define AppVersion "0.6.0"
+#define AppVersion "0.7.0"
 #ifndef Payload
   #define Payload "..\out\installer-payload"
 #endif
@@ -48,18 +48,18 @@ Name: "hu"; MessagesFile: "compiler:Languages\Hungarian.isl"
 en.GroupShell=Windows integration:
 es.GroupShell=Integración con Windows:
 hu.GroupShell=Windows-integráció:
-en.TaskContextMenu=Add "Make Docs-ready" to the right-click menu of images
-es.TaskContextMenu=Añadir "Preparar para Docs" al menú del clic derecho de las imágenes
-hu.TaskContextMenu=A „Docs-kész másolat készítése” parancs hozzáadása a képek jobb gombos menüjéhez
+en.TaskContextMenu=Add "Make Docs-ready" to the right-click menu of images, Word documents and PDFs
+es.TaskContextMenu=Añadir "Preparar para Docs" al menú del clic derecho de imágenes, documentos de Word y PDF
+hu.TaskContextMenu=A „Docs-kész másolat készítése” parancs hozzáadása a képek, Word-dokumentumok és PDF-ek jobb gombos menüjéhez
 en.TaskSendTo=Add NACHO to the Send to menu
 es.TaskSendTo=Añadir NACHO al menú Enviar a
 hu.TaskSendTo=A NACHO hozzáadása a Küldés menühöz
 en.MenuText=Make Docs-ready
 es.MenuText=Preparar para Docs
 hu.MenuText=Docs-kész másolat készítése
-en.AppComment=Docs-ready images: Normalise, Adjust, Compress, Hand Over
-es.AppComment=Imágenes listas para Docs: Normaliza, Ajusta, Comprime y Honra el Original
-hu.AppComment=Docs-kész képek: Normalizál, Arányt tart, Csökkent és Hűen Odaad
+en.AppComment=Smaller images and documents: Normalise, Adjust, Compress, Hand Over
+es.AppComment=Imágenes y documentos más pequeños: Normaliza, Ajusta, Comprime y Honra el Original
+hu.AppComment=Kisebb képek és dokumentumok: Normalizál, Arányt tart, Csökkent és Hűen Odaad
 
 [Tasks]
 Name: "contextmenu"; Description: "{cm:TaskContextMenu}"; GroupDescription: "{cm:GroupShell}"
@@ -70,6 +70,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "{#Payload}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\README.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\CHANGELOG.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\licenses\*"; DestDir: "{app}\licenses"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autoprograms}\NACHO"; Filename: "{app}\NACHO.exe"; Comment: "{cm:AppComment}"
@@ -114,6 +115,12 @@ Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.docx\shell\NACHO.M
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.docx\shell\NACHO.MakeDocsReady"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Player"; Tasks: contextmenu
 Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.docx\shell\NACHO.MakeDocsReady\command"; ValueType: string; ValueName: ""; ValueData: """{app}\NACHO.exe"" ""%1"""; Tasks: contextmenu
 
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.pdf\shell\NACHO.MakeDocsReady"; ValueType: string; ValueName: ""; ValueData: "{cm:MenuText}"; Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.pdf\shell\NACHO.MakeDocsReady"; ValueType: string; ValueName: "MUIVerb"; ValueData: "{cm:MenuText}"; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.pdf\shell\NACHO.MakeDocsReady"; ValueType: string; ValueName: "Icon"; ValueData: """{app}\NACHO.exe"",0"; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.pdf\shell\NACHO.MakeDocsReady"; ValueType: string; ValueName: "MultiSelectModel"; ValueData: "Player"; Tasks: contextmenu
+Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.pdf\shell\NACHO.MakeDocsReady\command"; ValueType: string; ValueName: ""; ValueData: """{app}\NACHO.exe"" ""%1"""; Tasks: contextmenu
+
 ; The language picked in setup; NACHO uses it on its first run.
 Root: HKCU; Subkey: "Software\NACHO"; ValueType: string; ValueName: "Language"; ValueData: "{language}"; Flags: uninsdeletekey
 
@@ -143,6 +150,7 @@ begin
   RegDeleteKeyIncludingSubkeys(HKCU, ShellKey('.webp'));
   RegDeleteKeyIncludingSubkeys(HKCU, ShellKey('.avif'));
   RegDeleteKeyIncludingSubkeys(HKCU, ShellKey('.docx'));
+  RegDeleteKeyIncludingSubkeys(HKCU, ShellKey('.pdf'));
 end;
 
 procedure RemoveSendTo();

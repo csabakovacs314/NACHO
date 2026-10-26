@@ -107,8 +107,8 @@ public static partial class SampleImages
             img.Write(small, MagickFormat.Jpeg);
         }
 
-        string pdf = P("scan-03.pdf");
-        File.WriteAllText(pdf, "%PDF-1.4\n% NACHO sample: not a real PDF\n");
+        // A text-only PDF: nothing to shrink, so NACHO keeps it (0.7.0 shrinks pictures inside PDFs).
+        string pdf = PdfTextOnly(P("scan-03.pdf"));
 
         string broken = P("broken.jpg");
         var junk = new byte[4096];

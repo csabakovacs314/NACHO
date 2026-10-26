@@ -7,7 +7,7 @@
 # Needs: .NET 10 SDK, xvfb-run, curl (the first run downloads appimagetool into out/tools).
 set -euo pipefail
 
-VERSION="${1:-0.6.0}"
+VERSION="${1:-0.7.0}"
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 OUT="$ROOT/out/linux"
 REL="$ROOT/out/linux-release"
@@ -45,6 +45,7 @@ PKG="nacho-$VERSION-linux-x64"
 mkdir -p "$OUT/$PKG"
 cp -R "$OUT/app" "$OUT/$PKG/app"
 cp "$ROOT/packaging/linux/install.sh" "$ROOT/packaging/linux/uninstall.sh" "$ROOT/README.txt" "$ROOT/CHANGELOG.md" "$OUT/$PKG/"
+cp -R "$ROOT/licenses" "$OUT/$PKG/licenses"
 chmod 755 "$OUT/$PKG/install.sh" "$OUT/$PKG/uninstall.sh" "$OUT/$PKG/app/nacho"
 tar -C "$OUT" --owner=0 --group=0 --numeric-owner -czf "$REL/$PKG.tar.gz" "$PKG"
 
@@ -62,6 +63,7 @@ cp "$ROOT/src/Nacho.Linux/Assets/nacho.svg" "$APPDIR/usr/share/icons/hicolor/sca
 mkdir -p "$APPDIR/usr/share/doc/nacho"
 cp "$ROOT/README.txt" "$ROOT/CHANGELOG.md" "$ROOT/tools/oxipng/LICENSE" "$APPDIR/usr/share/doc/nacho/"
 mv "$APPDIR/usr/share/doc/nacho/LICENSE" "$APPDIR/usr/share/doc/nacho/oxipng-LICENSE"
+cp -R "$ROOT/licenses" "$APPDIR/usr/share/doc/nacho/licenses"
 ln -sf nacho.png "$APPDIR/.DirIcon"
 if [ ! -s "$TOOLS/appimagetool-x86_64.AppImage" ]; then
     curl -fsSL -o "$TOOLS/appimagetool-x86_64.AppImage" \

@@ -2,6 +2,25 @@
 
 Versions: MAJOR.MINOR.PATCH. Minor for a feature, patch for a fix.
 
+## 0.7.0 (2026-10-26)
+
+**Asked for:** the menu named for files, not only images; smaller PDFs (pictures taken out, shrunk, and the PDF made again); a version check against GitHub.
+
+**Changed: files, not only images**
+- "Add images" is now "Add files" (ES "Añadir archivos", HU "Fájlok hozzáadása"); the drop zone, list counter, empty list, Open dialog, About and the installer's right-click option name images, Word and PDF files. The right-click entry "Make Docs-ready" now also appears on PDFs (Windows and Linux).
+
+**Added: smaller PDFs**
+- Drop a PDF: pictures printed sharper than the preset needs (Small 100, Balanced 150, Sharp 220 dpi) are scaled down, photos as JPEG and graphics without loss, and put back with PDFium; a picture used on many pages is shrunk once and replaced everywhere. Text, fonts, links, forms and bookmarks are untouched.
+- Safety check before a copy is kept: same page count and page sizes, same text on every page, and every page drawn from both files must stay within 24 dB PSNR. Otherwise, or when the copy is not at least 2% smaller, the original is kept and the tile says why.
+- Left as they are: transparency, CMYK and other print colour spaces, black-and-white scans (JBIG2, CCITT), pictures inside form XObjects. Password-protected and signed PDFs get a message and are not changed.
+- Tile "4 of 9 pictures made smaller · 3 pages · PDF", a Whole PDF panel with document, picture and page counts, and Compare with original page by page (Page Up and Page Down).
+- PDFium 158.0.8111 (BSD-3-Clause, prebuilt by bblanchon/pdfium-binaries) is bundled; its licences are in the new licenses folder.
+
+**Added: update check**
+- Once a day NACHO asks GitHub's public API for the latest release (no account, nothing about the user). A newer version shows a bar with Open release page and Not now; nothing is downloaded or installed. On and off in More options; About has Check for updates. Only NACHO's own release page is ever opened.
+
+**Tests:** 153 unit tests (19 new: 8 for PDFs with a hand-made sample PDF, 11 for the update check with a fake GitHub). Both self-tests add a PDF, PDF page compare and the update bar, with screenshots. Prototype on 16 PDFs from reportlab, img2pdf, pikepdf and LibreOffice: every shrunk file passed qpdf --check, kept its text (poppler) and its pages looked the same; 7 got 70% to 97% smaller, the rest were kept or refused as designed.
+
 ## 0.6.0 (2026-10-26)
 
 **Asked for:** two ideas from similar projects: a before/after slider with 100% zoom (from Squoosh and IMGo), and shrinking every picture in a document at once (the idea behind tinyoffice).

@@ -152,11 +152,11 @@ public sealed class ShrinkerTests : IClassFixture<SamplesFixture>
     }
 
     [Fact]
-    public void Pdf_gets_a_pdf_message()
+    public void Text_only_pdf_is_read_and_kept()
     {
         var r = _s.Shrink(_f.Samples.Pdf, Balanced, Opt("pdf"));
-        Assert.Equal(ResultKind.Error, r.Kind);
-        Assert.Equal(ErrorKind.Pdf, r.Error);
+        Assert.Equal(ResultKind.Kept, r.Kind);
+        Assert.Equal("PDF", r.Document?.Format);
     }
 
     [Fact]

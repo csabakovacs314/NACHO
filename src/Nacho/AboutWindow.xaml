@@ -36,7 +36,15 @@
                     <TextBlock x:Name="OtherExpansion" Style="{StaticResource Secondary}" FontStyle="Italic" FontSize="13" />
                 </StackPanel>
             </DockPanel>
-            <TextBlock x:Name="VersionText" Style="{StaticResource Secondary}" FontSize="13" Margin="0,12,0,18" />
+            <DockPanel Margin="0,12,0,18">
+                <Button x:Name="CheckButton" DockPanel.Dock="Right" Content="{l:L Update.CheckNow}" Click="Check_Click" MinHeight="32" Padding="12,4" VerticalAlignment="Top" />
+                <StackPanel>
+                    <TextBlock x:Name="VersionText" Style="{StaticResource Secondary}" FontSize="13" />
+                    <TextBlock x:Name="CheckText" FontSize="13" TextWrapping="Wrap" Margin="0,4,12,0" Visibility="Collapsed" AutomationProperties.LiveSetting="Polite" />
+                    <Button x:Name="ReleaseButton" Content="{l:L Update.Open}" Click="Release_Click" HorizontalAlignment="Left" MinHeight="32" Padding="12,4"
+                            Margin="0,6,0,0" Visibility="Collapsed" Style="{DynamicResource AccentButtonStyle}" />
+                </StackPanel>
+            </DockPanel>
 
             <TextBlock Text="{l:L About.How}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8" />
             <TextBlock Style="{StaticResource Step}"><Run Text="1. " /><Run Text="{l:L About.Way1}" /></TextBlock>
@@ -49,6 +57,9 @@
 
             <TextBlock Text="{l:L About.Doc}" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,8" />
             <TextBlock Text="{l:L About.DocBody}" TextWrapping="Wrap" />
+
+            <TextBlock Text="{l:L About.Pdf}" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,8" />
+            <TextBlock Text="{l:L About.PdfBody}" TextWrapping="Wrap" />
 
             <TextBlock Text="{l:L About.Keys}" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,8" />
             <TextBlock Text="{l:L About.KeysList}" TextWrapping="Wrap" FontSize="13" />

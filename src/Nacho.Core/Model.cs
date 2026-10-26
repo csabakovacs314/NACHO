@@ -4,7 +4,7 @@ public enum FormatMode { Auto, Jpeg, Png }
 
 public enum ResultKind { Shrunk, Kept, Error }
 
-public enum ErrorKind { None, NotFound, Pdf, NotAnImage, Damaged, DocLocked }
+public enum ErrorKind { None, NotFound, NotAnImage, Damaged, DocLocked, PdfLocked, PdfSigned, PdfEngine }
 
 public enum Badge { FromFormat, LocationRemoved, CameraRemoved, RotatedUpright, TextKeptSharp, Colours256, OverBudget, Animated, Transparency, FullColour }
 
@@ -24,6 +24,9 @@ public sealed class Preset
     }
 
     public Preset Clone() => new(Id, LongEdge, BudgetKB);
+
+    /// <summary>The sharpness pictures inside a PDF are kept at: Small 100, Balanced 150, Sharp 220 dots per inch.</summary>
+    public int PdfDpi => Id switch { "small" => 100, "sharp" => 220, _ => 150 };
 
     public long BudgetBytes => (long)BudgetKB * 1024;
 
@@ -93,9 +96,21 @@ public sealed class ShrinkResult
         : (int)Math.Round(100.0 * (OriginalBytes - OutputBytes) / OriginalBytes);
 }
 
-/// <summary>What NACHO did to the pictures inside one .docx.</summary>
+/// <summary>What NACHO did to the pictures inside one .docx or PDF.</summary>
 public sealed class DocumentReport
 {
+    /// <summary>"DOCX" or "PDF".</summary>
+    public string Format { get; set; } = "DOCX";
+
+    /// <summary>Pages in a PDF (0 for a .docx).</summary>
+    public int Pages { get; set; }
+
+    /// <summary>PDF only: a smaller version was made but did not pass the page-by-page check, so the original was kept.</summary>
+    public bool CheckFailed { get; set; }
+
+    /// <summary>PDF only: the target sharpness in dots per inch.</summary>
+    public int Dpi { get; set; }
+
     /// <summary>Pictures NACHO could read (photos, screenshots, GIFs).</summary>
     public int Pictures { get; set; }
 
@@ -104,7 +119,8 @@ public sealed class DocumentReport
     /// <summary>Pictures that were already Docs-ready and stay byte for byte as they were.</summary>
     public int Kept { get; set; }
 
-    /// <summary>Drawings (EMF, WMF, SVG) and pictures NACHO can't read; they stay as they were.</summary>
+    /// <summary>Drawings (EMF, WMF, SVG), pictures NACHO can't read, and in a PDF pictures with transparency, print
+    /// colours (CMYK), black-and-white scans or inside drawing groups; they stay as they were.</summary>
     public int Skipped { get; set; }
 
     /// <summary>Bytes of the readable pictures before and after.</summary>

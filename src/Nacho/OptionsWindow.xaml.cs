@@ -39,6 +39,7 @@ public partial class OptionsWindow : Window
         FmtPng.IsChecked = s.Format == FormatMode.Png;
         PrivLocation.IsChecked = s.RemoveLocation;
         PrivCamera.IsChecked = s.RemoveCamera;
+        UpdatesBox.IsChecked = s.CheckUpdates;
         FolderBox.Text = s.OutputFolder;
         SuffixBox.Text = s.Suffix;
         CtxMenu.IsChecked = s.ContextMenu;
@@ -115,6 +116,7 @@ public partial class OptionsWindow : Window
         _s.Suffix = suffix;
         _s.ContextMenu = CtxMenu.IsChecked == true;
         _s.SendTo = SendToBox.IsChecked == true;
+        _s.CheckUpdates = UpdatesBox.IsChecked == true;
         if (LangBox.SelectedItem is ComboBoxItem { Tag: string lang }) _s.Language = lang;
         DialogResult = true;
     }

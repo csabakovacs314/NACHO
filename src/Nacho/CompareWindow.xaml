@@ -51,6 +51,18 @@
                     <RadioButton x:Name="Zoom400" Tag="4" GroupName="Zoom" Content="400%" Checked="Zoom_Checked" ToolTip="4"
                                  Style="{DynamicResource {x:Type ToggleButton}}" MinHeight="32" MinWidth="56" Padding="10,4" />
                 </StackPanel>
+                <StackPanel x:Name="PageGroup" Orientation="Horizontal" Margin="0,4,12,4" Visibility="Collapsed">
+                    <Button x:Name="PrevPage" Click="PrevPage_Click" MinHeight="32" MinWidth="36" Padding="8,4" ToolTip="Page Up"
+                            AutomationProperties.Name="{l:L Compare.PrevPage}">
+                        <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE76B;" />
+                    </Button>
+                    <TextBlock x:Name="PageText" VerticalAlignment="Center" Margin="10,0" MinWidth="90" TextAlignment="Center"
+                               AutomationProperties.LiveSetting="Polite" />
+                    <Button x:Name="NextPage" Click="NextPage_Click" MinHeight="32" MinWidth="36" Padding="8,4" ToolTip="Page Down"
+                            AutomationProperties.Name="{l:L Compare.NextPage}">
+                        <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE76C;" />
+                    </Button>
+                </StackPanel>
                 <StackPanel x:Name="RightGroup" Orientation="Horizontal" Visibility="Collapsed">
                     <TextBlock Text="{l:L Compare.Right}" Style="{StaticResource Secondary}" VerticalAlignment="Center" Margin="4,0,6,0" />
                     <StackPanel Orientation="Horizontal" Margin="0,4,4,4" AutomationProperties.Name="{l:L Compare.Right}">

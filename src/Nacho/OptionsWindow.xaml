@@ -117,6 +117,14 @@
 
                 <Border Style="{StaticResource Card}">
                     <StackPanel>
+                        <TextBlock Text="{l:L Opt.Updates}" Style="{StaticResource Heading}" />
+                        <CheckBox x:Name="UpdatesBox" Content="{l:L Opt.CheckUpdates}" />
+                        <TextBlock Text="{l:L Opt.CheckUpdatesHint}" Style="{StaticResource Secondary}" Margin="28,2,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
                         <Label Content="{l:L Opt.Language}" Target="{Binding ElementName=LangBox}" Padding="0" Margin="0,0,0,6" FontSize="16" FontWeight="SemiBold" />
                         <ComboBox x:Name="LangBox" Width="180" HorizontalAlignment="Left">
                             <ComboBoxItem Tag="en" Content="English" />

@@ -1,4 +1,5 @@
 using ImageMagick;
+using Nacho.Core.Pdf;
 
 namespace Nacho.Core;
 
@@ -31,14 +32,50 @@ public sealed class ComparePictures
     public int OriginalHeight { get; private init; }
 
     /// <summary>True when the original had more pixels than the copy and was resized for the comparison.</summary>
-    public bool OriginalResized => OriginalWidth != Width || OriginalHeight != Height;
+    public bool OriginalResized => !IsPdf && (OriginalWidth != Width || OriginalHeight != Height);
+
+    /// <summary>A PDF comparison shows one page of the original PDF and of the smaller copy, drawn at the same size.</summary>
+    public bool IsPdf { get; private init; }
+
+    /// <summary>The page shown (0-based) and the number of pages, for a PDF.</summary>
+    public int Page { get; private init; }
+
+    public int PageCount { get; private init; }
+
+    /// <summary>Long edge of a drawn PDF page: about 170 dpi on A4, enough to see what scaling a picture changed.</summary>
+    public const int PdfPageLongEdge = 2000;
 
     public static bool CanCompare(ShrinkResult? r) =>
-        r is { Kind: ResultKind.Shrunk, IsDocument: false, OutputPath: { } p } && File.Exists(p) && File.Exists(r.SourcePath);
+        r is { Kind: ResultKind.Shrunk, OutputPath: { } p } && (!r.IsDocument || r.Document!.Format == "PDF")
+        && File.Exists(p) && File.Exists(r.SourcePath);
+
+    /// <summary>One page of a shrunk PDF: the original page left, the smaller copy's page right.</summary>
+    public static ComparePictures LoadPdfPage(ShrinkResult r, int page)
+    {
+        if (!CanCompare(r) || r.Document?.Format != "PDF") throw new InvalidOperationException("Not a shrunk PDF.");
+        int count = PdfPages.Count(r.OutputPath!);
+        page = Math.Clamp(page, 0, Math.Max(0, count - 1));
+        var a = PdfPages.Render(r.SourcePath, page, PdfPageLongEdge);
+        var b = PdfPages.Render(r.OutputPath!, page, PdfPageLongEdge);
+        if (a.Width != b.Width || a.Height != b.Height) throw new InvalidDataException("The pages have different sizes.");
+        return new ComparePictures
+        {
+            Width = a.Width,
+            Height = a.Height,
+            OriginalWidth = a.Width,
+            OriginalHeight = a.Height,
+            Original = a.Bgra,
+            Copy = b.Bgra,
+            IsPdf = true,
+            Page = page,
+            PageCount = count,
+        };
+    }
 
     public static ComparePictures Load(ShrinkResult r)
     {
         if (!CanCompare(r)) throw new InvalidOperationException("Nothing to compare: the copy or the original is missing.");
+        if (r.IsDocument) return LoadPdfPage(r, 0);
 
         using var copy = ReadFirstFrame(r.OutputPath!);
         using var original = ReadFirstFrame(r.SourcePath);

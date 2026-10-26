@@ -16,6 +16,7 @@ public static class ShellIntegration
         @"SystemFileAssociations\.webp",
         @"SystemFileAssociations\.avif",
         @"SystemFileAssociations\.docx",
+        @"SystemFileAssociations\.pdf",
     };
 
     public static string SendToShortcut => Path.Combine(

@@ -34,6 +34,7 @@ public partial class MainWindow : Window
     private bool _draggingOut;
     private bool _loading = true;
     private Func<string> _status = () => "";
+    private UpdateInfo? _update;
 
     public static readonly DependencyProperty IsNarrowProperty =
         DependencyProperty.Register(nameof(IsNarrow), typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
@@ -92,6 +93,60 @@ public partial class MainWindow : Window
     }
 
     public string StatusMessage => StatusText.Text;
+
+    // ---------- updates ----------
+
+    /// <summary>Once a day (when turned on), asks GitHub for a newer release and shows the bar if there is one.</summary>
+    public async Task CheckForUpdatesAsync()
+    {
+        if (!_s.CheckUpdates || !UpdateCheck.Due(_s.LastUpdateCheckUtc, DateTime.UtcNow)) return;
+        _s.LastUpdateCheckUtc = DateTime.UtcNow;
+        _s.Save();
+        var result = await UpdateCheck.CheckAsync(UpdateCheck.Current(typeof(App).Assembly));
+        if (result.Outcome == UpdateCheck.Outcome.Newer) ShowUpdate(result.Update!);
+    }
+
+    public void ShowUpdate(UpdateInfo info)
+    {
+        _update = info;
+        RenderUpdate();
+    }
+
+    public bool UpdateBarVisible => UpdateBar.Visibility == Visibility.Visible;
+
+    public string UpdateMessage => UpdateText.Text;
+
+    private void RenderUpdate()
+    {
+        UpdateBar.Visibility = _update is null ? Visibility.Collapsed : Visibility.Visible;
+        if (_update is null) return;
+        UpdateText.Text = Loc.F("Update.Available", _update.Version.ToString(3), UpdateCheck.Current(typeof(App).Assembly).ToString(3));
+    }
+
+    private void UpdateOpen_Click(object sender, RoutedEventArgs e)
+    {
+        if (_update is not null) OpenWeb(_update.PageUrl);
+    }
+
+    private void UpdateLater_Click(object sender, RoutedEventArgs e)
+    {
+        _update = null;
+        RenderUpdate();
+    }
+
+    /// <summary>Opens NACHO's own release page in the browser; any other address is refused.</summary>
+    public static void OpenWeb(string url)
+    {
+        if (!UpdateCheck.IsReleasePage(url) && url != UpdateCheck.ReleasesPage) return;
+        try
+        {
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            App.Log(ex);
+        }
+    }
 
     public void Select(ResultItem item)
     {
@@ -556,6 +611,7 @@ public partial class MainWindow : Window
         PresetBalanced.Content = PresetLabel(_s.Presets[1]);
         PresetSharp.Content = PresetLabel(_s.Presets[2]);
         foreach (var item in Items) item.Refresh();
+        RenderUpdate();
         UpdateCounts();
         UpdateSavings();
         UpdatePreview();
@@ -593,7 +649,8 @@ public partial class MainWindow : Window
         PreviewEmpty.Visibility = Visibility.Collapsed;
         PreviewDoc.Visibility = Visibility.Collapsed;
         bool doc = Results.SelectedItem is ResultItem { IsDocument: true };
-        PreviewHeading.Text = Loc.T(doc ? "Doc.Title" : "Preview.Title");
+        bool pdf = Results.SelectedItem is ResultItem { IsPdf: true };
+        PreviewHeading.Text = Loc.T(pdf ? "Doc.PdfTitle" : doc ? "Doc.Title" : "Preview.Title");
         PageGroup.Visibility = doc ? Visibility.Collapsed : Visibility.Visible;
 
         if (Results.SelectedItem is not ResultItem item || item.IsWorking)
@@ -623,8 +680,15 @@ public partial class MainWindow : Window
             DocPicsA.Text = Loc.Bytes(d.PicturesBefore);
             DocPicsB.Text = Loc.Bytes(d.PicturesAfter);
             DocCounts.Text = Loc.F("Doc.Counts", d.Pictures, d.Shrunk, d.Kept);
-            DocSkipped.Text = d.Skipped > 0 ? Loc.F("Doc.Skipped", d.Skipped) : "";
+            DocSkipped.Text = d.Skipped > 0 ? Loc.F(pdf ? "Doc.PdfSkipped" : "Doc.Skipped", d.Skipped) : "";
             DocSkipped.Visibility = d.Skipped > 0 ? Visibility.Visible : Visibility.Collapsed;
+            var pdfOnly = pdf ? Visibility.Visible : Visibility.Collapsed;
+            DocPagesLabel.Visibility = DocPagesA.Visibility = DocPagesB.Visibility = PdfPart.Visibility = pdfOnly;
+            DocxPart.Visibility = pdf ? Visibility.Collapsed : Visibility.Visible;
+            DocPagesA.Text = d.Pages.ToString(Loc.Instance.Culture);
+            DocPagesB.Text = d.Pages.ToString(Loc.Instance.Culture);
+            DocDpiNote.Text = pdf ? Loc.F("Doc.PdfDpi", d.Dpi, Loc.T("Preset." + _s.CurrentPreset)) : "";
+            DocCompareButton.Visibility = item.CanCompare ? Visibility.Visible : Visibility.Collapsed;
             PreviewDoc.Visibility = Visibility.Visible;
             return;
         }

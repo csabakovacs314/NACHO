@@ -100,6 +100,14 @@
 
                 <Border Classes="card">
                     <StackPanel>
+                        <TextBlock Text="{l:L Opt.Updates}" Classes="heading" />
+                        <CheckBox x:Name="UpdatesBox" Content="{l:L Opt.CheckUpdates}" />
+                        <TextBlock Text="{l:L Opt.CheckUpdatesHint}" Classes="hint" Margin="28,0,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card">
+                    <StackPanel>
                         <Label Content="{l:L Opt.Language}" Target="{Binding #LangBox}" Padding="0" Margin="0,0,0,6" FontSize="16" FontWeight="SemiBold" />
                         <ComboBox x:Name="LangBox" Width="180" HorizontalAlignment="Left">
                             <ComboBoxItem Tag="en" Content="English" />
