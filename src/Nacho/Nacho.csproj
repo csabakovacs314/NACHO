@@ -13,4 +13,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Nacho.Core\Nacho.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- oxipng (MIT), unpacked once to %LOCALAPPDATA%\NACHO\tools; see tools\oxipng\README.md. -->
+    <EmbeddedResource Include="..\..\tools\oxipng\win-x64\oxipng.exe" LogicalName="oxipng.exe" />
+  </ItemGroup>
 </Project>

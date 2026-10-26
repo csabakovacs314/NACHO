@@ -7,7 +7,7 @@
 # Needs: .NET 10 SDK, xvfb-run, curl (the first run downloads appimagetool into out/tools).
 set -euo pipefail
 
-VERSION="${1:-0.4.0}"
+VERSION="${1:-0.5.0}"
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 OUT="$ROOT/out/linux"
 REL="$ROOT/out/linux-release"
@@ -59,6 +59,9 @@ cp "$APPDIR/nacho.desktop" "$APPDIR/usr/share/applications/nacho.desktop"
 cp "$ROOT/src/Nacho.Linux/Assets/nacho.png" "$APPDIR/nacho.png"
 cp "$ROOT/src/Nacho.Linux/Assets/nacho.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/nacho.png"
 cp "$ROOT/src/Nacho.Linux/Assets/nacho.svg" "$APPDIR/usr/share/icons/hicolor/scalable/apps/nacho.svg"
+mkdir -p "$APPDIR/usr/share/doc/nacho"
+cp "$ROOT/README.txt" "$ROOT/CHANGELOG.md" "$ROOT/tools/oxipng/LICENSE" "$APPDIR/usr/share/doc/nacho/"
+mv "$APPDIR/usr/share/doc/nacho/LICENSE" "$APPDIR/usr/share/doc/nacho/oxipng-LICENSE"
 ln -sf nacho.png "$APPDIR/.DirIcon"
 if [ ! -s "$TOOLS/appimagetool-x86_64.AppImage" ]; then
     curl -fsSL -o "$TOOLS/appimagetool-x86_64.AppImage" \
@@ -117,6 +120,7 @@ left=$(find "$T/.local" -type f ! -name mimeinfo.cache 2>/dev/null | wc -l)
 [ "$left" = "0" ] && pass "uninstall leaves no NACHO file in ~/.local" || { find "$T/.local" -type f; fail "uninstall left $left files"; }
 if grep -qs nacho "$T/.local/share/applications/mimeinfo.cache"; then fail "the desktop's Open With index still names NACHO"; else pass "the desktop's Open With index no longer names NACHO"; fi
 [ -f "$T/.config/nacho/settings.json" ] && pass "uninstall keeps the settings" || fail "settings kept"
+[ ! -e "$T/.cache/nacho" ] && pass "uninstall removes the unpacked oxipng" || { find "$T/.cache/nacho"; fail "oxipng copy left"; }
 
 # The AppImage runs, and its menus point at the AppImage file itself.
 "${H[@]}" "$APPIMAGE_FILE" --appimage-extract-and-run --version | grep -q "NACHO $VERSION" && pass "AppImage starts" || fail "AppImage starts"

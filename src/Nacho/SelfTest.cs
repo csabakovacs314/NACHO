@@ -93,6 +93,35 @@ public static class SelfTest
         Check(w.Items.Where(i => i.IsOk).All(i => i.Result!.ShapeErrorPercent <= 0.1), "every copy keeps the original shape");
         Check(Get(samples.Photo).Result!.ShapeExact, "phone photo shape exact: " + ResultItem.Dim(Get(samples.Photo).Result!.OutputWidth, Get(samples.Photo).Result!.OutputHeight));
 
+        // 0.5.0: oxipng is unpacked and used, and a screenshot that would band keeps its full colours.
+        string? oxipng = PngOptimizer.ToolPath;
+        Check(oxipng is not null && File.Exists(oxipng), "oxipng unpacked: " + oxipng);
+        string oxiVersion = "";
+        if (oxipng is not null)
+        {
+            try
+            {
+                var psi = new System.Diagnostics.ProcessStartInfo(oxipng, "--version") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true };
+                using var p = System.Diagnostics.Process.Start(psi)!;
+                oxiVersion = p.StandardOutput.ReadToEnd().Trim();
+                p.WaitForExit(10000);
+            }
+            catch (Exception ex)
+            {
+                oxiVersion = ex.Message;
+            }
+        }
+        Check(oxiVersion == "oxipng 10.2.1", "oxipng runs: " + oxiVersion);
+        var shotResult = Get(samples.Screenshot).Result!;
+        Check(shotResult.PngOptimisedFrom is not null && shotResult.OutputBytes < shotResult.PngOptimisedFrom,
+            $"oxipng shrank the screenshot copy: {shotResult.PngOptimisedFrom} to {shotResult.OutputBytes} bytes");
+        string banded = SampleImages.BandedScreenshot(Path.Combine(outDir, "samples", "banded.png"));
+        var br = await Task.Run(() => new ImageShrinker().Shrink(banded, settings.GetPreset(), settings.ToOptions()));
+        Check(br.Badges.Contains(Badge.FullColour) && !br.Badges.Contains(Badge.Colours256) && br.PalettePsnr < ImageShrinker.MinPalettePsnr,
+            $"banded screenshot stays in full colour ({br.PalettePsnr:0.0} dB for 256 colours)");
+        Check(br.PngOptimisedFrom is not null, $"oxipng shrank the full-colour copy: {br.PngOptimisedFrom} to {br.OutputBytes} bytes");
+        Check(Loc.T("Badge.FullColour") == "Full colour, no banding", "the new badge has its English text");
+
         w.Select(Get(samples.Photo));
         await Settle();
         Check(w.CmpShapeB.Text == "3:4, exact", "preview shows the shape: " + w.CmpShapeB.Text);

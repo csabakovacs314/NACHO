@@ -1,4 +1,4 @@
-NACHO 0.4.0
+NACHO 0.5.0
 Normalise, Adjust, Compress, Hand Over
 (Spanish: Normaliza, Ajusta, Comprime y Honra el Original)
 (Hungarian: Normalizál, Arányt tart, Csökkent és Hűen Odaad)
@@ -8,22 +8,23 @@ Your original file is never changed. The copy goes to Pictures\Docs-Ready.
 NACHO runs on Windows 10 and 11, and on 64-bit Linux (see LINUX below).
 
 FILES
-  NACHO-0.4.0-setup.exe      Windows installer (recommended). English, Spanish or Hungarian, no admin rights needed.
+  NACHO-0.5.0-setup.exe      Windows installer (recommended). English, Spanish or Hungarian, no admin rights needed.
   NACHO.exe                  Windows portable. Runs on Windows 10 or 11 (x64) with nothing to install.
   Small\NACHO.exe            Same Windows app, much smaller, needs the .NET 10 Desktop Runtime.
-  Linux\NACHO-0.4.0-x86_64.AppImage     Linux, one file: make it executable and run it.
-  Linux\nacho-0.4.0-linux-x64.tar.gz    Linux, with install.sh (app menu, Open With, right-click entries).
+  Linux\NACHO-0.5.0-x86_64.AppImage     Linux, one file: make it executable and run it.
+  Linux\nacho-0.5.0-linux-x64.tar.gz    Linux, with install.sh (app menu, Open With, right-click entries).
   Linux\SHA256SUMS.txt                  Checksums for the two Linux files.
-  NACHO-0.4.0-source.zip     Source, unit tests, build.ps1 (Windows) and build-linux.sh (Linux).
-  NACHO-0.4.0.zip            Everything above in one package.
+  NACHO-0.5.0-source.zip     Source, unit tests, build.ps1 (Windows) and build-linux.sh (Linux).
+  NACHO-0.5.0.zip            Everything above in one package.
 
 INSTALLER
-  Run NACHO-0.4.0-setup.exe, pick English, Español or Magyar, then "Install for me only" (no admin
+  Run NACHO-0.5.0-setup.exe, pick English, Español or Magyar, then "Install for me only" (no admin
   rights; goes to %LOCALAPPDATA%\Programs\NACHO) or "Install for all users" (Program Files).
   Options on the way: the right-click entry (on by default), Send to, a desktop shortcut.
   NACHO then starts in the language you picked. You get a Start menu entry, and NACHO appears
   in Settings > Apps, where you can uninstall it.
-  Uninstall removes the program, its Start menu entry, the right-click entry and Send to.
+  Uninstall removes the program, its Start menu entry, the right-click entry, Send to and the
+  oxipng copy in %LOCALAPPDATA%\NACHO\tools.
   It keeps your settings (%APPDATA%\NACHO) and your Docs-Ready pictures.
   A newer setup installs over an older one and keeps your settings.
   If you used the portable NACHO.exe before with the right-click entry on, the installer
@@ -35,17 +36,18 @@ LINUX
   The window, presets, languages, preview and buttons are the same as on Windows.
 
   AppImage (quickest):
-    chmod +x NACHO-0.4.0-x86_64.AppImage
-    ./NACHO-0.4.0-x86_64.AppImage
+    chmod +x NACHO-0.5.0-x86_64.AppImage
+    ./NACHO-0.5.0-x86_64.AppImage
   In More options you can add it to the app menu, to Open With and to the right-click menu.
   Those point at the AppImage file, so put it where it will live first.
 
   Install (adds NACHO to the app menu, Open With and the right-click menu at once):
-    tar xzf nacho-0.4.0-linux-x64.tar.gz
-    cd nacho-0.4.0-linux-x64
+    tar xzf nacho-0.5.0-linux-x64.tar.gz
+    cd nacho-0.5.0-linux-x64
     ./install.sh                 (or ./install.sh --lang hu, --lang es)
   It goes to ~/.local/share/nacho, with the command ~/.local/bin/nacho.
-  Remove it with ~/.local/share/nacho/uninstall.sh (settings and Docs-Ready pictures stay).
+  Remove it with ~/.local/share/nacho/uninstall.sh (settings and Docs-Ready pictures stay; the oxipng
+  copy in ~/.cache/nacho/tools goes too).
 
   Right-click menu: Files (GNOME) shows Make Docs-ready under Scripts; Nemo, Caja and Dolphin show it
   directly. Every file manager also has Open With > NACHO.
@@ -56,7 +58,7 @@ LINUX
   translated name). Problems are logged in ~/.config/nacho/nacho.log.
   Needs the ICU library (libicu), which desktop distros have. If NACHO does not start, install it:
   Ubuntu, Debian, Mint: sudo apt install libicu-dev     Fedora, AlmaLinux: sudo dnf install libicu
-  Self-test: nacho --selftest /tmp/nacho-test   (or ./NACHO-0.4.0-x86_64.AppImage --selftest ...)
+  Self-test: nacho --selftest /tmp/nacho-test   (or ./NACHO-0.5.0-x86_64.AppImage --selftest ...)
 
 FIRST RUN (WINDOWS)
   The exe is not code-signed, so Windows SmartScreen may say "Windows protected your PC".
@@ -99,6 +101,11 @@ WHAT IT DOES TO EACH IMAGE
   saves photos as JPEG and screenshots as PNG, converts HEIC, WebP, AVIF, TIFF and BMP,
   keeps transparency and animation. If a copy would not be smaller and the original is
   already fine for Docs, NACHO keeps the original and says so.
+  Screenshots: NACHO tries 256 colours and uses them only when the picture looks the same
+  (badge "256 colours"). Where that would show banding, for example a screenshot with a photo
+  in it, the copy keeps all its colours (badge "Full colour, no banding").
+  Every PNG copy then goes through oxipng: the same pixels in about 5% fewer bytes (more for
+  full-colour copies). It adds well under a second per screenshot.
 
 RIGHT-CLICK MENU AND SEND TO
   Both are off until you tick them in More options. They are added for your user only
@@ -119,5 +126,31 @@ UNINSTALL
   Installed: Settings > Apps > NACHO > Uninstall.
   Portable: untick the right-click menu and Send to in More options, close NACHO, then delete
   its folder and %APPDATA%\NACHO.
+
+INCLUDED SOFTWARE
+  NACHO uses Magick.NET (Apache 2.0) for images and, on Linux, Avalonia (MIT) for the window.
+  It carries oxipng 10.2.1 (https://github.com/oxipng/oxipng) and unpacks it on first use to
+  %LOCALAPPDATA%\NACHO\tools on Windows or ~/.cache/nacho/tools on Linux. oxipng's licence:
+
+  The MIT License (MIT)
+  Copyright (c) 2016 Joshua Holmer
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
 
 Idea: Csaba Kovacs. Built with Claude.

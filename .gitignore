@@ -11,3 +11,5 @@ build-log.txt
 *.exe
 *.AppImage
 *.tar.gz
+# The bundled oxipng (MIT) is part of the source: the apps embed it
+!tools/oxipng/**/oxipng.exe

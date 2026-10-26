@@ -19,6 +19,7 @@ public sealed class SamplesFixture : IDisposable
     }
 }
 
+[Collection("Engine")]
 public sealed class ShrinkerTests : IClassFixture<SamplesFixture>
 {
     private static readonly Preset Small = new("small", 800, 150);

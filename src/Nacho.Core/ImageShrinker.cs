@@ -206,6 +206,13 @@ public sealed class ImageShrinker
         img.Settings.SetDefine(MagickFormat.Jpeg, "sampling-factor", "4:2:0");
     }
 
+    /// <summary>
+    /// The 256-colour version is used only when it stays this close to the full-colour picture. Below it,
+    /// screenshots with photos in them show banding; above it, text pages look the same. Measured on 19 real
+    /// screenshots in the compression study: banding cases scored 40 to 44 dB, clean ones 46 to 61 dB.
+    /// </summary>
+    public const double MinPalettePsnr = 45.0;
+
     private static Encoded EncodePng(IMagickImage<byte> img, Preset preset, ShrinkResult r, bool graphic, bool textBadge)
     {
         img.Format = MagickFormat.Png;
@@ -220,13 +227,38 @@ public sealed class ImageShrinker
             byte[] qb = q.ToByteArray();
             if (qb.LongLength <= bytes.LongLength * 7 / 10)
             {
-                bytes = qb;
-                r.Badges.Add(Badge.Colours256);
+                double psnr = Psnr(img, q);
+                r.PalettePsnr = psnr;
+                if (psnr >= MinPalettePsnr)
+                {
+                    bytes = qb;
+                    r.Badges.Add(Badge.Colours256);
+                }
+                else
+                {
+                    r.Badges.Add(Badge.FullColour);
+                }
             }
         }
+
+        // Same pixels, fewer bytes: oxipng tries better PNG filters and compression than Magick.NET's.
+        byte[] optimised = PngOptimizer.Optimize(bytes);
+        if (optimised.Length < bytes.Length)
+        {
+            r.PngOptimisedFrom = bytes.LongLength;
+            bytes = optimised;
+        }
+
         if (textBadge && graphic) r.Badges.Add(Badge.TextKeptSharp);
         if (bytes.LongLength > preset.BudgetBytes) r.Badges.Add(Badge.OverBudget);
         return new Encoded(bytes, "PNG", ".png", (int)img.Width, (int)img.Height);
+    }
+
+    /// <summary>Peak signal-to-noise ratio in dB, from Magick.NET's mean squared error (0 to 1 scale).</summary>
+    public static double Psnr(IMagickImage<byte> a, IMagickImage<byte> b)
+    {
+        double mse = a.Compare(b, ErrorMetric.MeanSquared);
+        return mse <= 1e-10 ? 100 : 10 * Math.Log10(1 / mse);
     }
 
     private static Encoded EncodeAnimated(MagickImageCollection images, int tw, int th, ShrinkResult r)

@@ -1,4 +1,5 @@
 using System.Windows;
+using Nacho.Core;
 
 namespace Nacho;
 
@@ -13,6 +14,8 @@ public partial class App : Application
             MessageBox.Show(ex.Exception.Message, "NACHO", MessageBoxButton.OK, MessageBoxImage.Error);
             ex.Handled = true;
         };
+
+        UnpackTools();
 
         string[] args = e.Args;
         if (args.Length >= 1 && args[0].Equals("--selftest", StringComparison.OrdinalIgnoreCase))
@@ -69,6 +72,22 @@ public partial class App : Application
                 "Dark" => ThemeMode.Dark,
                 _ => ThemeMode.System,
             };
+        }
+        catch (Exception ex)
+        {
+            Log(ex);
+        }
+    }
+
+    /// <summary>Unpacks the bundled oxipng to %LOCALAPPDATA%\NACHO\tools (once per version) for smaller PNGs.</summary>
+    public static void UnpackTools()
+    {
+        try
+        {
+            using var s = typeof(App).Assembly.GetManifestResourceStream("oxipng.exe");
+            if (s is null) return;
+            string cache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NACHO", "tools");
+            PngOptimizer.ToolPath = PngOptimizer.Extract(s, cache, "oxipng.exe");
         }
         catch (Exception ex)
         {

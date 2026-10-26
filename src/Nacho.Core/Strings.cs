@@ -57,6 +57,7 @@ public static partial class Strings
         ["Badge.OverBudget"] = "Over budget",
         ["Badge.Animated"] = "Animated",
         ["Badge.Transparency"] = "Transparency kept",
+        ["Badge.FullColour"] = "Full colour, no banding",
 
         ["Err.Title"] = "Can't shrink this file",
         ["Err.Pdf"] = "It is a PDF, not an image. Open it, export the page as PNG, then drop that file here.",
@@ -223,6 +224,7 @@ public static partial class Strings
         ["Badge.OverBudget"] = "Supera el límite",
         ["Badge.Animated"] = "Animada",
         ["Badge.Transparency"] = "Transparencia conservada",
+        ["Badge.FullColour"] = "Color completo, sin bandas",
 
         ["Err.Title"] = "No se puede reducir este archivo",
         ["Err.Pdf"] = "Es un PDF, no una imagen. Ábrelo, exporta la página como PNG y suelta ese archivo aquí.",
@@ -389,6 +391,7 @@ public static partial class Strings
         ["Badge.OverBudget"] = "Méretkeret felett",
         ["Badge.Animated"] = "Animált",
         ["Badge.Transparency"] = "Átlátszóság megtartva",
+        ["Badge.FullColour"] = "Teljes színek, sávosodás nélkül",
 
         ["Err.Title"] = "Ez a fájl nem kicsinyíthető",
         ["Err.Pdf"] = "Ez PDF, nem kép. Nyisd meg, mentsd az oldalt PNG-ként, és azt a fájlt húzd ide.",

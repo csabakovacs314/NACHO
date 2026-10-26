@@ -32,6 +32,7 @@ public partial class App : Application
             return;
         }
 
+        UnpackTools();
         Dispatcher.UIThread.UnhandledException += (_, e) =>
         {
             Log(e.Exception);
@@ -105,6 +106,22 @@ public partial class App : Application
         catch
         {
             return null;
+        }
+    }
+
+    /// <summary>Unpacks the bundled oxipng to ~/.cache/nacho/tools (once per version) for smaller PNGs.</summary>
+    public static void UnpackTools()
+    {
+        try
+        {
+            using var s = Asset("oxipng");
+            if (s is null) return;
+            string cache = Path.Combine(XdgPaths.Current.CacheHome, "nacho", "tools");
+            Nacho.Core.PngOptimizer.ToolPath = Nacho.Core.PngOptimizer.Extract(s, cache, "oxipng");
+        }
+        catch (Exception ex)
+        {
+            Log(ex);
         }
     }
 

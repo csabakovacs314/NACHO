@@ -23,5 +23,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Assets\nacho.svg" LogicalName="nacho.svg" />
     <EmbeddedResource Include="Assets\nacho.png" LogicalName="nacho.png" />
+    <!-- oxipng (MIT), unpacked once to ~/.cache/nacho/tools; see tools/oxipng/README.md. -->
+    <EmbeddedResource Include="..\..\tools\oxipng\linux-x64\oxipng" LogicalName="oxipng" />
   </ItemGroup>
 </Project>

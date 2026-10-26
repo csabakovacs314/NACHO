@@ -2,7 +2,7 @@
 ; Installs for the current user by default (no admin rights); "all users" can be chosen in the first dialog.
 ; English, Spanish and Hungarian. Compile: ISCC.exe installer\nacho.iss (after publishing the payload, see build.ps1).
 
-#define AppVersion "0.4.0"
+#define AppVersion "0.5.0"
 #ifndef Payload
   #define Payload "..\out\installer-payload"
 #endif
@@ -110,6 +110,11 @@ Root: HKCU; Subkey: "Software\Classes\SystemFileAssociations\.avif\shell\NACHO.M
 
 ; The language picked in setup; NACHO uses it on its first run.
 Root: HKCU; Subkey: "Software\NACHO"; ValueType: string; ValueName: "Language"; ValueData: "{language}"; Flags: uninsdeletekey
+
+[UninstallDelete]
+; The oxipng copy NACHO unpacks for smaller PNGs (settings in %APPDATA%\NACHO stay).
+Type: filesandordirs; Name: "{localappdata}\NACHO\tools"
+Type: dirifempty; Name: "{localappdata}\NACHO"
 
 [Run]
 Filename: "{app}\NACHO.exe"; Description: "{cm:LaunchProgram,NACHO}"; Flags: nowait postinstall skipifsilent

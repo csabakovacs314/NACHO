@@ -20,6 +20,9 @@ public sealed class XdgPaths
     /// <summary>$XDG_DATA_HOME, or ~/.local/share. App menu entries, icons and file manager menus live here.</summary>
     public string DataHome => Absolute(_env("XDG_DATA_HOME")) ?? Path.Combine(Home, ".local", "share");
 
+    /// <summary>$XDG_CACHE_HOME, or ~/.cache. Bundled tools are unpacked into its nacho folder.</summary>
+    public string CacheHome => Absolute(_env("XDG_CACHE_HOME")) ?? Path.Combine(Home, ".cache");
+
     /// <summary>$XDG_RUNTIME_DIR, or the temp folder. The single-instance socket lives here.</summary>
     public string RuntimeDir => Absolute(_env("XDG_RUNTIME_DIR")) ?? Path.GetTempPath();
 

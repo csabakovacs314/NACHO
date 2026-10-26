@@ -6,7 +6,7 @@ public enum ResultKind { Shrunk, Kept, Error }
 
 public enum ErrorKind { None, NotFound, Pdf, NotAnImage, Damaged }
 
-public enum Badge { FromFormat, LocationRemoved, CameraRemoved, RotatedUpright, TextKeptSharp, Colours256, OverBudget, Animated, Transparency }
+public enum Badge { FromFormat, LocationRemoved, CameraRemoved, RotatedUpright, TextKeptSharp, Colours256, OverBudget, Animated, Transparency, FullColour }
 
 public sealed class Preset
 {
@@ -62,6 +62,12 @@ public sealed class ShrinkResult
     public bool OutputHasLocation { get; set; }
     public List<Badge> Badges { get; } = new();
     public string? ErrorDetail { get; set; }
+
+    /// <summary>How close the 256-colour version came to the full-colour picture, in dB, when it was tried.</summary>
+    public double? PalettePsnr { get; set; }
+
+    /// <summary>The PNG's size before oxipng, when oxipng made it smaller.</summary>
+    public long? PngOptimisedFrom { get; set; }
 
     /// <summary>True when the copy has exactly the original's width-to-height ratio.</summary>
     public bool ShapeExact => OutputWidth > 0 && Shape.Same(OriginalWidth, OriginalHeight, OutputWidth, OutputHeight);

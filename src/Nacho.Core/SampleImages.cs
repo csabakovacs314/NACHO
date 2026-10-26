@@ -134,4 +134,42 @@ public static class SampleImages
         }
         return exif;
     }
+    /// <summary>
+    /// A screenshot with a photo-like panel: under 8000 colours, so NACHO treats it as a graphic, but its
+    /// 256-colour version bands (about 41 dB). The quality guard must keep it in full colour.
+    /// </summary>
+    public static string BandedScreenshot(string path)
+    {
+        const int w = 1000, h = 640, levels = 64;
+        var px = new byte[w * h * 3];
+        static byte Q(double c) => (byte)Math.Clamp(Math.Round(Math.Round(c / 255 * (levels - 1)) * 255.0 / (levels - 1)), 0, 255);
+        for (int y = 0; y < h; y++)
+        {
+            for (int x = 0; x < w; x++)
+            {
+                int i = (y * w + x) * 3;
+                byte r = 245, g = 245, b = 245;
+                if (x >= 40 && x < 600 && y >= 60 && y < 600)
+                {
+                    double u = (x - 40) / 560.0, v = (y - 60) / 540.0;
+                    r = Q(40 + 180 * u + 25 * Math.Sin(v * 9 + u * 3));
+                    g = Q(90 + 120 * v + 20 * Math.Sin(u * 7));
+                    b = Q(160 - 90 * u * v + 20 * Math.Cos((u + v) * 5));
+                }
+                else if (x >= 640 && x < 960 && (y / 24) % 2 == 0 && y % 24 < 12 && (x / 7) % 9 != 0)
+                {
+                    r = g = b = 40;
+                }
+                px[i] = r;
+                px[i + 1] = g;
+                px[i + 2] = b;
+            }
+        }
+        using var img = new MagickImage(px, new MagickReadSettings { Width = w, Height = h, Format = MagickFormat.Rgb, Depth = 8 });
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
+        // Stored without compression, like a raw screen capture, so NACHO makes a copy instead of keeping it.
+        img.Quality = 0;
+        img.Write(path, MagickFormat.Png24);
+        return path;
+    }
 }

@@ -2,6 +2,22 @@
 
 Versions: MAJOR.MINOR.PATCH. Minor for a feature, patch for a fix.
 
+## 0.5.0 (2026-10-26)
+
+**Asked for:** points 1 and 2 of the compression study: fix the banding in 256-colour screenshots, and add oxipng.
+
+**Fixed**
+- Screenshots with a photo in them (a window with thumbnails, a web page with pictures) showed banding in their 256-colour copy. NACHO now measures the 256-colour version against the full-colour picture and uses it only at 45 dB PSNR or better. Below that, the copy keeps all its colours and the tile says "Full colour, no banding" (also in Spanish and Hungarian). In the study the banding cases measured 40 to 44 dB and the clean ones 46 to 61 dB.
+
+**Added**
+- oxipng 10.2.1 (MIT) runs after every PNG copy: the same pixels in fewer bytes, about 5% on 256-colour screenshots and about 25% on full-colour ones, in well under a second. It is built into both apps and unpacked once to %LOCALAPPDATA%\NACHO\tools (Windows) or ~/.cache/nacho/tools (Linux). If it is missing or fails, NACHO keeps the PNG as Magick.NET wrote it.
+- Uninstall (Windows setup and Linux uninstall.sh) also removes the unpacked oxipng copy.
+- README: what NACHO does to screenshots, and the included software with oxipng's licence.
+
+**Size effect (19 real screenshots from the study):** total -6% when every screenshot keeps 256 colours. The 8 screenshots that would band now stay in full colour, so they are 2 to 3 times bigger than before (all still under the Balanced 300 KB budget); with them the total is about +67%, the price of no banding.
+
+**Tests:** 118 unit tests (8 new: the guard keeps a banded screenshot in full colour with identical pixels, a plain one keeps 256 colours, PSNR, oxipng shrinks a PNG with identical pixels, failures keep the original, unpacking repairs a changed copy). Both self-tests check that oxipng unpacks and runs (10.2.1), that it shrank the screenshot copy, and that a generated banded screenshot stays in full colour.
+
 ## 0.4.0 (2026-10-25)
 
 **Asked for:** a Linux version.

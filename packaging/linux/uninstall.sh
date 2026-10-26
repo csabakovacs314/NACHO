@@ -24,4 +24,9 @@ fi
 rm -rf "$DEST/app" "$DEST/README.txt" "$DEST/CHANGELOG.md"
 rm -f "$DEST/uninstall.sh"
 rmdir "$DEST" 2>/dev/null || true
+# The oxipng copy NACHO unpacked for smaller PNGs.
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}"
+case "$CACHE" in /*) ;; *) CACHE="$HOME/.cache" ;; esac
+rm -rf "$CACHE/nacho/tools"
+rmdir "$CACHE/nacho" 2>/dev/null || true
 echo "NACHO removed. Your settings (~/.config/nacho) and Docs-Ready pictures are still there."
