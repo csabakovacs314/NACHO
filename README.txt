@@ -1,4 +1,4 @@
-NACHO 0.11.0
+NACHO 0.12.0
 Normalise, Adjust, Compress, Hand Over
 (Spanish: Normaliza, Ajusta, Comprime y Honra el Original)
 (Hungarian: Normalizál, Arányt tart, Csökkent és Hűen Odaad)
@@ -8,12 +8,16 @@ NACHO makes every picture in it smaller, keeps each one in its place, and by def
 result in a new copy of the Doc, so your original stays exactly as it is. A real 410-page book
 with 251 photos went from 524 MB to 39 MB. See SHRINK A WHOLE GOOGLE DOC just below.
 
-NACHO opens on a start screen with both ways in side by side: Pictures and files on the left
-(drop them, Add files or Paste, and pick Small, Balanced or Sharp), A whole Google Doc on the right.
+New in 0.12.0: the same five steps for a Word file (.docx), on this computer or in Google Drive.
+See SHRINK A WORD FILE below.
+
+NACHO opens on a start screen with both ways in side by side: Pictures and PDFs on the left
+(drop them, Add files or Paste, and pick Small, Balanced or Sharp), A whole document on the right
+(Choose a Google Doc, or Choose a Word file).
 
 NACHO also makes a small, Docs-ready copy of a single image before it goes into a Google Doc,
-shrinks every picture in a Word document (.docx) at once, and makes smaller PDFs.
-Your original files are never changed. Copies go to Pictures\Docs-Ready.
+and makes smaller PDFs. Nothing changes until you decide: pictures and PDFs get smaller copies in
+Pictures\Docs-Ready, and a document is checked first; it is changed only if you choose so.
 NACHO runs on Windows 10 and 11, and on 64-bit Linux (see LINUX below).
 
 SHRINK A WHOLE GOOGLE DOC
@@ -49,19 +53,43 @@ SHRINK A WHOLE GOOGLE DOC
   tells Google. You can also remove NACHO's access at myaccount.google.com > Security >
   Third-party connections.
 
+SHRINK A WORD FILE (.docx)
+  Press Choose a Word file on the start screen (Ctrl+Shift+W), or drop a .docx anywhere on NACHO
+  (several at once wait their turn: "Next Word file" at the end). The same five steps:
+  1 Choose   On this computer (any folder, or drop it on the window) or In Google Drive (Google's
+             picker opens in your browser; NACHO can open only the files you pick).
+  2 Check    NACHO makes the smaller pictures in a temporary folder. Your file is only read.
+  3 Decide   Into a new copy (recommended, the default): "<name> (smaller).docx" next to the
+               original (in Docs-Ready if that folder can't be written), or in the same Drive
+               folder (My Drive if the folder belongs to someone else). The original is not touched;
+               it even works while Word has the file open.
+             Into this file: same name, folder, links and shortcuts. On this computer NACHO first
+               saves the original in Docs-Ready\Word originals, then swaps in the new file in one
+               step; Word must not have the file open, and if the file changed after the check
+               NACHO stops and asks you to check again. In Drive NACHO uploads a new version:
+               same link and sharing, and Drive keeps the old one in Manage versions for 30 days
+               (a copy is also saved on this computer when "Keep a copy of the original pictures"
+               is on).
+  4 Replace  A few seconds; the original stays whole until the new file is complete.
+  5 Done     Open in Word, Show in folder, and for a file changed on this computer Restore original,
+             which puts the old file back in its place. Recently shrunk lists your last five files.
+  Only the pictures change: text, styles, comments and tracked changes stay as they are. Drawings
+  (EMF, WMF, SVG) are left alone. Old .doc files and password-protected .docx files can't be
+  opened; save them as .docx without a password first.
+
 FILES
-  NACHO-0.11.0-setup.exe      Windows installer (recommended). English, Spanish or Hungarian, no admin rights needed.
+  NACHO-0.12.0-setup.exe      Windows installer (recommended). English, Spanish or Hungarian, no admin rights needed.
   NACHO.exe                  Windows portable. Runs on Windows 10 or 11 (x64) with nothing to install.
   Small\NACHO.exe            Same Windows app, much smaller, needs the .NET 10 Desktop Runtime.
-  Linux\NACHO-0.11.0-x86_64.AppImage     Linux, one file: make it executable and run it.
-  Linux\nacho-0.11.0-linux-x64.tar.gz    Linux, with install.sh (app menu, Open With, right-click entries).
+  Linux\NACHO-0.12.0-x86_64.AppImage     Linux, one file: make it executable and run it.
+  Linux\nacho-0.12.0-linux-x64.tar.gz    Linux, with install.sh (app menu, Open With, right-click entries).
   Linux\SHA256SUMS.txt                  Checksums for the two Linux files.
-  NACHO-0.11.0-source.zip     Source, unit tests, build.ps1 (Windows) and build-linux.sh (Linux).
-  NACHO-0.11.0.zip            Everything above in one package.
+  NACHO-0.12.0-source.zip     Source, unit tests, build.ps1 (Windows) and build-linux.sh (Linux).
+  NACHO-0.12.0.zip            Everything above in one package.
   licenses\                  Licences of the software NACHO includes (PDFium and its parts).
 
 INSTALLER
-  Run NACHO-0.11.0-setup.exe, pick English, Español or Magyar, then "Install for me only" (no admin
+  Run NACHO-0.12.0-setup.exe, pick English, Español or Magyar, then "Install for me only" (no admin
   rights; goes to %LOCALAPPDATA%\Programs\NACHO) or "Install for all users" (Program Files).
   Options on the way: the right-click entry (on by default), Send to, a desktop shortcut.
   NACHO then starts in the language you picked. You get a Start menu entry, and NACHO appears
@@ -79,14 +107,14 @@ LINUX
   The window, presets, languages, preview and buttons are the same as on Windows.
 
   AppImage (quickest):
-    chmod +x NACHO-0.11.0-x86_64.AppImage
-    ./NACHO-0.11.0-x86_64.AppImage
+    chmod +x NACHO-0.12.0-x86_64.AppImage
+    ./NACHO-0.12.0-x86_64.AppImage
   In More options you can add it to the app menu, to Open With and to the right-click menu.
   Those point at the AppImage file, so put it where it will live first.
 
   Install (adds NACHO to the app menu, Open With and the right-click menu at once):
-    tar xzf nacho-0.11.0-linux-x64.tar.gz
-    cd nacho-0.11.0-linux-x64
+    tar xzf nacho-0.12.0-linux-x64.tar.gz
+    cd nacho-0.12.0-linux-x64
     ./install.sh                 (or ./install.sh --lang hu, --lang es)
   It goes to ~/.local/share/nacho, with the command ~/.local/bin/nacho.
   Remove it with ~/.local/share/nacho/uninstall.sh (settings and Docs-Ready pictures stay; the oxipng
@@ -101,7 +129,7 @@ LINUX
   translated name). Problems are logged in ~/.config/nacho/nacho.log.
   Needs the ICU library (libicu), which desktop distros have. If NACHO does not start, install it:
   Ubuntu, Debian, Mint: sudo apt install libicu-dev     Fedora, AlmaLinux: sudo dnf install libicu
-  Self-test: nacho --selftest /tmp/nacho-test   (or ./NACHO-0.11.0-x86_64.AppImage --selftest ...)
+  Self-test: nacho --selftest /tmp/nacho-test   (or ./NACHO-0.12.0-x86_64.AppImage --selftest ...)
 
 FIRST RUN (WINDOWS)
   The exe is not code-signed, so Windows SmartScreen may say "Windows protected your PC".
@@ -109,11 +137,11 @@ FIRST RUN (WINDOWS)
   choose Properties, tick Unblock, then extract.
 
 FOUR WAYS IN
-  1. Drop images, .docx or PDF files on the window, or press Ctrl+O.
+  1. Drop images or PDF files on the window, or press Ctrl+O. A .docx opens in the Word window.
   2. Copy an image or a snip (Win+Shift+S), then press Ctrl+V in NACHO.
   3. Right-click an image in Explorer > Make Docs-ready (setup offers it, or turn it on in More options).
   4. Send to > NACHO (setup offers it, or turn it on in More options).
-  A Word document (.docx) works the same way: see A WHOLE DOC AT ONCE below.
+  A Word document (.docx): see SHRINK A WORD FILE above.
   A Google Doc already full of pictures: press Google Doc (Ctrl+G), or copy its link and press
   Ctrl+V. See SHRINK A WHOLE GOOGLE DOC above.
   Then drag the thumbnail into your Google Doc, or press Copy file and Ctrl+V in the Doc.
@@ -163,12 +191,11 @@ COMPARE WITH ORIGINAL
   banding, softer text. For a screenshot that kept full colour, the right side can switch to the
   256-colour version NACHO turned down, so you can see the banding it avoided.
 
-A WHOLE DOC AT ONCE (.docx)
-  In Google Docs choose File > Download > Microsoft Word (.docx), then drop the file on NACHO
-  (or right-click it > Make Docs-ready). Every picture inside goes through the same steps as a
-  dropped image, and a new "<name>-docs.docx" goes to Docs-Ready. The text and layout are copied
-  untouched; pictures keep their place and size on the page. Drawings (EMF, WMF, SVG) stay as
-  they are. Location data is removed from photos inside, like for single images.
+A GOOGLE DOC THROUGH WORD (.docx)
+  Usually Shrink a whole Google Doc is the better way. The old way still works: in Google Docs
+  choose File > Download > Microsoft Word (.docx) and shrink that file (see SHRINK A WORD FILE).
+  Every picture inside goes through the same steps as a dropped image; the text and layout are
+  copied untouched, and location data is removed from photos inside.
   Back into Google Docs: in Google Drive choose New > File upload (or drag the tile into Drive),
   then right-click the file > Open with > Google Docs. That makes a NEW Google Doc with a new
   link. Comments and suggestions may not all come back, and version history and sharing stay with
@@ -192,7 +219,7 @@ A SMALLER PDF
 
 UPDATES
   Once a day NACHO asks GitHub whether a newer release exists (turn it off in More options). It
-  sends nothing about you: GitHub sees an ordinary request from "NACHO/0.11.0". When a newer version
+  sends nothing about you: GitHub sees an ordinary request from "NACHO/0.12.0". When a newer version
   is out, a bar says so, with Open release page and Not now. NACHO never downloads or installs
   anything by itself. About > Check for updates asks straight away.
 

@@ -43,6 +43,12 @@ public sealed class AppSettings
     /// <summary>The last Docs NACHO shrank, newest first, for the "Recently shrunk" list.</summary>
     public List<Nacho.Core.Google.GoogleRecent> GoogleRecent { get; set; } = new();
 
+    /// <summary>Where the smaller pictures of a Word file go: a new copy next to it (true, the safe default) or the file itself.</summary>
+    public bool WordIntoCopy { get; set; } = true;
+
+    /// <summary>The last Word files NACHO shrank, newest first, for the "Recently shrunk" list.</summary>
+    public List<Nacho.Core.Word.WordRecent> WordRecent { get; set; } = new();
+
     /// <summary>The self-test points this at its own folder so it never touches the real settings.</summary>
     public static string? PathOverride { get; set; }
 
@@ -92,6 +98,7 @@ public sealed class AppSettings
 
     public void Normalise()
     {
+        WordRecent = Nacho.Core.Word.WordRecent.Clean(WordRecent);
         // Only well-formed Doc IDs come back from the file: the list opens them in the browser.
         GoogleRecent = (GoogleRecent ?? new())
             .Where(r => r is not null && !string.IsNullOrEmpty(r.DocId)

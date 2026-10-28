@@ -12,6 +12,7 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Nacho.Core;
 using Nacho.Core.Google;
+using Nacho.Core.Word;
 
 namespace Nacho.Linux;
 
@@ -38,6 +39,7 @@ public partial class MainWindow : Window
     private Func<string> _status = () => "";
     private UpdateInfo? _update;
     private GoogleDocWindow? _googleWindow;
+    private WordDocWindow? _wordWindow;
 
     public ObservableCollection<ResultItem> Items { get; } = new();
 
@@ -160,9 +162,20 @@ public partial class MainWindow : Window
 
     // ---------- adding and shrinking ----------
 
-    public async Task AddFilesAsync(IEnumerable<string> paths)
+    /// <summary>Adds files to the list. Word files open in the Word window instead (it checks them first and asks),
+    /// unless <paramref name="wordWindow"/> is false: then a .docx gets a smaller copy in Docs-Ready like a picture.</summary>
+    public async Task AddFilesAsync(IEnumerable<string> paths, bool wordWindow = true)
     {
         var files = Expand(paths).ToList();
+        if (wordWindow)
+        {
+            var word = files.Where(WordText.IsWordFile).ToList();
+            if (word.Count > 0)
+            {
+                files = files.Except(word).ToList();
+                OpenWordDoc(word);
+            }
+        }
         if (files.Count == 0) return;
         var batch = files.Select(f => new ResultItem(f, Path.GetFileName(f))).ToList();
         for (int i = batch.Count - 1; i >= 0; i--) Items.Insert(0, batch[i]);
@@ -244,6 +257,59 @@ public partial class MainWindow : Window
     // checks that Doc straight away; a link that merely sits on the clipboard from earlier is not used.
     private void GoogleDoc_Click(object? sender, RoutedEventArgs e) => OpenGoogleDoc(null);
 
+    private void WordDoc_Click(object? sender, RoutedEventArgs e) => OpenWordDoc(null);
+
+    /// <summary>Opens (or brings back) the Word window. With files, it checks the first one and queues the rest.</summary>
+    public WordDocWindow OpenWordDoc(IReadOnlyList<string>? files, bool activate = true)
+    {
+        var w = _wordWindow;
+        if (w is null)
+        {
+            w = new WordDocWindow(_s) { ShowActivated = activate };
+            _wordWindow = w;
+            w.Finished += WordFinished;
+            w.Restored += o => SetStatus(() => Loc.F("Status.WordRestored", o.Name));
+            w.OptionsRequested += () => OpenOptionsAsync(google: true);
+            w.Closed += (_, _) =>
+            {
+                _wordWindow = null;
+                RenderHome();
+            };
+            if (files is { Count: > 0 })
+            {
+                var first = files[0];
+                w.Enqueue(files.Skip(1));
+                w.Opened += async (_, _) => await w.OpenLocalAsync(first);
+            }
+            w.Show(this);
+        }
+        else
+        {
+            if (activate) w.Activate();
+            if (files is { Count: > 0 })
+            {
+                if (w.IsWorking || w.StageName == "Summary") w.Enqueue(files);
+                else
+                {
+                    w.Enqueue(files.Skip(1));
+                    _ = w.OpenLocalAsync(files[0]);
+                }
+            }
+        }
+        if (files is { Count: > 1 }) SetStatus(() => Loc.F("Status.WordQueued", files.Count - 1));
+        return w;
+    }
+
+    private void WordFinished(WordOutcome o)
+    {
+        long saved = Math.Max(0, o.BytesBefore - o.BytesAfter);
+        _s.AddSavings(saved);
+        _s.Save();
+        UpdateSavings();
+        SetStatus(() => Loc.F("Status.WordDone", o.Name, o.Replaced, Loc.Bytes(saved)));
+        RenderHome();
+    }
+
     /// <summary>Opens (or brings back) the Google Doc window; with a link, NACHO checks that Doc straight away.</summary>
     public GoogleDocWindow OpenGoogleDoc(string? link, bool activate = true)
     {
@@ -313,7 +379,7 @@ public partial class MainWindow : Window
     }
 
     /// <summary>"Images|*.jpg;*.png|All files|*.*" (the Windows filter text) as picker file types.</summary>
-    private static List<FilePickerFileType> ParseFilter(string filter)
+    internal static List<FilePickerFileType> ParseFilter(string filter)
     {
         var parts = filter.Split('|');
         var types = new List<FilePickerFileType>();
@@ -409,7 +475,7 @@ public partial class MainWindow : Window
         bool wasContext = _s.ContextMenu, wasApp = _s.AppMenu;
         var w = new OptionsWindow(_s);
         if (google) w.Opened += (_, _) => w.ScrollToGoogle();
-        Window owner = google && _googleWindow is not null ? _googleWindow : this;
+        Window owner = google && _wordWindow is { IsActive: true } ? _wordWindow : google && _googleWindow is not null ? _googleWindow : this;
         if (!await w.ShowDialog<bool>(owner)) return;
         _s.Save();
         if (_s.Language != before) Loc.Instance.Set(_s.Language);
@@ -503,6 +569,7 @@ public partial class MainWindow : Window
         else if (mods == KeyModifiers.Control && e.Key == Key.D) { OpenCompare(Results.SelectedItem as ResultItem); e.Handled = true; }
         else if (mods == KeyModifiers.Control && e.Key == Key.OemComma) { OpenOptions(); e.Handled = true; }
         else if (mods == KeyModifiers.Control && e.Key == Key.G) { GoogleDoc_Click(null, new RoutedEventArgs()); e.Handled = true; }
+        else if (mods == (KeyModifiers.Control | KeyModifiers.Shift) && e.Key == Key.W) { OpenWordDoc(null); e.Handled = true; }
         else if (mods == KeyModifiers.None && e.Key == Key.F1) { OpenAbout(); e.Handled = true; }
     }
 
@@ -791,7 +858,8 @@ public partial class MainWindow : Window
     {
         HomeSafeWhere.Text = Loc.F("Home.SafeBody", FolderName(_s.OutputFolder));
         HomeSteps.Children.Clear();
-        string[] steps = { "Home.Step1", "Home.Step2", _s.GoogleIntoCopy ? "Home.Step3" : "Home.Step3Doc" };
+        NewChipText.Text = Loc.T("Home.New") + ": WORD";
+        string[] steps = { "Home.Step1", "Home.Step2", "Home.Step3" };
         for (int i = 0; i < steps.Length; i++)
         {
             var number = new TextBlock { Text = (i + 1).ToString(Loc.Instance.Culture), FontSize = 12, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
@@ -806,7 +874,7 @@ public partial class MainWindow : Window
             HomeSteps.Children.Add(row);
         }
 
-        var last = _s.GoogleRecent.FirstOrDefault();
+        var last = LastDocument();
         LastTimeBox.IsVisible = last is not null;
         LastTimeText.Inlines?.Clear();
         if (last is null) return;
@@ -840,10 +908,25 @@ public partial class MainWindow : Window
         }
     }
 
-    private void LastTimeOpen_Click(object? sender, RoutedEventArgs e)
+    private void LastTimeOpen_Click(object? sender, RoutedEventArgs e) => LastDocument()?.Open();
+
+    /// <summary>The document shrunk most recently, a Google Doc or a Word file, for "Last time" on the start screen.</summary>
+    private LastDoc? LastDocument()
     {
-        if (_s.GoogleRecent.FirstOrDefault() is { } last) GoogleUi.OpenDoc(last.DocId);
+        var g = _s.GoogleRecent.FirstOrDefault();
+        var w = _s.WordRecent.FirstOrDefault();
+        if (w is not null && (g is null || w.When >= g.When))
+        {
+            return new LastDoc(w.Name, w.BytesBefore, w.BytesAfter, () =>
+            {
+                if (w.Where == WordWhere.Drive) WordUi.OpenDriveFile(w.Target);
+                else WordUi.OpenFile(w.Target);
+            });
+        }
+        return g is null ? null : new LastDoc(g.Title, g.BytesBefore, g.BytesAfter, () => GoogleUi.OpenDoc(g.DocId));
     }
+
+    private sealed record LastDoc(string Title, long BytesBefore, long BytesAfter, Action Open);
 
     private void UpdateCounts()
     {

@@ -35,12 +35,35 @@ public sealed class SampleGoogle : HttpMessageHandler
 
     /// <summary>What the pretend picker returns when NACHO does not name a Doc.</summary>
     public const string PickerDefault = "1SampleDocPickedInTheGooglePicker0000";
+
+    /// <summary>What the pretend picker returns when NACHO asks for a Word file.</summary>
+    public const string PickerWordDefault = "1SampleWordFilePickedInThePicker000";
+
+    /// <summary>Word files (and other files) in the pretend Drive, by ID.</summary>
+    public readonly Dictionary<string, DriveEntry> DriveFiles = new();
+
+    /// <summary>False: NACHO may not add files to the Word file's folder (a folder shared by someone else).</summary>
+    public bool ParentWritable = true;
+
+    public sealed class DriveEntry
+    {
+        public string Name = "";
+        public string Mime = GoogleAuth.WordMime;
+        public string? Parent = "folder-reports";
+        public byte[] Data = Array.Empty<byte>();
+        public int Version = 1;
+        public bool CanEdit = true;
+        public string Modified => $"2026-10-28T07:{Version:00}:00.000Z";
+    }
+
+    private readonly Dictionary<string, (string? FileId, string Name, string? Parent)> _sessions = new();
     private int _next;
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage req, CancellationToken ct)
     {
         string url = req.RequestUri!.ToString();
-        string body = req.Content is null ? "" : await req.Content.ReadAsStringAsync(ct);
+        byte[] raw = req.Content is null ? Array.Empty<byte>() : await req.Content.ReadAsByteArrayAsync(ct);
+        string body = Encoding.UTF8.GetString(raw);
         lock (Log) Log.Add(req.Method + " " + url);
 
         if (url == GoogleAuth.TokenEndpoint)
@@ -109,6 +132,57 @@ public sealed class SampleGoogle : HttpMessageHandler
             }
             return Json(200, """{"replies":[]}""");
         }
+        if (url.StartsWith(GoogleApi.UploadBase, StringComparison.Ordinal) && url.Contains("uploadType=resumable", StringComparison.Ordinal))
+        {
+            string session = "s" + Interlocked.Increment(ref _next);
+            var meta = JsonNode.Parse(body.Length > 0 ? body : "{}")!;
+            if (req.Method == HttpMethod.Patch)
+            {
+                string id = url[(GoogleApi.UploadBase.Length + 1)..].Split('?')[0];
+                lock (DriveFiles)
+                {
+                    if (!DriveFiles.TryGetValue(id, out var f) || (Picked is not null && !Picked.Contains(id))) return Json(404, """{"error":{"code":404,"message":"File not found."}}""");
+                    if (!f.CanEdit) return Json(403, """{"error":{"code":403,"message":"The user does not have sufficient permissions for this file.","errors":[{"reason":"insufficientFilePermissions"}]}}""");
+                }
+                lock (_sessions) _sessions[session] = (id, "", null);
+            }
+            else
+            {
+                string? parent = (string?)(meta["parents"] as JsonArray)?.FirstOrDefault();
+                if (parent is not null && !ParentWritable) return Json(403, """{"error":{"code":403,"message":"The user does not have sufficient permissions for this file.","errors":[{"reason":"insufficientFilePermissions"}]}}""");
+                lock (_sessions) _sessions[session] = (null, (string?)meta["name"] ?? "", parent);
+            }
+            var answer = Json(200, "");
+            answer.Headers.Location = new Uri("https://www.googleapis.com/upload/drive/v3/files?upload_id=" + session);
+            return answer;
+        }
+        if (req.Method == HttpMethod.Put && url.Contains("upload_id=", StringComparison.Ordinal))
+        {
+            string session = url[(url.IndexOf("upload_id=", StringComparison.Ordinal) + 10)..];
+            (string? FileId, string Name, string? Parent) s0;
+            lock (_sessions)
+            {
+                if (!_sessions.Remove(session, out s0)) return Json(404, "{}");
+            }
+            string id;
+            lock (DriveFiles)
+            {
+                if (s0.FileId is { } existing)
+                {
+                    id = existing;
+                    var f = DriveFiles[id];
+                    f.Data = raw;
+                    f.Version++;
+                }
+                else
+                {
+                    id = "word" + Interlocked.Increment(ref _next);
+                    DriveFiles[id] = new DriveEntry { Name = s0.Name, Parent = s0.Parent, Data = raw };
+                    if (Picked is not null) lock (Picked) Picked.Add(id); // NACHO made it, so drive.file lets NACHO open it
+                }
+                return Json(200, FileJson(id, DriveFiles[id]).ToJsonString());
+            }
+        }
         if (url.StartsWith(GoogleApi.UploadBase, StringComparison.Ordinal))
         {
             string id = "file" + Interlocked.Increment(ref _next);
@@ -150,8 +224,41 @@ public sealed class SampleGoogle : HttpMessageHandler
             lock (Files) foreach (var kv in Files) arr.Add(new JsonObject { ["id"] = kv.Key, ["name"] = kv.Value.Name });
             return Json(200, new JsonObject { ["files"] = arr }.ToJsonString());
         }
+        if (req.Method == HttpMethod.Get && url.StartsWith(GoogleApi.DriveBase + "/", StringComparison.Ordinal))
+        {
+            string id = url[(GoogleApi.DriveBase.Length + 1)..].Split('?')[0];
+            lock (DriveFiles)
+            {
+                if (!DriveFiles.TryGetValue(id, out var f) || (Picked is not null && !Picked.Contains(id))) return Json(404, """{"error":{"code":404,"message":"File not found."}}""");
+                if (url.Contains("alt=media", StringComparison.Ordinal)) return new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(f.Data) };
+                return Json(200, FileJson(id, f).ToJsonString());
+            }
+        }
         if (url.StartsWith("https://www.googleapis.com/drive/v3/about", StringComparison.Ordinal)) return Json(200, """{"user":{"emailAddress":"tester@example.com"}}""");
         return Json(404, """{"error":{"code":404,"message":"unknown address"}}""");
+    }
+
+    private static JsonObject FileJson(string id, DriveEntry f)
+    {
+        var o = new JsonObject
+        {
+            ["id"] = id,
+            ["name"] = f.Name,
+            ["mimeType"] = f.Mime,
+            ["size"] = f.Data.Length.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ["modifiedTime"] = f.Modified,
+            ["capabilities"] = new JsonObject { ["canEdit"] = f.CanEdit },
+            ["webViewLink"] = "https://docs.google.com/document/d/" + id + "/edit?rtpof=true",
+        };
+        if (f.Parent is not null) o["parents"] = new JsonArray(f.Parent);
+        return o;
+    }
+
+    /// <summary>Puts a Word file in the pretend Drive under the ID the pretend picker returns for Word files.</summary>
+    public SampleGoogle WithWordFile(byte[] docx, string name = "Team handbook.docx", string id = PickerWordDefault)
+    {
+        lock (DriveFiles) DriveFiles[id] = new DriveEntry { Name = name, Data = docx };
+        return this;
     }
 
     /// <summary>The Doc as Google would return it for this ID: the same content for a copy (other IDs only when asked).</summary>
@@ -236,7 +343,8 @@ public sealed class SampleGoogle : HttpMessageHandler
         string code = "c-1";
         if (q.TryGetValue("trigger_onepick", out string? pick) && pick == "true")
         {
-            string id = q.TryGetValue("file_ids", out string? ids) && ids.Length > 0 ? ids.Split(',')[0] : PickerDefault;
+            bool word = q.TryGetValue("mimetypes", out string? mimes) && mimes.Contains(GoogleAuth.WordMime, StringComparison.Ordinal);
+            string id = q.TryGetValue("file_ids", out string? ids) && ids.Length > 0 ? ids.Split(',')[0] : word ? PickerWordDefault : PickerDefault;
             extra = "&picked_file_ids=" + Uri.EscapeDataString(id);
             code = "pick:" + id;
         }

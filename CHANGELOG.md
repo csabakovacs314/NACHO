@@ -2,6 +2,27 @@
 
 Versions: MAJOR.MINOR.PATCH. Minor for a feature, patch for a fix.
 
+## 0.12.0 (2026-10-28)
+
+**Asked for:** the same automation as for a Google Doc, for Word files: (a) a .docx on this PC and (b) a .docx in Google Drive. Mockups first, approved as shown; a dropped .docx opens the Word window and is checked; the new copy goes next to the original.
+
+**Added: Shrink a Word file** (Nielsen H1 to H10, ISO 9241-110, WCAG 2.2 AA, Microsoft guidance for commands and dialogs)
+- The same five steps as a Google Doc: Choose, Check, Decide, Replace, Done. Choose has two equal cards: On this PC (or drop the file on the window) and In Google Drive (Google's picker, limited to Word files; NACHO can open only the files you pick).
+- Check only reads: the smaller file is made in a private temporary folder. The window says READ ONLY until you decide.
+- Decide: Into a new copy (recommended, the default) writes "<name> (smaller).docx" next to the original, or in the same Drive folder. If the folder can't be written, the copy goes to Docs-Ready (or My Drive) and Done says so. Into this file keeps the name, folder, links and sharing.
+- This PC, into this file: the file must be unchanged since the check and not open in Word (or LibreOffice on Linux). NACHO first saves the original in Docs-Ready\Word originals, writes the new file beside it and swaps it in one step, so the original is never half written. Done offers Restore original.
+- Google Drive, into this file: NACHO checks the file was not changed in Drive and that you may edit it, then uploads a new version (same link and sharing; Drive keeps the old one in Manage versions for 30 days). With "Keep a copy of the original pictures" on, the original is also saved on this computer. An upload can be stopped; nothing in Drive changes until it is complete.
+- Done: the new size, Open in Word (or Open in browser), Show in folder, and the original's row. Several Word files dropped at once wait their turn ("Next Word file").
+- Recently shrunk lists the last five Word files (where they live and what was done), and the start screen's "Last time" shows the latest Google Doc or Word file.
+
+**Changed**
+- Start screen: the right card is now "A whole document" (Google Doc or Word file) with two buttons, Choose a Google Doc (Ctrl+G) and Choose a Word file (Ctrl+Shift+W, or drop a .docx anywhere). The left card is "Pictures and PDFs". The green line says: "Nothing changes until you decide."
+- A .docx dropped, added, pasted, opened with NACHO or sent from the right-click menu opens the Word window instead of getting a "-docs" copy in the list.
+
+**Build:** build.ps1 no longer assumes Downloads\NACHO: the release folder and the Google client file are found next to the source folder (or given with -ProjectDir and -GoogleClient), so the project can live anywhere.
+
+**Tests:** 13 new unit tests for the Word engine (the check only reads; the copy beside the original, numbered when taken; in place with backup and Restore; a changed or open file is refused; Drive copy, My Drive fallback, new version with a PC backup, changed or view-only Drive files refused). Both self-tests run the Word window end to end against the pretend Google: a copy and then the file itself on this PC (with Restore), a Drive copy and a new Drive version, and save word-en-choose, word-en-decide, word-en-decide-file, word-en-decide-drive and word-en-done.
+
 ## 0.11.0 (2026-10-27)
 
 **Asked for:** one design everywhere, not only in the Google Doc window (mockup first, approved as shown, both apps, all windows and Compare, English, Spanish and Hungarian).

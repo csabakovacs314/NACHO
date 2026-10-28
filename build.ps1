@@ -1,14 +1,17 @@
-# Builds a NACHO release into a NEW folder: Downloads\NACHO\NACHO-<version>
+# Builds a NACHO release into a NEW folder next to this source folder: <project folder>\NACHO-<version>
+# (the project folder is the one that holds build-<version>, google-client and the releases, wherever it lives).
 # Steps: icon, unit tests, portable and small exe, installer, self-test, source zip, package zip.
 # Needs: .NET 10 SDK, Inno Setup 6 (winget install JRSoftware.InnoSetup --scope user).
 # -LinuxDir: a folder with the Linux packages made by build-linux.sh; they go into the release's Linux folder.
 # -GoogleClient: the Google "Desktop app" client file built into NACHO for Google Docs in place. It is read from
 #   outside the source folder and never copied into the source zip. Without it, users load their own client file.
-param([string]$Version = "0.11.0", [string]$LinuxDir = "",
-      [string]$GoogleClient = (Join-Path $env:USERPROFILE "Downloads\NACHO\google-client\client.json"))
+param([string]$Version = "0.12.0", [string]$LinuxDir = "",
+      [string]$GoogleClient = "", [string]$ProjectDir = "")
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
-$release = Join-Path $env:USERPROFILE "Downloads\NACHO\NACHO-$Version"
+if (-not $ProjectDir) { $ProjectDir = Split-Path $root -Parent }
+if (-not $GoogleClient) { $GoogleClient = Join-Path $ProjectDir "google-client\client.json" }
+$release = Join-Path $ProjectDir "NACHO-$Version"
 if (Test-Path $release) { throw "Release folder already exists: $release. A new version needs a new folder." }
 $iscc = @("$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe", "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe") |
     Where-Object { Test-Path $_ } | Select-Object -First 1

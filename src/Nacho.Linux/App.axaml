@@ -118,6 +118,8 @@
             <StreamGeometry x:Key="Icon.Sync">M13,8 A5,5 0 1 1 11.5,4.4 M11.5,1.75 V4.6 H8.65</StreamGeometry>
             <StreamGeometry x:Key="Icon.Warning">M8,2 L14.5,13.5 H1.5 Z M8,6.25 V9.5 M8,11.5 V11.75</StreamGeometry>
             <StreamGeometry x:Key="Icon.CheckCircle">M8,1.5 A6.5,6.5 0 1 1 7.99,1.5 Z M5,8.25 L7,10.25 L11,6</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Computer">M2,3 H14 V11 H2 Z M5.5,14 H10.5 M8,11 V14</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Restore">M3,8 A5,5 0 1 0 4.5,4.4 M4.5,1.75 V4.6 H7.35</StreamGeometry>
             <StreamGeometry x:Key="Icon.Error">M8,1.5 A6.5,6.5 0 1 1 7.99,1.5 Z M5.75,5.75 L10.25,10.25 M10.25,5.75 L5.75,10.25</StreamGeometry>
         </ResourceDictionary>
     </Application.Resources>

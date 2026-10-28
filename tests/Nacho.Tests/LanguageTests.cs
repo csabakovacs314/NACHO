@@ -61,7 +61,7 @@ public sealed class LanguageTests
     public void Hungarian_is_a_real_translation()
     {
         // Only codes, units and product names may stay the same (A4, Letter, "{0} · {1} px", Google Docs).
-        string[] productNames = { "Google Docs", "{0} px · {1} KB" };
+        string[] productNames = { "Google Docs", "Google Drive", "{0} px · {1} KB" };
         int same = Strings.En.Count(kv => Strings.Hu[kv.Key] == kv.Value && !productNames.Contains(kv.Value));
         Assert.True(same <= 3, $"{same} Hungarian texts are identical to English");
         Assert.Equal("Normalizál, Arányt tart, Csökkent és Hűen Odaad", Strings.Hu["App.Expansion"]);

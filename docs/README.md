@@ -1,8 +1,8 @@
 # NACHO pictures
 
-Screenshots of NACHO 0.11.0 on Windows and on Linux, the design mockups they were built from, and the first mockup from October 2026.
+Screenshots of NACHO 0.12.0 on Windows and on Linux, the design mockups they were built from, and the first mockup from October 2026.
 
-All screenshots are taken by NACHO's own self-test (`NACHO.exe --selftest <folder>` on Windows 11, `nacho --selftest <folder>` on Linux on a virtual X display). It generates its own sample pictures, a sample Word document and PDF, and talks to a pretend Google with a sample Doc ("Plantas no nativas (sample)") and the account tester@example.com. No real Doc or account is shown.
+All screenshots are taken by NACHO's own self-test (`NACHO.exe --selftest <folder>` on Windows 11, `nacho --selftest <folder>` on Linux on a virtual X display). It generates its own sample pictures, a sample Word document and PDF, and talks to a pretend Google with a sample Doc ("Plantas no nativas (sample)"), a sample Word file in Drive ("Team handbook.docx") and the account tester@example.com. No real Doc or account is shown.
 
 ## Shrink a whole Google Doc
 
@@ -38,11 +38,37 @@ Signed-in account, where the smaller pictures go by default, keep the original p
 
 <img src="screenshots/options-google-en.png" width="560" alt="More options, Google Docs section">
 
-## The main window, version 0.11.0
+## Shrink a Word file (0.12.0)
 
-### Start: both ways in
+The same five steps for a .docx on this PC or in Google Drive. Nothing changes before step 4; by default the smaller pictures go into a new file next to the original.
 
-<img src="screenshots-linux/main-en-home.png" width="900" alt="Start screen: Pictures and files on the left, A whole Google Doc on the right">
+### Step 1, Choose
+
+<img src="screenshots/word-en-choose.png" width="560" alt="Word window, step 1: On this PC or In Google Drive, the signed-in account, and recently shrunk files">
+
+### Step 3, Decide
+
+A file on this PC, with Into this file selected: the original is saved first in Docs-Ready > Word originals.
+
+<img src="screenshots/word-en-decide-file.png" width="560" alt="Word window, step 3 for a file on this PC with Into this file selected">
+
+A file in Google Drive: a new copy in the same Drive folder, or a new version of the same file.
+
+<img src="screenshots/word-en-decide-drive.png" width="560" alt="Word window, step 3 for a file in Google Drive">
+
+### Step 5, Done
+
+<img src="screenshots/word-en-done.png" width="560" alt="Word window, step 5: Team handbook.docx is smaller, with the saved original and Restore original">
+
+On Linux:
+
+<img src="screenshots-linux/word-en-decide.png" width="420" alt="Word window on Linux, step 3"> <img src="screenshots-linux/word-en-done.png" width="420" alt="Word window on Linux, step 5">
+
+## The main window
+
+### Start: both ways in (0.12.0)
+
+<img src="screenshots-linux/main-en-home.png" width="900" alt="Start screen: Pictures and PDFs on the left, A whole document (Google Doc or Word file) on the right">
 
 <img src="screenshots-linux/main-en-home-dark.png" width="900" alt="Start screen, dark theme">
 
@@ -80,7 +106,7 @@ A section list on the left that follows your scrolling. The bottom bar is Reset 
 
 <img src="screenshots/about-en.png" width="300" alt="About in English"> <img src="screenshots/about-es.png" width="300" alt="About in Spanish"> <img src="screenshots/about-hu.png" width="300" alt="About in Hungarian">
 
-## The Linux app, version 0.11.0
+## The Linux app, version 0.12.0
 
 The same design on Linux (Avalonia). The font is Inter, which ships with NACHO so every distro shows the same window.
 

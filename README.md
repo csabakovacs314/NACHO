@@ -33,7 +33,7 @@ Five steps, always visible at the top of the window:
 - **Into a new copy** (recommended, the default): "&lt;title&gt; (smaller)", in the same Drive folder. The original is not touched; to undo, delete the copy. The copy is private to you until you share it.
 - **Into this Doc**: for a Doc other people already use. Same link, sharing, comments and history. To undo, use File > Version history.
 
-**What NACHO can reach:** only the Docs you pick and the files it makes itself (Google's `drive.file` permission). It never sees your password, never sees the rest of your Drive, and never deletes a Doc. Each picture keeps its size on the page and its wrapping; a Docs crop is cut into the smaller picture, so it looks the same.
+**What NACHO can reach:** only the Docs and files you pick and the files it makes itself (Google's `drive.file` permission). It never sees your password, never sees the rest of your Drive, and never deletes a Doc. Each picture keeps its size on the page and its wrapping; a Docs crop is cut into the smaller picture, so it looks the same.
 
 <p>
 <img src="docs/screenshots/google-en-choose.png" width="270" alt="Step 1, Choose: Choose a Google Doc, or paste its link; recently shrunk Docs">
@@ -41,14 +41,32 @@ Five steps, always visible at the top of the window:
 <img src="docs/screenshots-linux/google-en-done.png" width="270" alt="Step 5, Done: 19.1 MB to 589 KB, 96% smaller, with the copy, the untouched original and the saved original pictures">
 </p>
 
-## Pictures, Word documents and PDFs
+## Shrink a Word file (new in 0.12.0)
 
-NACHO opens on a start screen with both ways in side by side: **Pictures and files** on the left, **A whole Google Doc** on the right.
+The same five steps for a Word file (.docx), **on your computer or in Google Drive**. Press **Choose a Word file…** on the start screen (Ctrl+Shift+W), or drop a .docx anywhere on NACHO.
 
-<img src="docs/screenshots-linux/main-en-home.png" width="860" alt="NACHO start screen: Pictures and files with a drop area and the Small, Balanced and Sharp presets; A whole Google Doc with three steps and Choose a Google Doc">
+<img src="docs/screenshots/word-en-decide.png" width="560" alt="NACHO's Word window at step 3, Decide: the file gets 96% smaller; Into a new copy next to the original (recommended) or Into this file">
+
+- **Choose:** a .docx on this PC, or one in Google Drive through Google's own picker (NACHO can open only the files you pick).
+- **Check:** NACHO makes the smaller pictures in a temporary folder. Your file is only read.
+- **Decide:** **Into a new copy** (recommended, the default): "&lt;name&gt; (smaller).docx" next to the original, or in the same Drive folder. Or **Into this file**: same name, folder, links and sharing. On your computer NACHO first saves the original in Docs-Ready\Word originals and swaps in the new file in one step, and only if Word doesn't have it open. In Drive it uploads a new version; Drive keeps the old one in Manage versions.
+- **Done:** Open in Word, Show in folder, and **Restore original** for a file changed on your computer.
+
+Only the pictures change: text, styles, comments and tracked changes stay as they are.
+
+<p>
+<img src="docs/screenshots/word-en-choose.png" width="270" alt="Step 1, Choose: On this PC or In Google Drive, with recently shrunk files">
+<img src="docs/screenshots/word-en-decide-drive.png" width="270" alt="Step 3 for a file in Google Drive: a new copy in the same Drive folder, or a new version of the file">
+<img src="docs/screenshots/word-en-done.png" width="270" alt="Step 5, Done: Team handbook.docx is smaller, 8.9 MB to 359 KB, with Restore original">
+</p>
+
+## Pictures and PDFs
+
+NACHO opens on a start screen with both ways in side by side: **Pictures and PDFs** on the left, **A whole document** (a Google Doc or a Word file) on the right. Nothing changes until you decide.
+
+<img src="docs/screenshots-linux/main-en-home.png" width="860" alt="NACHO start screen: Pictures and PDFs with a drop area and the Small, Balanced and Sharp presets; A whole document with three steps, Choose a Google Doc and Choose a Word file">
 
 - **Single pictures:** drop photos or screenshots (or paste with Ctrl+V, or right-click a file and choose Make Docs-ready). NACHO makes a small, Docs-ready copy in Pictures\Docs-Ready, keeps the shape exactly, removes the location, and never changes your original. Then drag the thumbnail into your Doc.
-- **Word documents (.docx):** every picture inside is shrunk at once; upload the new file to Drive.
 - **PDFs:** pictures sharper than needed are scaled down; text, fonts, links and forms stay as they are, and every page is checked before the copy is kept.
 - **Compare with original** (Ctrl+D) shows the copy and the original side by side with a slider.
 

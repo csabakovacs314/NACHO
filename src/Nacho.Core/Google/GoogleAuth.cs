@@ -155,6 +155,9 @@ public sealed class GoogleAuth
     public const string Scopes = "https://www.googleapis.com/auth/drive.file";
 
     public const string DocMime = "application/vnd.google-apps.document";
+
+    /// <summary>A Word file (.docx) stored in Drive.</summary>
+    public const string WordMime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
     public const string AuthEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
     public const string TokenEndpoint = "https://oauth2.googleapis.com/token";
     public const string RevokeEndpoint = "https://oauth2.googleapis.com/revoke";
@@ -190,7 +193,8 @@ public sealed class GoogleAuth
 
     /// <summary>The sign-in address; with <paramref name="pick"/> Google shows its file picker (only Google Docs,
     /// pre-filtered to <paramref name="fileId"/> when NACHO already knows which Doc).</summary>
-    public string AuthUrl(string redirect, string challenge, string state, bool pick = false, string? fileId = null, bool chooseAccount = false)
+    public string AuthUrl(string redirect, string challenge, string state, bool pick = false, string? fileId = null, bool chooseAccount = false,
+        string mimeTypes = DocMime)
     {
         var q = new Dictionary<string, string>
         {
@@ -207,7 +211,7 @@ public sealed class GoogleAuth
         if (pick)
         {
             q["trigger_onepick"] = "true";
-            q["mimetypes"] = DocMime;
+            q["mimetypes"] = mimeTypes;
             if (!string.IsNullOrEmpty(fileId)) q["file_ids"] = fileId;
         }
         return AuthEndpoint + "?" + string.Join("&", q.Select(kv => kv.Key + "=" + Uri.EscapeDataString(kv.Value)));
@@ -215,7 +219,8 @@ public sealed class GoogleAuth
 
     /// <summary>Opens Google's sign-in page (and with <paramref name="pick"/> its file picker) and waits for the answer.
     /// Returns the IDs of the files the user picked (empty for a plain sign-in).</summary>
-    public async Task<IReadOnlyList<string>> SignInAsync(TimeSpan timeout, CancellationToken ct = default, bool pick = false, string? fileId = null, bool chooseAccount = false)
+    public async Task<IReadOnlyList<string>> SignInAsync(TimeSpan timeout, CancellationToken ct = default, bool pick = false, string? fileId = null, bool chooseAccount = false,
+        string mimeTypes = DocMime)
     {
         string verifier = Base64Url(RandomNumberGenerator.GetBytes(32));
         string state = Base64Url(RandomNumberGenerator.GetBytes(16));
@@ -224,7 +229,7 @@ public sealed class GoogleAuth
         using var listener = new HttpListener();
         listener.Prefixes.Add(redirect);
         listener.Start();
-        string url = AuthUrl(redirect, Challenge(verifier), state, pick, fileId, chooseAccount);
+        string url = AuthUrl(redirect, Challenge(verifier), state, pick, fileId, chooseAccount, mimeTypes);
         if (!OpenBrowser(url)) throw new GoogleException(GoogleError.Network, "The browser could not be opened.");
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);

@@ -21,6 +21,12 @@ public static partial class Strings
         ["About.Way3"] = "Right-click an image in your file manager and choose Open With > NACHO, or Make Docs-ready (turn it on in More options).",
         ["About.Way4"] = "Then drag the thumbnail into your Google Doc.",
         ["About.ReplaceBody"] = "Click the image in the Doc, choose Replace image > Upload from computer, and pick the copy in Docs-Ready. Quicker: right-click its tile in NACHO, choose Copy path, then press Ctrl+L, Ctrl+V and Enter in the file dialog. The copy has the same shape as the original, so it takes the old image's place without stretching.",
+        ["Wd.PcTitle"] = "On this computer",
+        ["Wd.WherePc"] = "this computer",
+        ["Wd.FileCon1"] = "Close it in Word or LibreOffice first",
+        ["Wd.ErrInUse"] = "\"{0}\" is open in Word or LibreOffice. Close it there and try again, or choose Into a new copy.",
+        ["Wd.OpenWord"] = "Open the file",
+        ["Home.Step1"] = "Choose a Google Doc, or a Word file on this computer or in Google Drive",
     };
 
     public static readonly IReadOnlyDictionary<string, string> LinuxEs = new Dictionary<string, string>
@@ -38,6 +44,12 @@ public static partial class Strings
         ["About.Way3"] = "Haz clic derecho en una imagen de tu gestor de archivos y elige Abrir con > NACHO, o Preparar para Docs (actívalo en Más opciones).",
         ["About.Way4"] = "Después arrastra la miniatura a tu Google Doc.",
         ["About.ReplaceBody"] = "Haz clic en la imagen del Doc, elige Reemplazar imagen > Subir desde el ordenador y selecciona la copia en Docs-Ready. Más rápido: haz clic derecho en su miniatura en NACHO, elige Copiar ruta y, en el diálogo de archivos, pulsa Ctrl+L, Ctrl+V e Intro. La copia tiene la misma proporción que el original, así que ocupa el lugar de la imagen anterior sin deformarse.",
+        ["Wd.PcTitle"] = "En este ordenador",
+        ["Wd.WherePc"] = "este ordenador",
+        ["Wd.FileCon1"] = "Ciérralo antes en Word o LibreOffice",
+        ["Wd.ErrInUse"] = "\"{0}\" está abierto en Word o LibreOffice. Ciérralo allí y vuelve a intentarlo, o elige En una copia nueva.",
+        ["Wd.OpenWord"] = "Abrir el archivo",
+        ["Home.Step1"] = "Elige un Google Doc, o un archivo de Word de este ordenador o de Google Drive",
     };
 
     public static readonly IReadOnlyDictionary<string, string> LinuxHu = new Dictionary<string, string>
@@ -55,6 +67,12 @@ public static partial class Strings
         ["About.Way3"] = "Kattints jobb gombbal egy képre a fájlkezelőben, és válaszd a Megnyitás ezzel > NACHO vagy a Docs-kész másolat készítése parancsot (a Beállításokban kapcsolhatod be).",
         ["About.Way4"] = "Ezután húzd a bélyegképet a Google Docs-dokumentumodba.",
         ["About.ReplaceBody"] = "Kattints a képre a dokumentumban, válaszd a Kép cseréje > Feltöltés a számítógépről lehetőséget, és válaszd ki a másolatot a Docs-Ready mappából. Gyorsabban: kattints jobb gombbal a csempéjére a NACHO-ban, válaszd az Elérési út másolása parancsot, majd a fájlválasztóban nyomj Ctrl+L-t, Ctrl+V-t és Entert. A másolat aránya megegyezik az eredetiével, ezért torzítás nélkül kerül a régi kép helyére.",
+        ["Wd.PcTitle"] = "Ezen a számítógépen",
+        ["Wd.WherePc"] = "ez a számítógép",
+        ["Wd.FileCon1"] = "Előbb zárd be a Wordben vagy a LibreOffice-ban",
+        ["Wd.ErrInUse"] = "A(z) \"{0}\" meg van nyitva a Wordben vagy a LibreOffice-ban. Zárd be ott, és próbáld újra, vagy válaszd az Egy új másolatba lehetőséget.",
+        ["Wd.OpenWord"] = "A fájl megnyitása",
+        ["Home.Step1"] = "Válassz egy Google-dokumentumot, vagy egy Word-fájlt erről a számítógépről vagy a Google Drive-ból",
     };
 
     public static IReadOnlyDictionary<string, string> LinuxFor(string language) => Normalise(language) switch

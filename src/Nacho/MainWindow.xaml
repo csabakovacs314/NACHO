@@ -247,7 +247,7 @@
                             </Border>
                             <Border DockPanel.Dock="Right" VerticalAlignment="Top" CornerRadius="10" Padding="9,2" Margin="8,2,0,0"
                                     Background="{DynamicResource AccentFillColorDefaultBrush}">
-                                <TextBlock Text="{l:L Home.New}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                                <TextBlock x:Name="NewChipText" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
                             </Border>
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock Text="{l:L Home.GoogleTitle}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
@@ -273,12 +273,21 @@
                             </DockPanel>
                         </Border>
 
-                        <WrapPanel Grid.Row="4" Margin="0,16,0,0">
-                            <Button x:Name="HomeChoose" Click="GoogleDoc_Click" Style="{DynamicResource AccentButtonStyle}" MinHeight="40" Padding="20,4"
-                                    Margin="0,0,12,0" Content="{l:L Gd.Choose}" ToolTip="{l:L Cmd.GoogleDocTip}"
-                                    AutomationProperties.HelpText="{l:L Cmd.GoogleDocTip}" />
-                            <TextBlock Text="{l:L Home.ChooseHint}" Style="{StaticResource Secondary}" VerticalAlignment="Center" />
-                        </WrapPanel>
+                        <StackPanel Grid.Row="4" Margin="0,16,0,0">
+                            <WrapPanel Margin="0,0,0,8">
+                                <Button x:Name="HomeChoose" Click="GoogleDoc_Click" Style="{DynamicResource AccentButtonStyle}" MinHeight="40" Padding="20,4"
+                                        Margin="0,0,12,0" Content="{l:L Gd.Choose}" ToolTip="{l:L Cmd.GoogleDocTip}" MinWidth="220"
+                                        AutomationProperties.HelpText="{l:L Cmd.GoogleDocTip}" />
+                                <TextBlock Text="{l:L Home.ChooseHint}" Style="{StaticResource Secondary}" VerticalAlignment="Center" />
+                            </WrapPanel>
+                            <WrapPanel>
+                                <Button x:Name="HomeWord" Click="WordDoc_Click" MinHeight="40" Padding="20,4" Margin="0,0,12,0" MinWidth="220"
+                                        Content="{l:L Wd.PcButton}" FontWeight="SemiBold" BorderThickness="2"
+                                        BorderBrush="{DynamicResource AccentFillColorDefaultBrush}" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                        ToolTip="{l:L Home.WordHint}" AutomationProperties.HelpText="{l:L Home.WordHint}" />
+                                <TextBlock Text="{l:L Home.WordHint}" Style="{StaticResource Secondary}" VerticalAlignment="Center" />
+                            </WrapPanel>
+                        </StackPanel>
                     </Grid>
                 </Border>
             </Grid>

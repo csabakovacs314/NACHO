@@ -132,6 +132,24 @@ public static class GoogleDocParser
 }
 
 /// <summary>The few Google Docs and Drive calls NACHO makes, with retries for the "slow down" answers.</summary>
+/// <summary>A file in Drive as NACHO sees it.</summary>
+public sealed record DriveFile(string Id, string Name, string MimeType, long Size, string? ParentId, string? Modified, bool CanEdit, string? Link)
+{
+    public bool IsWord => MimeType == GoogleAuth.WordMime;
+
+    public static DriveFile From(JsonNode f) => new(
+        (string?)f["id"] ?? throw new GoogleException(GoogleError.Server, "Drive did not return the file."),
+        (string?)f["name"] ?? "",
+        (string?)f["mimeType"] ?? "",
+        long.TryParse((string?)f["size"], System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out long size) ? size : 0,
+        (string?)(f["parents"] as JsonArray)?.FirstOrDefault(),
+        (string?)f["modifiedTime"],
+        (bool?)f["capabilities"]?["canEdit"] ?? false,
+        (string?)f["webViewLink"]);
+
+    public static string OpenUrl(string fileId) => "https://drive.google.com/file/d/" + Uri.EscapeDataString(fileId) + "/view";
+}
+
 public sealed class GoogleApi
 {
     public const string DocsBase = "https://docs.googleapis.com/v1/documents/";
@@ -236,6 +254,79 @@ public sealed class GoogleApi
             requests.Add(new JsonObject { ["replaceImage"] = r });
         }
         return JsonAsync(HttpMethod.Post, DocsBase + Uri.EscapeDataString(docId) + ":batchUpdate", new JsonObject { ["requests"] = requests }, ct, docWrite: true);
+    }
+
+    // ---------- Word files (.docx) in Drive ----------
+
+    public const string FileFields = "id,name,mimeType,size,parents,modifiedTime,capabilities(canEdit),webViewLink";
+
+    /// <summary>Name, size, folder, last change and whether the user may change the file (a file picked in the picker).</summary>
+    public async Task<DriveFile> GetFileAsync(string fileId, CancellationToken ct = default) =>
+        DriveFile.From(await JsonAsync(HttpMethod.Get, $"{DriveBase}/{Uri.EscapeDataString(fileId)}?fields={FileFields}&supportsAllDrives=true",
+            null, ct, docRead: true).ConfigureAwait(false));
+
+    /// <summary>Downloads a file's content to a local path.</summary>
+    public async Task DownloadFileAsync(string fileId, string path, CancellationToken ct = default)
+    {
+        using var resp = await SendAsync(() => new HttpRequestMessage(HttpMethod.Get,
+            $"{DriveBase}/{Uri.EscapeDataString(fileId)}?alt=media&supportsAllDrives=true"), ct).ConfigureAwait(false);
+        if (!resp.IsSuccessStatusCode) throw await Fail(resp, ct, true).ConfigureAwait(false);
+        await using var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
+        await resp.Content.CopyToAsync(fs, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Uploads a new file (in <paramref name="parentId"/>, or My Drive when null). NACHO made it, so drive.file lets NACHO open it.</summary>
+    public async Task<DriveFile> UploadNewFileAsync(string name, string? parentId, string mime, string path, CancellationToken ct = default)
+    {
+        var meta = new JsonObject { ["name"] = name, ["mimeType"] = mime };
+        if (!string.IsNullOrEmpty(parentId)) meta["parents"] = new JsonArray(parentId);
+        string session = await StartUploadAsync(HttpMethod.Post, $"{UploadBase}?uploadType=resumable&supportsAllDrives=true&fields={FileFields}",
+            meta, mime, new FileInfo(path).Length, ct).ConfigureAwait(false);
+        return await FinishUploadAsync(session, mime, path, ct, docWrite: false).ConfigureAwait(false);
+    }
+
+    /// <summary>Uploads new content for an existing file: same ID, link and sharing; Drive keeps the old content as a
+    /// previous version (Manage versions).</summary>
+    public async Task<DriveFile> UpdateFileContentAsync(string fileId, string mime, string path, CancellationToken ct = default)
+    {
+        string session = await StartUploadAsync(HttpMethod.Patch,
+            $"{UploadBase}/{Uri.EscapeDataString(fileId)}?uploadType=resumable&supportsAllDrives=true&fields={FileFields}",
+            new JsonObject(), mime, new FileInfo(path).Length, ct, docWrite: true).ConfigureAwait(false);
+        return await FinishUploadAsync(session, mime, path, ct, docWrite: true).ConfigureAwait(false);
+    }
+
+    /// <summary>Starts a resumable upload (safe for big files) and returns its session address.</summary>
+    private async Task<string> StartUploadAsync(HttpMethod method, string url, JsonObject meta, string mime, long length, CancellationToken ct, bool docWrite = false)
+    {
+        using var resp = await SendAsync(() =>
+        {
+            var req = new HttpRequestMessage(method, url) { Content = new StringContent(meta.ToJsonString(), Encoding.UTF8, "application/json") };
+            req.Headers.Add("X-Upload-Content-Type", mime);
+            req.Headers.Add("X-Upload-Content-Length", length.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            return req;
+        }, ct).ConfigureAwait(false);
+        if (!resp.IsSuccessStatusCode) throw await Fail(resp, ct, false, docWrite).ConfigureAwait(false);
+        var location = resp.Headers.Location;
+        // The session address must be Google's upload host: the access token goes nowhere else.
+        if (location is null || !location.IsAbsoluteUri || location.Scheme != Uri.UriSchemeHttps
+            || !location.Host.Equals("www.googleapis.com", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new GoogleException(GoogleError.Server, "Drive did not start the upload.");
+        }
+        return location.ToString();
+    }
+
+    private async Task<DriveFile> FinishUploadAsync(string session, string mime, string path, CancellationToken ct, bool docWrite)
+    {
+        using var resp = await SendAsync(() =>
+        {
+            var content = new StreamContent(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read));
+            content.Headers.ContentType = new MediaTypeHeaderValue(mime);
+            return new HttpRequestMessage(HttpMethod.Put, session) { Content = content };
+        }, ct).ConfigureAwait(false);
+        if (!resp.IsSuccessStatusCode) throw await Fail(resp, ct, false, docWrite).ConfigureAwait(false);
+        string body = await resp.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+        return DriveFile.From(JsonNode.Parse(body) ?? new JsonObject());
     }
 
     public async Task DeleteAsync(string fileId, CancellationToken ct = default)

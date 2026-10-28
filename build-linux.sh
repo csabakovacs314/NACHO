@@ -9,7 +9,7 @@
 # keep that file outside the source folder (it is never copied into the packages' source).
 set -euo pipefail
 
-VERSION="${1:-0.11.0}"
+VERSION="${1:-0.12.0}"
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 OUT="$ROOT/out/linux"
 REL="$ROOT/out/linux-release"

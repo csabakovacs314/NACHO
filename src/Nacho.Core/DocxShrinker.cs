@@ -40,6 +40,12 @@ public sealed class DocxShrinker
 
     public DocxShrinker(ImageShrinker images) => _images = images;
 
+    /// <summary>Called after each picture inside the document: (pictures looked at, pictures in the document).</summary>
+    public Action<int, int>? Progress { get; set; }
+
+    /// <summary>Stops between pictures when cancelled (the Word window's Stop).</summary>
+    public CancellationToken Cancel { get; set; }
+
     /// <summary>True for .docx and .docm, and for the old .doc (which gets a clear message instead of a shrink).</summary>
     public static bool IsWordFile(string path) =>
         Path.GetExtension(path).ToLowerInvariant() is ".docx" or ".docm" or ".doc";
@@ -97,11 +103,20 @@ public sealed class DocxShrinker
             Suffix = "",
         };
 
-        int n = 0;
+        int n = 0, seen = 0;
+        int total = entries.Count(e => e.FullName.StartsWith("word/", StringComparison.OrdinalIgnoreCase) && !e.FullName.EndsWith('/') && e.Length > 0
+            && (PictureExtensions.Contains(Path.GetExtension(e.Name)) || Path.GetExtension(e.Name).ToLowerInvariant() is ".emf" or ".wmf" or ".svg"));
+        Progress?.Invoke(0, total);
         foreach (var e in entries)
         {
             if (!e.FullName.StartsWith("word/", StringComparison.OrdinalIgnoreCase) || e.FullName.EndsWith('/') || e.Length == 0) continue;
             string ext = Path.GetExtension(e.Name);
+            bool counted = PictureExtensions.Contains(ext) || ext.ToLowerInvariant() is ".emf" or ".wmf" or ".svg";
+            if (counted)
+            {
+                Cancel.ThrowIfCancellationRequested();
+                Progress?.Invoke(seen++, total);
+            }
             if (ext.Equals(".emf", StringComparison.OrdinalIgnoreCase) || ext.Equals(".wmf", StringComparison.OrdinalIgnoreCase)
                 || ext.Equals(".svg", StringComparison.OrdinalIgnoreCase))
             {
@@ -148,6 +163,7 @@ public sealed class DocxShrinker
             TryDelete(src);
         }
 
+        Progress?.Invoke(total, total);
         if (replaced.Count == 0) return KeepDocument(r, report);
 
         var renames = replaced.Where(kv => !kv.Key.Equals(kv.Value.NewName, StringComparison.OrdinalIgnoreCase))

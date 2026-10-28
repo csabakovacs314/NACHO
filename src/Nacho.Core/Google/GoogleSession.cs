@@ -71,10 +71,10 @@ public sealed class GoogleSession
 
     /// <summary>Opens Google's file picker in the browser (signing in if needed) and returns the chosen Doc's ID and
     /// the account's e-mail address. With <paramref name="docId"/>, the picker shows just that Doc.</summary>
-    public async Task<(string DocId, string Email)> PickAsync(string? docId, CancellationToken ct = default)
+    public async Task<(string DocId, string Email)> PickAsync(string? docId, CancellationToken ct = default, string mimeTypes = GoogleAuth.DocMime)
     {
         bool choose = ChooseAccountNext;
-        var picked = await Auth.SignInAsync(TimeSpan.FromMinutes(10), ct, pick: true, fileId: docId, chooseAccount: choose).ConfigureAwait(false);
+        var picked = await Auth.SignInAsync(TimeSpan.FromMinutes(10), ct, pick: true, fileId: docId, chooseAccount: choose, mimeTypes: mimeTypes).ConfigureAwait(false);
         ChooseAccountNext = false;
         return (picked[0], await EmailAsync(ct).ConfigureAwait(false));
     }

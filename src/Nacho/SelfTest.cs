@@ -180,7 +180,7 @@ public static class SelfTest
 
         // 0.6.0: a whole Word document, and the before/after slider.
         string docx = SampleImages.WordDocument(Path.Combine(outDir, "samples", "Team plan.docx"));
-        await w.AddFilesAsync(new[] { docx, banded });
+        await w.AddFilesAsync(new[] { docx, banded }, wordWindow: false);
         await w.WaitIdleAsync();
         await Settle();
         var docItem = w.Items.First(i => i.SourcePath == docx);
@@ -423,6 +423,79 @@ public static class SelfTest
         }
         gw.Close();
 
+        // 0.12.0: a Word file on this PC (a new copy; then the file itself and Restore original) and in Google Drive
+        // (a new copy; then a new version of the file), against the same pretend Google.
+        string wordDir = Path.Combine(outDir, "word");
+        Directory.CreateDirectory(wordDir);
+        string handbook = SampleImages.WordDocument(Path.Combine(wordDir, "Team handbook.docx"));
+        byte[] handbookBytes = File.ReadAllBytes(handbook);
+        settings.WordRecent.Clear();
+        settings.WordIntoCopy = true;
+        await w.AddFilesAsync(new[] { handbook });
+        var ww = w.OpenWordDoc(null, activate: false);
+        await Until(() => ww.StageName == "Summary" || ww.Error is not null, 90);
+        Check(ww.StageName == "Summary" && ww.Check is { CanShrink: true }, $"Word: a dropped .docx opens the Word window and is checked ({ww.StageName}, error: {ww.Error ?? "none"})");
+        Check(!w.Items.Any(i => i.SourcePath == handbook), "Word: the .docx did not go into the pictures list");
+        Check(File.ReadAllBytes(handbook).AsSpan().SequenceEqual(handbookBytes), "Word: the check changed nothing in the file");
+        Check(ww.IntoCopy && ww.PrimaryLabel == Loc.T("Gd.MakeCopy"), "Word: a new copy is chosen; the button says " + ww.PrimaryLabel);
+        Check(ww.WillLine == Loc.F("Wd.WillCopyPc", "Team handbook.docx"), "Word: the banner says only the new file is written: " + ww.WillLine);
+        Shot(ww, Path.Combine(outDir, "word-en-decide.png"), dark: false);
+        await ww.ApplyAsync();
+        await Settle();
+        string wordCopy = Path.Combine(wordDir, "Team handbook (smaller).docx");
+        Check(ww.StageName == "Done" && File.Exists(wordCopy) && new FileInfo(wordCopy).Length < handbookBytes.Length,
+            $"Word: the smaller copy is next to the original ({ww.StageName}, error: {ww.Error ?? "none"})");
+        Check(File.ReadAllBytes(handbook).AsSpan().SequenceEqual(handbookBytes), "Word: the original is untouched after the copy");
+        Check(ww.Done == Loc.T("Wd.DoneCopyTitle") && settings.WordRecent.Count == 1 && settings.WordRecent[0].Copy, "Word: done, and listed as a copy: " + ww.Done);
+        Check(w.StatusMessage.Contains("pictures replaced", StringComparison.Ordinal), "Word: main window status: " + w.StatusMessage);
+
+        await ww.OpenLocalAsync(handbook);
+        await Until(() => ww.StageName == "Summary" || ww.Error is not null, 90);
+        ww.IntoCopy = false;
+        int wordPics = ww.Check?.Report.Shrunk ?? 0;
+        Check(ww.PrimaryLabel == (wordPics == 1 ? Loc.T("Wd.Replace1") : Loc.F("Wd.ReplaceN", wordPics)), "Word: in-place button: " + ww.PrimaryLabel);
+        Shot(ww, Path.Combine(outDir, "word-en-decide-file.png"), dark: false);
+        await ww.ApplyAsync();
+        await Settle();
+        string backupDir = Path.Combine(settings.OutputFolder, "Word originals");
+        var backups = Directory.Exists(backupDir) ? Directory.GetFiles(backupDir, "Team handbook *.docx") : Array.Empty<string>();
+        Check(ww.StageName == "Done" && new FileInfo(handbook).Length < handbookBytes.Length, $"Word: the file itself is smaller ({ww.StageName}, error: {ww.Error ?? "none"})");
+        Check(backups.Length == 1 && File.ReadAllBytes(backups[0]).AsSpan().SequenceEqual(handbookBytes), "Word: the original was saved first in Docs-Ready > Word originals");
+        Check(ww.Done == Loc.F("Wd.DoneTitle", "Team handbook.docx"), "Word: in-place done message: " + ww.Done);
+        Shot(ww, Path.Combine(outDir, "word-en-done.png"), dark: false);
+        ww.RestoreOriginal();
+        await Settle();
+        Check(ww.WasRestored && File.ReadAllBytes(handbook).AsSpan().SequenceEqual(handbookBytes), "Word: Restore original put the old file back");
+        Check(settings.WordRecent.Count == 1, "Word: the restored file is no longer listed as changed");
+
+        fake.WithWordFile(handbookBytes);
+        await ww.ChooseInDriveAsync();
+        await Until(() => !ww.IsWorking, 90);
+        Check(ww.StageName == "Summary" && ww.Check?.Where == Nacho.Core.Word.WordWhere.Drive, $"Word: a file picked in Drive is downloaded and checked ({ww.StageName}, error: {ww.Error ?? "none"})");
+        ww.IntoCopy = true;
+        Shot(ww, Path.Combine(outDir, "word-en-decide-drive.png"), dark: false);
+        await ww.ApplyAsync();
+        await Settle();
+        Check(ww.StageName == "Done" && fake.DriveFiles.Count == 2 && fake.DriveFiles.Values.Any(f => f.Name == "Team handbook (smaller).docx")
+            && fake.DriveFiles[SampleGoogle.PickerWordDefault].Version == 1, $"Word: the Drive copy is next to the original, which is untouched ({ww.StageName}, error: {ww.Error ?? "none"})");
+        await ww.ChooseInDriveAsync();
+        await Until(() => !ww.IsWorking, 90);
+        ww.IntoCopy = false;
+        Check(ww.PrimaryLabel == Loc.T("Wd.Upload"), "Word: Drive in-place button: " + ww.PrimaryLabel);
+        await ww.ApplyAsync();
+        await Settle();
+        Check(ww.StageName == "Done" && fake.DriveFiles[SampleGoogle.PickerWordDefault].Version == 2 && fake.DriveFiles.Count == 2,
+            $"Word: the Drive file got a new version and no other file ({ww.StageName}, error: {ww.Error ?? "none"})");
+        Check(settings.WordRecent.Count == 3, "Word: Recently shrunk lists three runs: " + settings.WordRecent.Count);
+        ww.Close();
+        await Settle();
+        var ww2 = w.OpenWordDoc(null, activate: false);
+        await Settle();
+        Check(ww2.StageName == "Choose" && ww2.RecentCount == 3 && ww2.SafeLine.Contains(Loc.T("Wd.SafeTitle"), StringComparison.Ordinal),
+            $"Word: the button opens at Choose, read only, with the recent files ({ww2.StageName}, {ww2.RecentCount}, {ww2.SafeLine})");
+        Shot(ww2, Path.Combine(outDir, "word-en-choose.png"), dark: false);
+        ww2.Close();
+
         foreach (string lang in Strings.Languages)
         {
             Loc.Instance.Set(lang);
@@ -444,7 +517,7 @@ public static class SelfTest
         Loc.Instance.Set("en");
 
         w.Close();
-        foreach (string shot in new[] { "main-en-light", "main-es-light", "main-hu-light", "main-es-dark", "main-en-narrow", "main-en-doc", "main-en-pdf", "compare-en-pdf", "main-en-update", "compare-en-copy", "compare-en-256", "compare-hu-256", "compare-en-photo-dark", "options-en", "options-es", "options-hu", "about-en", "about-es", "about-hu", "main-en-home", "main-en-home-dark", "main-en-home-narrow", "options-google-en", "google-en-choose", "google-en-decide", "google-hu-decide", "google-es-decide", "google-en-decide-doc", "google-en-done", "google-en-drivefull", "google-en-readonly" })
+        foreach (string shot in new[] { "main-en-light", "main-es-light", "main-hu-light", "main-es-dark", "main-en-narrow", "main-en-doc", "main-en-pdf", "compare-en-pdf", "main-en-update", "compare-en-copy", "compare-en-256", "compare-hu-256", "compare-en-photo-dark", "options-en", "options-es", "options-hu", "about-en", "about-es", "about-hu", "main-en-home", "main-en-home-dark", "main-en-home-narrow", "options-google-en", "google-en-choose", "google-en-decide", "google-hu-decide", "google-es-decide", "google-en-decide-doc", "google-en-done", "google-en-drivefull", "google-en-readonly", "word-en-choose", "word-en-decide", "word-en-decide-file", "word-en-decide-drive", "word-en-done" })
         {
             var f = new FileInfo(Path.Combine(outDir, shot + ".png"));
             Check(f.Exists && f.Length > 10_000, $"screenshot {shot}.png saved");
