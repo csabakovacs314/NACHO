@@ -2,21 +2,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:l="using:Nacho.Linux"
         x:Class="Nacho.Linux.OptionsWindow"
-        Title="{l:L Opt.Title}" Width="660" Height="800" MinWidth="440" MinHeight="420"
+        Title="{l:L Opt.Title}" Width="860" Height="820" MinWidth="440" MinHeight="420"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
     <Window.Styles>
         <Style Selector="TextBlock.hint">
-            <Setter Property="Foreground" Value="{DynamicResource N.TextSecondary}" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-        </Style>
-        <Style Selector="TextBlock.heading">
-            <Setter Property="FontSize" Value="16" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Margin" Value="0,0,0,8" />
         </Style>
         <Style Selector="Border.card">
             <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="Padding" Value="18,16" />
         </Style>
         <Style Selector="TextBox.num">
             <Setter Property="MinWidth" Value="100" />
@@ -25,12 +19,69 @@
         </Style>
     </Window.Styles>
 
-    <Grid x:Name="Root" RowDefinitions="*,Auto">
-        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Margin="24,16,24,8">
-                <TextBlock Text="{l:L Opt.Title}" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,16" />
+    <Grid x:Name="Root" RowDefinitions="*,Auto" ColumnDefinitions="Auto,*">
+        <!-- The list of sections on the left always shows where you are (H1, H6) -->
+        <Border x:Name="NavPane" Width="200" Padding="10,20,10,10" BorderThickness="0,0,1,0"
+                BorderBrush="{DynamicResource N.Divider}" Background="{DynamicResource N.Layer}">
+            <StackPanel>
+                <TextBlock Text="{l:L Opt.Title}" FontSize="18" FontWeight="SemiBold" Margin="10,0,0,12" TextWrapping="Wrap" />
+                <StackPanel x:Name="NavList" AutomationProperties.Name="{l:L Opt.Sections}">
+                    <RadioButton x:Name="NavGoogle" Tag="SecGoogle" GroupName="Nav" Classes="nav" Content="{l:L Opt.Google}" Click="Nav_Click" />
+                    <RadioButton Tag="SecPresets" GroupName="Nav" Classes="nav" Content="{l:L Opt.Presets}" Click="Nav_Click" />
+                    <RadioButton Tag="SecFormat" GroupName="Nav" Classes="nav" Content="{l:L Opt.Format}" Click="Nav_Click" />
+                    <RadioButton Tag="SecPrivacy" GroupName="Nav" Classes="nav" Content="{l:L Opt.Privacy}" Click="Nav_Click" />
+                    <RadioButton Tag="SecWhere" GroupName="Nav" Classes="nav" Content="{l:L Opt.Where}" Click="Nav_Click" />
+                    <RadioButton Tag="SecShell" GroupName="Nav" Classes="nav" Content="{l:L Opt.Shell}" Click="Nav_Click" />
+                    <RadioButton Tag="SecLanguage" GroupName="Nav" Classes="nav" Content="{l:L Opt.Language}" Click="Nav_Click" />
+                    <RadioButton Tag="SecUpdates" GroupName="Nav" Classes="nav" Content="{l:L Opt.Updates}" Click="Nav_Click" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
 
-                <Border Classes="card">
+        <ScrollViewer x:Name="Scroller" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      ScrollChanged="Scroller_ScrollChanged">
+            <StackPanel x:Name="Sections" Margin="24,20,24,8">
+                <Border x:Name="SecGoogle" Classes="card">
+                    <StackPanel>
+                        <TextBlock Text="{l:L Opt.Google}" Classes="heading" />
+                        <TextBlock Text="{l:L Opt.GoogleHint}" Classes="hint" Margin="0,0,0,12" />
+                        <DockPanel Margin="0,0,0,14">
+                            <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="16" Margin="0,0,12,0" VerticalAlignment="Center"
+                                    Background="{DynamicResource N.Accent}">
+                                <l:StrokeIcon Data="{StaticResource Icon.Account}" Foreground="{DynamicResource N.OnAccent}"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Spacing="8">
+                                <Button x:Name="GoogleSignInButton" Content="{l:L Opt.GoogleSignIn}" Click="GoogleSignIn_Click" Padding="12,4" Margin="8,0,0,0" />
+                                <Button x:Name="GoogleSignOutButton" Content="{l:L Opt.GoogleSignOut}" Click="GoogleSignOut_Click" Padding="12,4" Margin="8,0,0,0" />
+                            </StackPanel>
+                            <TextBlock x:Name="GoogleStatus" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="SemiBold"
+                                       AutomationProperties.LiveSetting="Polite" />
+                        </DockPanel>
+                        <TextBlock x:Name="GoogleProblem" IsVisible="False" TextWrapping="Wrap" FontSize="13" Margin="0,0,0,10"
+                                   Foreground="{DynamicResource N.Critical}" AutomationProperties.LiveSetting="Assertive" />
+                        <TextBlock Text="{l:L Opt.GoogleDest}" FontWeight="SemiBold" Margin="0,4,0,8" TextWrapping="Wrap" />
+                        <StackPanel Margin="0,0,0,4" AutomationProperties.Name="{l:L Opt.GoogleDest}">
+                            <RadioButton x:Name="DestCopy" GroupName="GoogleDest" Content="{l:L Opt.GoogleDestCopy}" Margin="0,0,0,4" />
+                            <RadioButton x:Name="DestDoc" GroupName="GoogleDest" Content="{l:L Opt.GoogleDestDoc}" Margin="0,0,0,4" />
+                        </StackPanel>
+                        <TextBlock Text="{l:L Opt.GoogleDestHint}" Classes="hint" Margin="0,0,0,12" />
+                        <CheckBox x:Name="GoogleKeepBox" Content="{l:L Opt.GoogleKeep}" Margin="0,0,0,10" />
+                        <Expander x:Name="GoogleAdvanced" Header="{l:L Opt.GoogleClient}" HorizontalAlignment="Stretch">
+                            <StackPanel Margin="0,8,0,0">
+                                <RadioButton x:Name="ClientBuiltIn" GroupName="Client" Content="{l:L Opt.GoogleClientBuiltIn}" Margin="0,0,0,8" IsCheckedChanged="Client_Changed" />
+                                <RadioButton x:Name="ClientOwn" GroupName="Client" Content="{l:L Opt.GoogleClientOwn}" Margin="0,0,0,8" IsCheckedChanged="Client_Changed" />
+                                <DockPanel Margin="28,0,0,6">
+                                    <Button DockPanel.Dock="Right" Content="{l:L Opt.GoogleClientChoose}" Click="ChooseClient_Click" Padding="12,4" Margin="8,0,0,0" />
+                                    <TextBox x:Name="ClientFileBox" IsReadOnly="True" VerticalContentAlignment="Center" AutomationProperties.Name="{l:L Opt.GoogleClientOwn}" />
+                                </DockPanel>
+                                <TextBlock Text="{l:L Opt.GoogleClientHint}" Classes="hint" Margin="28,0,0,0" />
+                                <TextBlock x:Name="ClientNote" Classes="hint" Margin="28,6,0,0" IsVisible="False" />
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
+                </Border>
+                <Border x:Name="SecPresets" Classes="card">
                     <StackPanel>
                         <TextBlock Text="{l:L Opt.Presets}" Classes="heading" />
                         <TextBlock Text="{l:L Opt.PresetsHint}" Classes="hint" Margin="0,0,0,12" />
@@ -57,8 +108,7 @@
                         </Grid>
                     </StackPanel>
                 </Border>
-
-                <Border Classes="card">
+                <Border x:Name="SecFormat" Classes="card">
                     <StackPanel AutomationProperties.Name="{l:L Opt.Format}">
                         <TextBlock Text="{l:L Opt.Format}" Classes="heading" />
                         <RadioButton x:Name="FmtAuto" GroupName="Format" Content="{l:L Opt.FormatAuto}" Margin="0,0,0,4" />
@@ -66,8 +116,7 @@
                         <RadioButton x:Name="FmtPng" GroupName="Format" Content="{l:L Opt.FormatPng}" />
                     </StackPanel>
                 </Border>
-
-                <Border Classes="card">
+                <Border x:Name="SecPrivacy" Classes="card">
                     <StackPanel>
                         <TextBlock Text="{l:L Opt.Privacy}" Classes="heading" />
                         <CheckBox x:Name="PrivLocation" Content="{l:L Opt.PrivacyLocation}" Margin="0,0,0,4" />
@@ -75,8 +124,7 @@
                         <TextBlock Text="{l:L Opt.PrivacyHint}" Classes="hint" />
                     </StackPanel>
                 </Border>
-
-                <Border Classes="card">
+                <Border x:Name="SecWhere" Classes="card">
                     <StackPanel>
                         <TextBlock Text="{l:L Opt.Where}" Classes="heading" />
                         <Label Content="{l:L Opt.Folder}" Target="{Binding #FolderBox}" Padding="0" Margin="0,0,0,6" />
@@ -88,8 +136,7 @@
                         <TextBox x:Name="SuffixBox" Width="180" HorizontalAlignment="Left" />
                     </StackPanel>
                 </Border>
-
-                <Border Classes="card">
+                <Border x:Name="SecShell" Classes="card">
                     <StackPanel>
                         <TextBlock Text="{l:L Opt.Shell}" Classes="heading" />
                         <CheckBox x:Name="CtxMenu" Content="{l:L Opt.ContextMenu}" />
@@ -97,16 +144,7 @@
                         <CheckBox x:Name="AppMenuBox" Content="{l:L Opt.SendTo}" />
                     </StackPanel>
                 </Border>
-
-                <Border Classes="card">
-                    <StackPanel>
-                        <TextBlock Text="{l:L Opt.Updates}" Classes="heading" />
-                        <CheckBox x:Name="UpdatesBox" Content="{l:L Opt.CheckUpdates}" />
-                        <TextBlock Text="{l:L Opt.CheckUpdatesHint}" Classes="hint" Margin="28,0,0,0" />
-                    </StackPanel>
-                </Border>
-
-                <Border Classes="card">
+                <Border x:Name="SecLanguage" Classes="card">
                     <StackPanel>
                         <Label Content="{l:L Opt.Language}" Target="{Binding #LangBox}" Padding="0" Margin="0,0,0,6" FontSize="16" FontWeight="SemiBold" />
                         <ComboBox x:Name="LangBox" Width="180" HorizontalAlignment="Left">
@@ -116,20 +154,28 @@
                         </ComboBox>
                     </StackPanel>
                 </Border>
+                <Border x:Name="SecUpdates" Classes="card">
+                    <StackPanel>
+                        <TextBlock Text="{l:L Opt.Updates}" Classes="heading" />
+                        <CheckBox x:Name="UpdatesBox" Content="{l:L Opt.CheckUpdates}" />
+                        <TextBlock Text="{l:L Opt.CheckUpdatesHint}" Classes="hint" Margin="28,0,0,0" />
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
 
-        <Border Grid.Row="1" Padding="24,12" BorderThickness="0,1,0,0"
-                BorderBrush="{DynamicResource N.Divider}" Background="{DynamicResource N.Layer}">
+        <!-- The same command bar as every NACHO dialog: secondary left, main action right, Cancel last -->
+        <Border Grid.Row="1" Grid.ColumnSpan="2" Classes="cmdbar">
             <StackPanel>
                 <TextBlock x:Name="ErrorText" IsVisible="False" TextWrapping="Wrap" Margin="0,0,0,10"
                            Foreground="{DynamicResource N.Critical}" AutomationProperties.LiveSetting="Assertive" />
                 <DockPanel>
-                    <Button DockPanel.Dock="Left" Content="{l:L Opt.Reset}" Click="Reset_Click" Padding="12,4" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                    <Button DockPanel.Dock="Left" Content="{l:L Opt.Reset}" Click="Reset_Click" Padding="12,4" Margin="0,0,12,0" />
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+                        <Button Content="{l:L Opt.Save}" IsDefault="True" Click="Save_Click" MinWidth="96" Padding="14,4" Classes="accent" />
                         <Button Content="{l:L Opt.Cancel}" IsCancel="True" Click="Cancel_Click" MinWidth="96" Padding="12,4" />
-                        <Button Content="{l:L Opt.Save}" IsDefault="True" Click="Save_Click" MinWidth="96" Padding="12,4" Classes="accent" />
                     </StackPanel>
+                    <TextBlock x:Name="SaveHint" Text="{l:L Opt.SaveHint}" Classes="hint" VerticalAlignment="Center" Margin="0,0,12,0" />
                 </DockPanel>
             </StackPanel>
         </Border>

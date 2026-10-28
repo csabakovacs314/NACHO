@@ -5,9 +5,11 @@
 # Steps: unit tests, publish, self-test on a virtual display, packages, then install/uninstall,
 # second-launch and AppImage checks in a throwaway home folder.
 # Needs: .NET 10 SDK, xvfb-run, curl (the first run downloads appimagetool into out/tools).
+# NACHO_GOOGLE_CLIENT=/path/client.json builds in the Google "Desktop app" client for Google Docs in place;
+# keep that file outside the source folder (it is never copied into the packages' source).
 set -euo pipefail
 
-VERSION="${1:-0.7.0}"
+VERSION="${1:-0.11.0}"
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 OUT="$ROOT/out/linux"
 REL="$ROOT/out/linux-release"
@@ -22,8 +24,16 @@ echo "1/6 Unit tests"
 dotnet test "$ROOT/tests/Nacho.Tests/Nacho.Tests.csproj" -c Release --nologo
 
 echo "2/6 Publish linux-x64, self-contained"
+GC_ARG=()
+if [ -n "${NACHO_GOOGLE_CLIENT:-}" ] && [ -f "$NACHO_GOOGLE_CLIENT" ]; then
+    case "$(realpath "$NACHO_GOOGLE_CLIENT")" in "$ROOT"/*) echo "Keep the Google client file outside the source folder." >&2; exit 1;; esac
+    GC_ARG=(-p:NachoGoogleClient="$(realpath "$NACHO_GOOGLE_CLIENT")")
+    echo "   Google client: built in"
+else
+    echo "   Google client: none (users will need their own client file)"
+fi
 dotnet publish "$ROOT/src/Nacho.Linux/Nacho.Linux.csproj" -c Release -r linux-x64 --self-contained true \
-    -p:PublishSingleFile=false -o "$OUT/app" --nologo
+    -p:PublishSingleFile=false -o "$OUT/app" --nologo "${GC_ARG[@]}"
 find "$OUT/app" -name '*.pdb' -delete
 if grep -rqa "$ROOT" "$OUT/app"; then
     echo "A build path leaked into the published files:" >&2

@@ -2,26 +2,15 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:l="clr-namespace:Nacho"
-        Title="{l:L Opt.Title}" Width="660" Height="800" MinWidth="440" MinHeight="420"
+        Title="{l:L Opt.Title}" Width="860" Height="820" MinWidth="440" MinHeight="420"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
     <Window.Resources>
-        <Style x:Key="Secondary" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-        </Style>
-        <Style x:Key="Card" TargetType="Border">
-            <Setter Property="Padding" Value="16" />
+        <Style x:Key="OptCard" TargetType="Border" BasedOn="{StaticResource Card}">
             <Setter Property="Margin" Value="0,0,0,16" />
-            <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="Padding" Value="18,16" />
         </Style>
-        <Style x:Key="Heading" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="16" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Margin" Value="0,0,0,8" />
+        <Style x:Key="Hint" TargetType="TextBlock" BasedOn="{StaticResource Secondary}">
+            <Setter Property="FontSize" Value="13" />
         </Style>
     </Window.Resources>
 
@@ -30,15 +19,76 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Margin="24,16,24,8">
-                <TextBlock Text="{l:L Opt.Title}" FontSize="22" FontWeight="SemiBold" Margin="0,0,0,16" />
+        <!-- The list of sections on the left always shows where you are (H1, H6) -->
+        <Border x:Name="NavPane" Width="200" Padding="10,20,10,10" BorderThickness="0,0,1,0"
+                BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" Background="{DynamicResource LayerFillColorDefaultBrush}">
+            <StackPanel>
+                <TextBlock Text="{l:L Opt.Title}" FontSize="18" FontWeight="SemiBold" Margin="10,0,0,12" TextWrapping="Wrap" />
+                <StackPanel x:Name="NavList" AutomationProperties.Name="{l:L Opt.Sections}" KeyboardNavigation.DirectionalNavigation="Cycle">
+                    <RadioButton x:Name="NavGoogle" Tag="SecGoogle" GroupName="Nav" Style="{StaticResource NavItem}" Content="{l:L Opt.Google}" Click="Nav_Click" />
+                    <RadioButton Tag="SecPresets" GroupName="Nav" Style="{StaticResource NavItem}" Content="{l:L Opt.Presets}" Click="Nav_Click" />
+                    <RadioButton Tag="SecFormat" GroupName="Nav" Style="{StaticResource NavItem}" Content="{l:L Opt.Format}" Click="Nav_Click" />
+                    <RadioButton Tag="SecPrivacy" GroupName="Nav" Style="{StaticResource NavItem}" Content="{l:L Opt.Privacy}" Click="Nav_Click" />
+                    <RadioButton Tag="SecWhere" GroupName="Nav" Style="{StaticResource NavItem}" Content="{l:L Opt.Where}" Click="Nav_Click" />
+                    <RadioButton Tag="SecShell" GroupName="Nav" Style="{StaticResource NavItem}" Content="{l:L Opt.Shell}" Click="Nav_Click" />
+                    <RadioButton Tag="SecLanguage" GroupName="Nav" Style="{StaticResource NavItem}" Content="{l:L Opt.Language}" Click="Nav_Click" />
+                    <RadioButton Tag="SecUpdates" GroupName="Nav" Style="{StaticResource NavItem}" Content="{l:L Opt.Updates}" Click="Nav_Click" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
 
-                <Border Style="{StaticResource Card}">
+        <ScrollViewer x:Name="Scroller" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      ScrollChanged="Scroller_ScrollChanged">
+            <StackPanel x:Name="Sections" Margin="24,20,24,8">
+                <Border x:Name="SecGoogle" Style="{StaticResource OptCard}">
+                    <StackPanel>
+                        <TextBlock Text="{l:L Opt.Google}" Style="{StaticResource Heading}" />
+                        <TextBlock Text="{l:L Opt.GoogleHint}" Style="{StaticResource Hint}" Margin="0,0,0,12" />
+                        <DockPanel Margin="0,0,0,14">
+                            <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="16" Margin="0,0,12,0" VerticalAlignment="Center"
+                                    Background="{DynamicResource AccentFillColorDefaultBrush}">
+                                <TextBlock Style="{StaticResource Icon}" Text="&#xE77B;" FontSize="16" HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                            </Border>
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button x:Name="GoogleSignInButton" Content="{l:L Opt.GoogleSignIn}" Click="GoogleSignIn_Click" MinHeight="32" Padding="12,4" Margin="8,0,0,0" />
+                                <Button x:Name="GoogleSignOutButton" Content="{l:L Opt.GoogleSignOut}" Click="GoogleSignOut_Click" MinHeight="32" Padding="12,4" Margin="8,0,0,0" />
+                            </StackPanel>
+                            <TextBlock x:Name="GoogleStatus" VerticalAlignment="Center" TextWrapping="Wrap" FontWeight="SemiBold"
+                                       AutomationProperties.LiveSetting="Polite" />
+                        </DockPanel>
+                        <TextBlock x:Name="GoogleProblem" Visibility="Collapsed" TextWrapping="Wrap" FontSize="13" Margin="0,0,0,10"
+                                   Foreground="{DynamicResource SystemFillColorCriticalBrush}" AutomationProperties.LiveSetting="Assertive" />
+                        <TextBlock x:Name="GoogleDestLabel" Text="{l:L Opt.GoogleDest}" FontWeight="SemiBold" Margin="0,4,0,8" TextWrapping="Wrap" />
+                        <StackPanel Margin="0,0,0,4" AutomationProperties.Name="{l:L Opt.GoogleDest}">
+                            <RadioButton x:Name="DestCopy" GroupName="GoogleDest" Content="{l:L Opt.GoogleDestCopy}" Margin="0,0,0,8" />
+                            <RadioButton x:Name="DestDoc" GroupName="GoogleDest" Content="{l:L Opt.GoogleDestDoc}" Margin="0,0,0,6" />
+                        </StackPanel>
+                        <TextBlock Text="{l:L Opt.GoogleDestHint}" Style="{StaticResource Hint}" Margin="0,0,0,12" />
+                        <CheckBox x:Name="GoogleKeepBox" Content="{l:L Opt.GoogleKeep}" Margin="0,0,0,10" />
+                        <Expander x:Name="GoogleAdvanced" Header="{l:L Opt.GoogleClient}">
+                            <StackPanel Margin="0,8,0,0">
+                                <RadioButton x:Name="ClientBuiltIn" GroupName="Client" Content="{l:L Opt.GoogleClientBuiltIn}" Margin="0,0,0,8" Checked="Client_Checked" />
+                                <RadioButton x:Name="ClientOwn" GroupName="Client" Content="{l:L Opt.GoogleClientOwn}" Margin="0,0,0,8" Checked="Client_Checked" />
+                                <DockPanel Margin="28,0,0,6">
+                                    <Button DockPanel.Dock="Right" Content="{l:L Opt.GoogleClientChoose}" Click="ChooseClient_Click" MinHeight="32" Padding="12,4" Margin="8,0,0,0" />
+                                    <TextBox x:Name="ClientFileBox" IsReadOnly="True" VerticalContentAlignment="Center" AutomationProperties.Name="{l:L Opt.GoogleClientOwn}" />
+                                </DockPanel>
+                                <TextBlock Text="{l:L Opt.GoogleClientHint}" Style="{StaticResource Hint}" Margin="28,0,0,0" />
+                                <TextBlock x:Name="ClientNote" Style="{StaticResource Hint}" Margin="28,6,0,0" Visibility="Collapsed" />
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
+                </Border>
+                <Border x:Name="SecPresets" Style="{StaticResource OptCard}">
                     <StackPanel>
                         <TextBlock Text="{l:L Opt.Presets}" Style="{StaticResource Heading}" />
-                        <TextBlock Text="{l:L Opt.PresetsHint}" Style="{StaticResource Secondary}" Margin="0,0,0,12" />
+                        <TextBlock Text="{l:L Opt.PresetsHint}" Style="{StaticResource Hint}" Margin="0,0,0,12" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -52,10 +102,10 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Column="0" Text="{l:L Opt.ColDefault}" Style="{StaticResource Secondary}" FontWeight="SemiBold" Margin="0,0,16,8" />
-                            <TextBlock Grid.Column="1" Text="{l:L Opt.ColPreset}" Style="{StaticResource Secondary}" FontWeight="SemiBold" Margin="0,0,16,8" />
-                            <TextBlock Grid.Column="2" Text="{l:L Opt.ColEdge}" Style="{StaticResource Secondary}" FontWeight="SemiBold" Margin="0,0,12,8" />
-                            <TextBlock Grid.Column="3" Text="{l:L Opt.ColBudget}" Style="{StaticResource Secondary}" FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <TextBlock Grid.Column="0" Text="{l:L Opt.ColDefault}" Style="{StaticResource Hint}" FontWeight="SemiBold" Margin="0,0,16,8" />
+                            <TextBlock Grid.Column="1" Text="{l:L Opt.ColPreset}" Style="{StaticResource Hint}" FontWeight="SemiBold" Margin="0,0,16,8" />
+                            <TextBlock Grid.Column="2" Text="{l:L Opt.ColEdge}" Style="{StaticResource Hint}" FontWeight="SemiBold" Margin="0,0,12,8" />
+                            <TextBlock Grid.Column="3" Text="{l:L Opt.ColBudget}" Style="{StaticResource Hint}" FontWeight="SemiBold" Margin="0,0,0,8" />
 
                             <RadioButton x:Name="DefSmall" Grid.Row="1" GroupName="Default" VerticalAlignment="Center" Margin="0,0,16,8" />
                             <TextBlock x:Name="NameSmall" Grid.Row="1" Grid.Column="1" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,8" />
@@ -74,8 +124,7 @@
                         </Grid>
                     </StackPanel>
                 </Border>
-
-                <Border Style="{StaticResource Card}">
+                <Border x:Name="SecFormat" Style="{StaticResource OptCard}">
                     <StackPanel AutomationProperties.Name="{l:L Opt.Format}">
                         <TextBlock Text="{l:L Opt.Format}" Style="{StaticResource Heading}" />
                         <RadioButton x:Name="FmtAuto" GroupName="Format" Content="{l:L Opt.FormatAuto}" Margin="0,0,0,8" />
@@ -83,17 +132,15 @@
                         <RadioButton x:Name="FmtPng" GroupName="Format" Content="{l:L Opt.FormatPng}" />
                     </StackPanel>
                 </Border>
-
-                <Border Style="{StaticResource Card}">
+                <Border x:Name="SecPrivacy" Style="{StaticResource OptCard}">
                     <StackPanel>
                         <TextBlock Text="{l:L Opt.Privacy}" Style="{StaticResource Heading}" />
                         <CheckBox x:Name="PrivLocation" Content="{l:L Opt.PrivacyLocation}" Margin="0,0,0,8" />
                         <CheckBox x:Name="PrivCamera" Content="{l:L Opt.PrivacyCamera}" Margin="0,0,0,8" />
-                        <TextBlock Text="{l:L Opt.PrivacyHint}" Style="{StaticResource Secondary}" />
+                        <TextBlock Text="{l:L Opt.PrivacyHint}" Style="{StaticResource Hint}" />
                     </StackPanel>
                 </Border>
-
-                <Border Style="{StaticResource Card}">
+                <Border x:Name="SecWhere" Style="{StaticResource OptCard}">
                     <StackPanel>
                         <TextBlock Text="{l:L Opt.Where}" Style="{StaticResource Heading}" />
                         <Label Content="{l:L Opt.Folder}" Target="{Binding ElementName=FolderBox}" Padding="0" Margin="0,0,0,6" />
@@ -105,25 +152,15 @@
                         <TextBox x:Name="SuffixBox" Width="180" HorizontalAlignment="Left" />
                     </StackPanel>
                 </Border>
-
-                <Border Style="{StaticResource Card}">
+                <Border x:Name="SecShell" Style="{StaticResource OptCard}">
                     <StackPanel>
                         <TextBlock Text="{l:L Opt.Shell}" Style="{StaticResource Heading}" />
                         <CheckBox x:Name="CtxMenu" Content="{l:L Opt.ContextMenu}" />
-                        <TextBlock Text="{l:L Opt.ContextMenuHint}" Style="{StaticResource Secondary}" Margin="28,2,0,10" />
+                        <TextBlock Text="{l:L Opt.ContextMenuHint}" Style="{StaticResource Hint}" Margin="28,2,0,10" />
                         <CheckBox x:Name="SendToBox" Content="{l:L Opt.SendTo}" />
                     </StackPanel>
                 </Border>
-
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <TextBlock Text="{l:L Opt.Updates}" Style="{StaticResource Heading}" />
-                        <CheckBox x:Name="UpdatesBox" Content="{l:L Opt.CheckUpdates}" />
-                        <TextBlock Text="{l:L Opt.CheckUpdatesHint}" Style="{StaticResource Secondary}" Margin="28,2,0,0" />
-                    </StackPanel>
-                </Border>
-
-                <Border Style="{StaticResource Card}">
+                <Border x:Name="SecLanguage" Style="{StaticResource OptCard}">
                     <StackPanel>
                         <Label Content="{l:L Opt.Language}" Target="{Binding ElementName=LangBox}" Padding="0" Margin="0,0,0,6" FontSize="16" FontWeight="SemiBold" />
                         <ComboBox x:Name="LangBox" Width="180" HorizontalAlignment="Left">
@@ -133,22 +170,29 @@
                         </ComboBox>
                     </StackPanel>
                 </Border>
+                <Border x:Name="SecUpdates" Style="{StaticResource OptCard}">
+                    <StackPanel>
+                        <TextBlock Text="{l:L Opt.Updates}" Style="{StaticResource Heading}" />
+                        <CheckBox x:Name="UpdatesBox" Content="{l:L Opt.CheckUpdates}" />
+                        <TextBlock Text="{l:L Opt.CheckUpdatesHint}" Style="{StaticResource Hint}" Margin="28,2,0,0" />
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
 
-        <Border Grid.Row="1" Padding="24,12" BorderThickness="0,1,0,0"
-                BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
-                Background="{DynamicResource LayerFillColorDefaultBrush}">
+        <!-- The same command bar as every NACHO dialog: secondary left, main action right, Cancel last -->
+        <Border Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource CommandBar}">
             <StackPanel>
                 <TextBlock x:Name="ErrorText" Visibility="Collapsed" TextWrapping="Wrap" Margin="0,0,0,10"
                            Foreground="{DynamicResource SystemFillColorCriticalBrush}" AutomationProperties.LiveSetting="Assertive" />
                 <DockPanel>
-                    <Button DockPanel.Dock="Left" Content="{l:L Opt.Reset}" Click="Reset_Click" MinHeight="32" Padding="12,4" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="{l:L Opt.Cancel}" IsCancel="True" MinHeight="32" MinWidth="96" Padding="12,4" Margin="0,0,8,0" />
-                        <Button Content="{l:L Opt.Save}" IsDefault="True" Click="Save_Click" MinHeight="32" MinWidth="96" Padding="12,4"
+                    <Button DockPanel.Dock="Left" Content="{l:L Opt.Reset}" Click="Reset_Click" MinHeight="32" Padding="12,4" Margin="0,0,12,0" />
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <Button Content="{l:L Opt.Save}" IsDefault="True" Click="Save_Click" MinHeight="32" MinWidth="96" Padding="14,4" Margin="0,0,8,0"
                                 Style="{DynamicResource AccentButtonStyle}" />
+                        <Button Content="{l:L Opt.Cancel}" IsCancel="True" MinHeight="32" MinWidth="96" Padding="12,4" />
                     </StackPanel>
+                    <TextBlock x:Name="SaveHint" Text="{l:L Opt.SaveHint}" Style="{StaticResource Hint}" VerticalAlignment="Center" Margin="0,0,12,0" />
                 </DockPanel>
             </StackPanel>
         </Border>

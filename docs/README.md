@@ -1,88 +1,117 @@
 # NACHO pictures
 
-Three sets: the mockup NACHO was designed from, and screenshots of the app as built on Windows and on Linux.
+Screenshots of NACHO 0.11.0 on Windows and on Linux, the design mockups they were built from, and the first mockup from October 2026.
 
-## Mockup (23 Oct 2026)
+All screenshots are taken by NACHO's own self-test (`NACHO.exe --selftest <folder>` on Windows 11, `nacho --selftest <folder>` on Linux on a virtual X display). It generates its own sample pictures, a sample Word document and PDF, and talks to a pretend Google with a sample Doc ("Plantas no nativas (sample)") and the account tester@example.com. No real Doc or account is shown.
 
-Drawn before any code, against Nielsen's 10 heuristics, ISO 9241-110, WCAG 2.2 AA and Microsoft's Windows guidance for commands and dialogs. Rendered at 2x from the design canvas; the font is a stand-in for Segoe UI.
+## Shrink a whole Google Doc
 
-Some mockup ideas are not built yet: the clipboard watcher, the first-run tour, the Docs-Outbox folder, tray notifications and "Start with Windows". The rest is in the app, sometimes in a different place (the app puts Copy path and Copy as picture on the tile's right-click menu, for example).
+The Google Doc window shows five steps at the top: Choose, Check, Decide, Replace, Done. Nothing in Google changes before step 4, and by default the smaller pictures go into a new copy so the original stays as it is.
 
-### Main window
-Tiles with before and after sizes, the page-fit preview, and the plain-language error for a file NACHO cannot shrink.
+### Step 1, Choose
 
-<img src="mockup/1-main-window.png" width="900" alt="Mockup of the NACHO main window with four result tiles and a page-fit preview">
+Google's own picker opens in the browser. A pasted link works too. Recently shrunk Docs are listed with Open.
 
-### Compact window, 400 px wide
-The same window narrowed: presets become a dropdown and the preview moves behind a button.
+<img src="screenshots/google-en-choose.png" width="560" alt="Step 1, Choose: READ ONLY strip, signed-in account, Choose a Google Doc, paste a link, recently shrunk Docs">
 
-<img src="mockup/2-compact-400px.png" width="300" alt="Mockup of the NACHO window at 400 pixels wide">
+### Step 3, Decide
 
-### First run
-An empty drop zone as the one obvious action, with a three-step tour.
+The size now and after, the counts as chips, and two choices with what each keeps and what it costs. A sentence says exactly what will be written.
 
-<img src="mockup/3-first-run.png" width="720" alt="Mockup of NACHO's first run with an empty drop zone and step 1 of a three-step tour">
+<img src="screenshots/google-en-decide.png" width="560" alt="Step 3, Decide: 19.1 MB to 587 KB, Into a new copy selected and recommended">
 
-### More options
-Advanced settings kept out of the main window.
+<img src="screenshots/google-en-decide-doc.png" width="560" alt="Step 3, Decide with Into this Doc selected">
 
-<img src="mockup/4-more-options.png" width="540" alt="Mockup of the More options window: presets, output format, privacy, where copies go">
+In Spanish and Hungarian:
 
-### Tray notifications
-Feedback when the window is closed, with Undo.
+<img src="screenshots/google-es-decide.png" width="420" alt="Step 3 in Spanish"> <img src="screenshots/google-hu-decide.png" width="420" alt="Step 3 in Hungarian">
 
-<img src="mockup/5-notifications.png" width="315" alt="Mockup of two NACHO tray notifications">
+### Step 5, Done
 
-## The Windows app, version 0.3.0
+The result in large type, the new copy (with Copy link), the original marked not touched, and the original pictures saved on the computer.
 
-The Windows window did not change in 0.4.0.
+<img src="screenshots-linux/google-en-done.png" width="560" alt="Step 5, Done: Your smaller copy is ready, 19.1 MB to 589 KB, 96% smaller">
 
-Taken by NACHO's own self-test (`NACHO.exe --selftest <folder>`) on Windows 11, from the sample images it generates.
+### More options > Google Docs
 
-### Main window: English, Spanish, Hungarian
+Signed-in account, where the smaller pictures go by default, keep the original pictures, and the sign-in client.
 
-<img src="screenshots/main-en-light.png" width="900" alt="NACHO main window in English">
+<img src="screenshots/options-google-en.png" width="560" alt="More options, Google Docs section">
 
-<img src="screenshots/main-es-light.png" width="900" alt="NACHO main window in Spanish">
+## The main window, version 0.11.0
 
-<img src="screenshots/main-hu-light.png" width="900" alt="NACHO main window in Hungarian">
+### Start: both ways in
 
-### Dark theme and compact layout
+<img src="screenshots-linux/main-en-home.png" width="900" alt="Start screen: Pictures and files on the left, A whole Google Doc on the right">
 
-<img src="screenshots/main-es-dark.png" width="900" alt="NACHO main window in Spanish, dark theme">
+<img src="screenshots-linux/main-en-home-dark.png" width="900" alt="Start screen, dark theme">
 
-<img src="screenshots/main-en-narrow.png" width="300" alt="NACHO main window at 420 pixels wide">
+<img src="screenshots-linux/main-en-home-narrow.png" width="300" alt="Start screen at 420 pixels wide: the two cards stack">
 
-### More options: English, Spanish, Hungarian
+### Results: English, Spanish, Hungarian (Windows)
 
-<img src="screenshots/options-en.png" width="300" alt="More options in English"> <img src="screenshots/options-es.png" width="300" alt="More options in Spanish"> <img src="screenshots/options-hu.png" width="300" alt="More options in Hungarian">
+Each file is a card: the old size struck through, the new size large and green, the percentage smaller, details as chips, Copy file, Show in folder and Compare. The selected card has the accent border; a file that needs attention has an amber border.
 
-### About: Spanish, Hungarian
+<img src="screenshots/main-en-light.png" width="900" alt="Results in English">
 
-<img src="screenshots/about-es.png" width="420" alt="About window in Spanish"> <img src="screenshots/about-hu.png" width="420" alt="About window in Hungarian">
+<img src="screenshots/main-es-light.png" width="900" alt="Results in Spanish">
 
-## The Linux app, version 0.4.0
+<img src="screenshots/main-hu-light.png" width="900" alt="Results in Hungarian">
 
-The same window on Linux (Avalonia), taken by its own self-test (`nacho --selftest <folder>`) on a virtual X display. The font is Inter, which ships with NACHO so every distro shows the same window.
+### Dark theme and compact layout (Windows)
 
-### Main window: English, Spanish, Hungarian
+<img src="screenshots/main-es-dark.png" width="900" alt="Results in Spanish, dark theme">
 
-<img src="screenshots-linux/main-en-light.png" width="900" alt="NACHO for Linux, main window in English">
+<img src="screenshots/main-en-narrow.png" width="300" alt="Results at 420 pixels wide">
 
-<img src="screenshots-linux/main-es-light.png" width="900" alt="NACHO for Linux, main window in Spanish">
+### Compare with original
 
-<img src="screenshots-linux/main-hu-light.png" width="900" alt="NACHO for Linux, main window in Hungarian">
+<img src="screenshots/compare-en-copy.png" width="900" alt="Compare window: the original and the copy with a divider">
 
-### Dark theme and compact layout
+### More options: English, Spanish, Hungarian (Windows)
+
+A section list on the left that follows your scrolling. The bottom bar is Reset to defaults, then Save options, then Cancel.
+
+<img src="screenshots/options-en.png" width="420" alt="More options in English"> <img src="screenshots/options-es.png" width="420" alt="More options in Spanish">
+
+<img src="screenshots/options-hu.png" width="420" alt="More options in Hungarian">
+
+### About: English, Spanish, Hungarian (Windows)
+
+<img src="screenshots/about-en.png" width="300" alt="About in English"> <img src="screenshots/about-es.png" width="300" alt="About in Spanish"> <img src="screenshots/about-hu.png" width="300" alt="About in Hungarian">
+
+## The Linux app, version 0.11.0
+
+The same design on Linux (Avalonia). The font is Inter, which ships with NACHO so every distro shows the same window.
+
+<img src="screenshots-linux/main-en-light.png" width="900" alt="NACHO for Linux, results in English">
 
 <img src="screenshots-linux/main-es-dark.png" width="900" alt="NACHO for Linux in Spanish, dark theme">
 
-<img src="screenshots-linux/main-en-narrow.png" width="300" alt="NACHO for Linux at 420 pixels wide">
+<img src="screenshots-linux/google-en-choose.png" width="420" alt="Google Doc window on Linux, step 1"> <img src="screenshots-linux/google-en-decide.png" width="420" alt="Google Doc window on Linux, step 3">
 
-### More options: English, Spanish, Hungarian
+<img src="screenshots-linux/options-en.png" width="420" alt="More options on Linux"> <img src="screenshots-linux/about-en.png" width="300" alt="About on Linux">
 
-<img src="screenshots-linux/options-en.png" width="300" alt="More options in English, Linux"> <img src="screenshots-linux/options-es.png" width="300" alt="More options in Spanish, Linux"> <img src="screenshots-linux/options-hu.png" width="300" alt="More options in Hungarian, Linux">
+<img src="screenshots-linux/compare-en-copy.png" width="900" alt="Compare window on Linux">
 
-### About: Spanish, Hungarian
+## Design mockups for 0.11.0
 
-<img src="screenshots-linux/about-es.png" width="420" alt="About window in Spanish, Linux"> <img src="screenshots-linux/about-hu.png" width="420" alt="About window in Hungarian, Linux">
+Drawn before the code and approved as shown, against Nielsen's 10 heuristics, ISO 9241-110, WCAG 2.2 AA and Microsoft's Windows guidance for commands and dialogs. The font in the mockups is a stand-in.
+
+### Start screen
+
+<img src="mockup-0.11/mockup-start.png" width="900" alt="Mockup of the start screen">
+
+### Results
+
+<img src="mockup-0.11/mockup-results.png" width="900" alt="Mockup of the results view">
+
+## The first mockup (23 Oct 2026)
+
+What NACHO was first designed from. Some ideas are not built: the clipboard watcher, the first-run tour, the Docs-Outbox folder, tray notifications and "Start with Windows".
+
+<img src="mockup/1-main-window.png" width="900" alt="First mockup of the main window with four result tiles and a page-fit preview">
+
+<img src="mockup/2-compact-400px.png" width="300" alt="First mockup at 400 pixels wide"> <img src="mockup/4-more-options.png" width="540" alt="First mockup of More options">
+
+<img src="mockup/3-first-run.png" width="720" alt="First mockup of the first run"> <img src="mockup/5-notifications.png" width="315" alt="First mockup of tray notifications">

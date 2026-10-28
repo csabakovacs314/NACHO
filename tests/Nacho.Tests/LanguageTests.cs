@@ -39,7 +39,7 @@ public sealed class LanguageTests
     public void Every_text_formats_without_errors(string lang)
     {
         var culture = Strings.CultureFor(lang);
-        var args = new object[] { "a", "b", "c", "d" };
+        var args = new object[] { "a", "b", "c", "d", "e", "f" };
         foreach (var (key, text) in Strings.For(lang))
         {
             string s = string.Format(culture, text, args);
@@ -60,8 +60,9 @@ public sealed class LanguageTests
     [Fact]
     public void Hungarian_is_a_real_translation()
     {
-        int same = Strings.En.Count(kv => Strings.Hu[kv.Key] == kv.Value);
-        // Only codes and units may stay the same (A4, Letter, "{0} · {1} px").
+        // Only codes, units and product names may stay the same (A4, Letter, "{0} · {1} px", Google Docs).
+        string[] productNames = { "Google Docs", "{0} px · {1} KB" };
+        int same = Strings.En.Count(kv => Strings.Hu[kv.Key] == kv.Value && !productNames.Contains(kv.Value));
         Assert.True(same <= 3, $"{same} Hungarian texts are identical to English");
         Assert.Equal("Normalizál, Arányt tart, Csökkent és Hűen Odaad", Strings.Hu["App.Expansion"]);
     }

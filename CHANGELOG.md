@@ -2,6 +2,105 @@
 
 Versions: MAJOR.MINOR.PATCH. Minor for a feature, patch for a fix.
 
+## 0.11.0 (2026-10-27)
+
+**Asked for:** one design everywhere, not only in the Google Doc window (mockup first, approved as shown, both apps, all windows and Compare, English, Spanish and Hungarian).
+
+**Changed: one look in every window** (Nielsen H1 to H10, ISO 9241-110, WCAG 2.2 AA, Microsoft guidance for commands and dialogs)
+- Shared building blocks for Windows and Linux: cards, chips, segmented choices, numbered step dots, link buttons and the same bottom bar. On Windows they live in Theme.xaml (with a High Contrast fallback for every colour); on Linux in App.axaml.
+- Main window, start: a header with the logo; a green line saying your originals are never changed and where the copies go (Open the folder); two equal cards side by side. Pictures and files: a large drop area, Add files and Paste, and the three presets as cards with their size (Small 800 px · 150 KB…). A whole Google Doc: the three steps, what NACHO can see, the last Doc you shrank (with Open) and Choose a Google Doc. Narrow windows stack the cards.
+- Main window, results: the commands move into the header (Add files, Paste, Google Doc, the presets as one segmented control, Undo batch). Above the list: the count, chips for smaller, kept and needs attention, and the total before and after. A small drop strip stays. Each result is a card: the old size struck through, the new size large and green, a % smaller chip, details as chips, Copy file, and Show in folder and Compare as links. The selected card gets the accent border; a file that needs attention gets an amber border and a warning icon.
+- More options: a section list on the left that follows your scrolling and jumps to a section; Google Docs comes first and now has "Where the smaller pictures go, by default" (a new copy, or the Doc itself). The bottom bar is Reset to defaults, then Save options (main action), then Cancel.
+- About: the version in its own strip that turns green, blue or amber after Check for updates; Shrink a whole Google Doc first with the accent border; the four ways in with numbered dots; shortcuts as key caps; a link to the privacy policy.
+- Compare: segmented zoom and right-side choices in a header, and Close in the bottom bar.
+
+**Tests:** both self-tests check that the start screen shows while the list is empty and gives way to the results, and save new screenshots: main-en-home, main-en-home-dark, main-en-home-narrow and about-en.
+
+## 0.10.1 (2026-10-27)
+
+**Reported:** pressing Google Doc started checking the Doc used last time instead of offering the picker.
+
+**Fixed**
+- The Google Doc button, Ctrl+G and "Shrink a whole Google Doc…" now always open at step 1 (Choose). Before, a Docs link still on the clipboard (for example from Copy link) was checked straight away. Pasting a Docs link with Ctrl+V or dropping one on the window still checks that Doc at once, because that is an explicit choice.
+- "Shrink another Doc" empties the link box, so the next run starts at the picker.
+- Windows: the READ ONLY strip shows a shield icon (it showed a leaf-like glyph).
+
+**Tests:** both self-tests open the window with a Docs link on the clipboard and check that it stays at Choose and reads nothing.
+
+## 0.10.0 (2026-10-27)
+
+**Asked for:** emphasise the Google Docs feature in the documentation; work on a copy of the original Doc and leave the original intact (with an option to change the original, chosen after discussing the trade-offs); a better window by the visibility standards, mockup first; a logo.
+
+**Added: a new copy by default**
+- Step 3 asks where the smaller pictures go. **Into a new copy** (recommended, the default): Google makes "<title> (smaller)" in the same Drive folder, NACHO replaces the pictures there, and the original is only read. **Into this Doc**: the 0.8.0 behaviour, same link, sharing and comments. The choice is remembered.
+- The copy is made with the Drive API (files.copy). A live test on the 251-picture book: the copy took 4 s and kept all 251 tab and picture IDs; NACHO still matches pictures by order and size if Google ever changes the IDs, and leaves a picture alone if it can't be matched.
+- A full Drive or a Doc whose owner turned off copying gets its own message, and nothing changes. A view-only Doc now works: choose Into a new copy. If the Doc itself refuses the first pictures, NACHO goes back to step 3 instead of ending.
+- Stop is safe at any time; the copy request itself is never cut half way, so no unseen copy is left behind.
+
+**Changed: the Google Doc window, five visible steps** (Nielsen H1, ISO 9241-110 self-descriptiveness, WCAG 2.2 AA)
+- A step rail on top: Choose, Check, Decide, Replace, Done, with ticks for finished steps (shape, not only colour).
+- A green READ ONLY line while choosing and checking. While replacing, both Docs are on screen: the original marked NOT TOUCHED, the copy BEING WRITTEN (or, in place, THIS DOC BEING CHANGED).
+- Check shows a picture-by-picture grid (with a legend and counts), the last picture done, the time left, the free disk space against what the check needs, and the connection (retries so far).
+- Decide shows the size before and after as bars, the counts as chips, an optional list of every picture, two choice cards with what each keeps and what it costs, a sentence that says exactly what will be written, and a time estimate.
+- Replace shows phases (copy made, replacing with group and time left, clean up), the last three pictures replaced, and why Stop is safe.
+- Done shows the result in large type, the copy (with Copy link), the original, and the original pictures on this computer.
+- Use another account; Recently shrunk (the last five Docs, with Open); chips for the preset and originals with Change… to More options.
+- The title bar shows the percentage; on Windows the taskbar button shows the progress too.
+
+**Added: logo**
+- A nacho chip holding a picture (#F2B33D chip, #005FB8 picture), drawn in three detail levels for 16 to 256 px. Used for the Windows icon (tools/make-icon.ps1), the Linux icon (Assets/nacho.svg and nacho.png) and both About windows.
+
+**Docs**
+- README starts with the Google Doc feature and its five steps. About lists it first. The main window's empty list offers "Shrink a whole Google Doc…". The privacy policy mentions the copy.
+
+**Tests:** 31 Google unit tests (5 new: copy mode reads the original and writes only the copy; a copy with other IDs is matched by order and size; a picture missing from the copy is left alone; a full Drive and a refused copy change nothing). Both self-tests now make a copy, then replace in place, hit a full Drive and a view-only Doc, and take screenshots of every step in English, plus Decide in Spanish and Hungarian.
+
+## 0.9.0 (2026-10-27, built, not published)
+
+**Asked for:** anybody can use the Google Doc feature with their own Google account, without technical background.
+
+**Changed: Google's file picker, one small permission**
+- NACHO now asks Google for one permission only: the Drive files the user uses with NACHO (`drive.file`). It no longer asks to see all Google Docs. This is a "non-sensitive" permission, so Google needs no security review and there is no 100-user limit.
+- Shrink a Google Doc opens with **Choose a Google Doc…** as the main button. Google opens in the browser, the user signs in (first time only), allows NACHO and picks the Doc; NACHO checks it straight away.
+- A pasted or dropped link still works. If NACHO hasn't been given that Doc yet, Google's picker opens with just that Doc and the user confirms it once.
+- Messages rewritten for the picker (nothing picked, permission not allowed, Doc the chosen account can't open). More options, About, README and the privacy policy describe the single permission.
+
+**Google Cloud side**
+- The app is published (In production) with only `drive.file` and the Picker API. Homepage and privacy policy: csabakovacs314.github.io. Brand verification submitted.
+
+**Tests:** 26 Google unit tests (2 new: the picker returns the chosen Doc and only that Doc opens; closing the picker is a cancel). The pretend Google now behaves like `drive.file`: a Doc not picked answers 404. Both self-tests open the picker for a pasted link, pick from an empty link, and keep the earlier checks.
+
+## 0.8.0 (2026-10-27)
+
+**Asked for:** an option to change the pictures of a Google Doc in place, with the setup in NACHO's settings.
+
+**Added: a Google Doc in place**
+- New Google Doc command (Ctrl+G). Copying a Docs link and pressing Ctrl+V, or dragging the link onto the window, opens it too.
+- Three steps the user controls. **Check** reads the Doc, including every tab, downloads each picture and makes the smaller copies on this computer, changing nothing. It then shows the count of pictures, how many will shrink, how many are kept or left alone, and the size before and after. **Replace** puts each copy back in the same place. **Done** shows what changed, with Open the Doc and Show the originals.
+- Each picture keeps its object, size, position and wrapping in the Doc. The Doc keeps its link, comments, sharing and version history, and File > Version history is the undo.
+- A Docs crop is cut into the copy before replacing, because Google resets crops on replace; the visible picture stays the same. Drawings, charts linked from Sheets and pictures with brightness, contrast, transparency or rotation are left alone.
+- How a picture goes back: it is uploaded to the user's Drive as a temporary file, shared as "anyone with the link" for a few seconds, swapped in with the Docs API, then deleted. Temporary files left by an interrupted run are removed at the start of the next one.
+- Copies of the original pictures go to Docs-Ready\Google Docs originals\<Doc title> <date> (on by default).
+- Stop (Esc) finishes the group in progress and stops; closing the window while replacing asks to stop first.
+- Clear messages for a wrong link, a Doc the account can't open, a view-only Doc, an expired sign-in, Google asking to slow down, and no connection. Busy answers are retried with backoff.
+
+**Added: More options > Google Docs**
+- Sign in with Google and Sign out, with the signed-in account shown. The sign-in happens in the browser, so NACHO never sees the password. It uses a one-time local address and PKCE.
+- Permissions are limited to Google Docs and "only the files NACHO creates" in Drive.
+- The sign-in is kept encrypted with Windows DPAPI, or on Linux in a file only the user can read. Sign out deletes it and revokes it at Google.
+- Keep a copy of the original pictures (on by default).
+- Advanced: the Google client built into NACHO, or the user's own client file (Desktop app OAuth client). Release builds include NACHO's client from a file outside the source; the source never contains it.
+
+**Other**
+- About and README explain the new feature. Ctrl+G is added to the shortcut list.
+- docs/index.md and docs/privacy.md: the homepage and privacy policy Google needs before the app can leave Testing mode.
+
+**Prototype on a real Doc:** a 410-page book with 251 pictures (126 inline, 125 wrapped, 124 of those with a side crop). The scan estimated 655.7 MB of pictures down to 31.1 MB with Balanced.
+- Live replacements tested: an inline photo (5.2 MB PNG to 202 KB JPEG), a wrapped picture with a crop, and a wrapped picture without one.
+- Google stored NACHO's bytes exactly. The object ID, size, margins and position stayed the same, and the crop came out visually the same.
+
+**Tests:** 175 unit tests (22 new) against an in-memory fake Google: link parsing, client files, the Doc parser (tabs, child tabs, effects, crops), check then apply, a picture removed between check and apply, cancelling, leftover clean-up, retries and token renewal, error messages, the browser sign-in with PKCE and a forged answer, and the private sign-in file on Linux. Both self-tests sign in, check, replace and hit a view-only Doc against the same fake Google, with screenshots.
+
 ## 0.7.0 (2026-10-26)
 
 **Asked for:** the menu named for files, not only images; smaller PDFs (pictures taken out, shrunk, and the PDF made again); a version check against GitHub.

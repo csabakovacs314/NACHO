@@ -11,4 +11,8 @@
     <PackageReference Include="bblanchon.PDFium.Win32" Version="158.0.8111" />
     <PackageReference Include="bblanchon.PDFium.Linux" Version="158.0.8111" />
   </ItemGroup>
+  <!-- The Google sign-in client is passed in by the build scripts (-p:NachoGoogleClient=path); it is never in the source. -->
+  <ItemGroup Condition="'$(NachoGoogleClient)' != '' and Exists('$(NachoGoogleClient)')">
+    <EmbeddedResource Include="$(NachoGoogleClient)" LogicalName="Nacho.GoogleClient.json" Link="Google\client.json" />
+  </ItemGroup>
 </Project>

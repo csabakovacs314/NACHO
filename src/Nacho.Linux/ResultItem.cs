@@ -40,6 +40,11 @@ public sealed class ResultItem : INotifyPropertyChanged
     public string SizeText => IsOk
         ? Loc.F("Tile.SizeLine", Loc.Bytes(Result!.OriginalBytes), Loc.Bytes(Result.OutputBytes)) : "";
 
+    /// <summary>The original size, shown struck through next to the new one.</summary>
+    public string BeforeText => IsOk ? Loc.Bytes(Result!.OriginalBytes) : "";
+
+    public string AfterText => IsOk ? Loc.Bytes(Result!.OutputBytes) : "";
+
     public string SmallerText => IsOk ? Loc.F("Tile.Smaller", Result!.PercentSmaller) : "";
 
     public string PxText => IsOk && IsDocument ? DocumentLine(Result!.Document!) : IsOk

@@ -6,10 +6,6 @@
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
-        <Style x:Key="Secondary" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-        </Style>
         <Style x:Key="Chip" TargetType="Border">
             <Setter Property="Background" Value="#E6202020" />
             <Setter Property="CornerRadius" Value="4" />
@@ -35,48 +31,51 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Command bar: zoom, right side, close -->
-        <DockPanel Grid.Row="0" Margin="12,10,12,6" LastChildFill="False">
-            <Button DockPanel.Dock="Right" Content="{l:L Compare.Close}" Click="Close_Click" IsCancel="True"
-                    MinHeight="32" MinWidth="88" Padding="12,4" Margin="4" />
-            <WrapPanel DockPanel.Dock="Left" Orientation="Horizontal">
+        <!-- Header: zoom, page and what the right side shows, as segmented choices like the main window -->
+        <Border Grid.Row="0" Padding="16,6" Margin="0,0,0,10" BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" Background="{DynamicResource LayerFillColorDefaultBrush}">
+            <WrapPanel Orientation="Horizontal">
                 <TextBlock Text="{l:L Compare.Zoom}" Style="{StaticResource Secondary}" VerticalAlignment="Center" Margin="4,0,6,0" />
-                <StackPanel Orientation="Horizontal" Margin="0,4,12,4" AutomationProperties.Name="{l:L Compare.Zoom}">
+                <Border Style="{StaticResource SegmentFrame}" Margin="0,4,16,4" Background="{DynamicResource ControlStrokeColorDefaultBrush}">
+                <StackPanel Orientation="Horizontal" AutomationProperties.Name="{l:L Compare.Zoom}">
                     <RadioButton x:Name="ZoomFit" Tag="0" GroupName="Zoom" Content="{l:L Compare.Fit}" Checked="Zoom_Checked" ToolTip="0"
-                                 Style="{DynamicResource {x:Type ToggleButton}}" MinHeight="32" MinWidth="56" Padding="10,4" Margin="0,0,2,0" />
+                                 Style="{StaticResource Segment}" MinWidth="56" Padding="10,4" l:Seg.Corner="5,0,0,5" />
                     <RadioButton x:Name="Zoom100" Tag="1" GroupName="Zoom" Content="100%" Checked="Zoom_Checked" ToolTip="{l:L Compare.ActualPixels}"
-                                 Style="{DynamicResource {x:Type ToggleButton}}" MinHeight="32" MinWidth="56" Padding="10,4" Margin="0,0,2,0" />
+                                 Style="{StaticResource Segment}" MinWidth="56" Padding="10,4" Margin="1,0,0,0" />
                     <RadioButton x:Name="Zoom200" Tag="2" GroupName="Zoom" Content="200%" Checked="Zoom_Checked" ToolTip="2"
-                                 Style="{DynamicResource {x:Type ToggleButton}}" MinHeight="32" MinWidth="56" Padding="10,4" Margin="0,0,2,0" />
+                                 Style="{StaticResource Segment}" MinWidth="56" Padding="10,4" Margin="1,0,0,0" />
                     <RadioButton x:Name="Zoom400" Tag="4" GroupName="Zoom" Content="400%" Checked="Zoom_Checked" ToolTip="4"
-                                 Style="{DynamicResource {x:Type ToggleButton}}" MinHeight="32" MinWidth="56" Padding="10,4" />
+                                 Style="{StaticResource Segment}" MinWidth="56" Padding="10,4" Margin="1,0,0,0" l:Seg.Corner="0,5,5,0" />
                 </StackPanel>
+                </Border>
                 <StackPanel x:Name="PageGroup" Orientation="Horizontal" Margin="0,4,12,4" Visibility="Collapsed">
                     <Button x:Name="PrevPage" Click="PrevPage_Click" MinHeight="32" MinWidth="36" Padding="8,4" ToolTip="Page Up"
                             AutomationProperties.Name="{l:L Compare.PrevPage}">
-                        <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE76B;" />
+                        <TextBlock FontFamily="{StaticResource Icons}" Text="&#xE76B;" />
                     </Button>
                     <TextBlock x:Name="PageText" VerticalAlignment="Center" Margin="10,0" MinWidth="90" TextAlignment="Center"
                                AutomationProperties.LiveSetting="Polite" />
                     <Button x:Name="NextPage" Click="NextPage_Click" MinHeight="32" MinWidth="36" Padding="8,4" ToolTip="Page Down"
                             AutomationProperties.Name="{l:L Compare.NextPage}">
-                        <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE76C;" />
+                        <TextBlock FontFamily="{StaticResource Icons}" Text="&#xE76C;" />
                     </Button>
                 </StackPanel>
                 <StackPanel x:Name="RightGroup" Orientation="Horizontal" Visibility="Collapsed">
                     <TextBlock Text="{l:L Compare.Right}" Style="{StaticResource Secondary}" VerticalAlignment="Center" Margin="4,0,6,0" />
-                    <StackPanel Orientation="Horizontal" Margin="0,4,4,4" AutomationProperties.Name="{l:L Compare.Right}">
+                    <Border Style="{StaticResource SegmentFrame}" Margin="0,4,4,4" Background="{DynamicResource ControlStrokeColorDefaultBrush}">
+                    <StackPanel Orientation="Horizontal" AutomationProperties.Name="{l:L Compare.Right}">
                         <RadioButton x:Name="ShowCopy" GroupName="Right" Content="{l:L Compare.ShowCopy}" Checked="Right_Checked" IsChecked="True"
-                                     Style="{DynamicResource {x:Type ToggleButton}}" MinHeight="32" Padding="10,4" Margin="0,0,2,0" />
+                                     Style="{StaticResource Segment}" Padding="10,4" l:Seg.Corner="5,0,0,5" />
                         <RadioButton x:Name="ShowPalette" GroupName="Right" Content="{l:L Compare.ShowPalette}" Checked="Right_Checked"
-                                     Style="{DynamicResource {x:Type ToggleButton}}" MinHeight="32" Padding="10,4" />
+                                     Style="{StaticResource Segment}" Padding="10,4" Margin="1,0,0,0" l:Seg.Corner="0,5,5,0" />
                     </StackPanel>
+                    </Border>
                 </StackPanel>
             </WrapPanel>
-        </DockPanel>
+        </Border>
 
         <!-- The picture: copy underneath, original on top and cut off at the divider -->
-        <Border x:Name="Viewport" Grid.Row="1" Margin="12,0,12,8" ClipToBounds="True" Focusable="True" Cursor="SizeWE"
+        <Border x:Name="Viewport" Grid.Row="1" Margin="16,0,16,8" CornerRadius="8" ClipToBounds="True" Focusable="True" Cursor="SizeWE"
                 BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                 Background="{DynamicResource SubtleFillColorSecondaryBrush}"
                 AutomationProperties.Name="{l:L Compare.Area}"
@@ -91,7 +90,7 @@
                 <Rectangle x:Name="LineLight" Width="2" Fill="White" />
                 <Grid x:Name="Handle" Width="36" Height="36">
                     <Ellipse Fill="White" Stroke="#202020" StrokeThickness="2" />
-                    <TextBlock Text="&#xE76B;&#xE76C;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="12"
+                    <TextBlock Text="&#xE76B;&#xE76C;" FontFamily="{StaticResource Icons}" FontSize="12"
                                Foreground="#202020" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Grid>
                 <Border x:Name="LeftChip" Style="{StaticResource Chip}">
@@ -113,14 +112,17 @@
                     AutomationProperties.Name="{l:L Compare.Divider}" ValueChanged="Divider_ValueChanged" />
         </DockPanel>
 
-        <Border Grid.Row="3" Padding="16,8,16,10" BorderThickness="0,1,0,0"
-                BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
-                Background="{DynamicResource LayerFillColorDefaultBrush}">
-            <StackPanel>
-                <TextBlock x:Name="SizeNote" FontSize="13" TextWrapping="Wrap" />
-                <TextBlock x:Name="PaletteNote" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,0" Visibility="Collapsed" />
-                <TextBlock Text="{l:L Compare.Hint}" Style="{StaticResource Secondary}" FontSize="12" Margin="0,4,0,0" />
-            </StackPanel>
+        <!-- The same bottom bar as every NACHO window: what you see on the left, Close on the right -->
+        <Border Grid.Row="3" Style="{StaticResource CommandBar}" Padding="16,10">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="{l:L Compare.Close}" Click="Close_Click" IsCancel="True" VerticalAlignment="Center"
+                        MinHeight="32" MinWidth="96" Padding="12,4" Margin="16,0,0,0" />
+                <StackPanel>
+                    <TextBlock x:Name="SizeNote" FontSize="13" TextWrapping="Wrap" />
+                    <TextBlock x:Name="PaletteNote" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,0" Visibility="Collapsed" />
+                    <TextBlock Text="{l:L Compare.Hint}" Style="{StaticResource Secondary}" Margin="0,4,0,0" />
+                </StackPanel>
+            </DockPanel>
         </Border>
     </Grid>
 </Window>

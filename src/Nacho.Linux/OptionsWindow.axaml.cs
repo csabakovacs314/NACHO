@@ -1,9 +1,12 @@
+using Avalonia.Threading;
+using Avalonia;
 using System.Globalization;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Nacho.Core;
+using Nacho.Core.Google;
 
 namespace Nacho.Linux;
 
@@ -26,6 +29,53 @@ public partial class OptionsWindow : Window
         Icon = App.Icon();
         Fill(settings);
         LabelPresets();
+        RenderGoogle();
+        NavGoogle.IsChecked = true;
+        SizeChanged += (_, _) => ApplyLayout();
+    }
+
+    // ---------- sections ----------
+
+    private bool _navScrolling;
+
+    private void ApplyLayout()
+    {
+        bool narrow = Bounds.Width > 0 && Bounds.Width < 640;
+        NavPane.IsVisible = !narrow;
+        SaveHint.IsVisible = !narrow;
+    }
+
+    private Control? Section(object? tag) => tag is string name ? this.FindControl<Control>(name) : null;
+
+    private void Nav_Click(object? sender, RoutedEventArgs e)
+    {
+        if (Section((sender as Control)?.Tag) is { } section) ShowSection(section);
+    }
+
+    /// <summary>Scrolls a section's card to the top of the page.</summary>
+    private void ShowSection(Control section)
+    {
+        _navScrolling = true;
+        double top = section.TranslatePoint(new Point(0, 0), Sections)?.Y ?? 0;
+        Scroller.Offset = new Vector(Scroller.Offset.X, Math.Max(0, top));
+        Dispatcher.UIThread.Post(() => _navScrolling = false, DispatcherPriority.Background);
+    }
+
+    /// <summary>While you scroll, the section list marks the card at the top.</summary>
+    private void Scroller_ScrollChanged(object? sender, ScrollChangedEventArgs e)
+    {
+        if (_navScrolling || !IsLoaded) return;
+        RadioButton? current = null;
+        foreach (var nav in NavList.Children.OfType<RadioButton>())
+        {
+            if (Section(nav.Tag) is not { } section) continue;
+            double top = section.TranslatePoint(new Point(0, 0), Scroller)?.Y ?? 0;
+            if (top <= 48 || current is null) current = nav;
+            if (top > 48) break;
+        }
+        if (Scroller.Extent.Height > Scroller.Viewport.Height && Scroller.Offset.Y >= Scroller.Extent.Height - Scroller.Viewport.Height - 1)
+            current = NavList.Children.OfType<RadioButton>().Last();
+        if (current is not null && current.IsChecked != true) current.IsChecked = true;
     }
 
     private void Fill(AppSettings s)
@@ -47,6 +97,137 @@ public partial class OptionsWindow : Window
         AppMenuBox.IsChecked = s.AppMenu;
         UpdatesBox.IsChecked = s.CheckUpdates;
         LangBox.SelectedIndex = Math.Max(0, Array.IndexOf(Strings.Languages, s.Language));
+        GoogleKeepBox.IsChecked = s.GoogleKeepOriginals;
+        (s.GoogleIntoCopy ? DestCopy : DestDoc).IsChecked = true;
+        ClientFileBox.Text = s.GoogleClientFile;
+        bool builtIn = GoogleClientInfo.BuiltIn is not null || GoogleUi.SelfTestClient;
+        ClientBuiltIn.IsEnabled = builtIn;
+        (builtIn && string.IsNullOrWhiteSpace(s.GoogleClientFile) ? ClientBuiltIn : ClientOwn).IsChecked = true;
+        GoogleAdvanced.IsExpanded = !builtIn || !string.IsNullOrWhiteSpace(s.GoogleClientFile);
+        ClientNote.Text = builtIn ? "" : Loc.T("Opt.GoogleClientNone");
+        ClientNote.IsVisible = !builtIn;
+    }
+
+    // ---------- Google Docs ----------
+
+    /// <summary>The client file the dialog currently points at ("" = built in).</summary>
+    private string ChosenClientFile => ClientOwn.IsChecked == true ? (ClientFileBox.Text ?? "").Trim() : "";
+
+    public string GoogleStatusText => GoogleStatus.Text ?? "";
+
+    /// <summary>For the self-test's screenshot of the Google Docs card.</summary>
+    public void ScrollToGoogle()
+    {
+        GoogleAdvanced.IsExpanded = true;
+        NavGoogle.IsChecked = true;
+        ShowSection(SecGoogle);
+    }
+
+    private void RenderGoogle()
+    {
+        bool signedIn = GoogleUi.Session.HasSignIn;
+        GoogleStatus.Text = !signedIn ? Loc.T("Opt.GoogleSignedOut")
+            : string.IsNullOrEmpty(_s.GoogleEmail) ? Loc.T("Gd.SignedIn") : Loc.F("Gd.SignedInAs", _s.GoogleEmail);
+        GoogleSignInButton.IsVisible = !signedIn;
+        GoogleSignOutButton.IsVisible = signedIn;
+    }
+
+    private void ShowGoogleProblem(string? text)
+    {
+        GoogleProblem.Text = text ?? "";
+        GoogleProblem.IsVisible = text is not null;
+    }
+
+    /// <summary>Signs in now (not on Save), with the client chosen in this dialog.</summary>
+    public async Task SignInAsync()
+    {
+        ShowGoogleProblem(null);
+        string file = ChosenClientFile;
+        if (ClientOwn.IsChecked == true && (file.Length == 0 || GoogleClientInfo.FromFile(file) is null))
+        {
+            ShowGoogleProblem(Loc.T("Opt.GoogleClientBad"));
+            return;
+        }
+        _s.GoogleClientFile = file;
+        var session = GoogleUi.For(_s);
+        if (!session.IsAvailable)
+        {
+            ShowGoogleProblem(Loc.T("Gd.NotSetUp"));
+            return;
+        }
+        GoogleSignInButton.IsEnabled = false;
+        GoogleStatus.Text = Loc.T("Gd.Signing");
+        try
+        {
+            string email = await Task.Run(() => session.SignInAsync());
+            _s.GoogleEmail = email;
+            _s.Save();
+        }
+        catch (Exception ex) when (ex is GoogleException or HttpRequestException or System.Net.HttpListenerException)
+        {
+            App.Log(ex);
+            ShowGoogleProblem(GoogleUi.Message(ex));
+        }
+        finally
+        {
+            GoogleSignInButton.IsEnabled = true;
+            RenderGoogle();
+        }
+    }
+
+    private async void GoogleSignIn_Click(object? sender, RoutedEventArgs e) => await SignInAsync();
+
+    private async void GoogleSignOut_Click(object? sender, RoutedEventArgs e)
+    {
+        ShowGoogleProblem(null);
+        GoogleSignOutButton.IsEnabled = false;
+        try
+        {
+            await GoogleUi.For(_s).SignOutAsync();
+        }
+        catch (GoogleException ex)
+        {
+            App.Log(ex);
+        }
+        finally
+        {
+            _s.GoogleEmail = "";
+            _s.Save();
+            GoogleSignOutButton.IsEnabled = true;
+            RenderGoogle();
+            GoogleSignInButton.Focus();
+        }
+    }
+
+    private void Client_Changed(object? sender, RoutedEventArgs e)
+    {
+        if (GoogleProblem is not null) ShowGoogleProblem(null);
+    }
+
+    private async void ChooseClient_Click(object? sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = Loc.T("Dlg.ClientTitle"),
+                AllowMultiple = false,
+                FileTypeFilter = new[] { new FilePickerFileType("JSON") { Patterns = new[] { "*.json" } } },
+            });
+            if (files.Count == 0 || files[0].TryGetLocalPath() is not { } path) return;
+            if (GoogleClientInfo.FromFile(path) is null)
+            {
+                ShowGoogleProblem(Loc.T("Opt.GoogleClientBad"));
+                return;
+            }
+            ClientFileBox.Text = path;
+            ClientOwn.IsChecked = true;
+            ShowGoogleProblem(null);
+        }
+        catch (Exception ex)
+        {
+            App.Log(ex);
+        }
     }
 
     private void LabelPresets()
@@ -103,6 +284,13 @@ public partial class OptionsWindow : Window
             return;
         }
 
+        if (ClientOwn.IsChecked == true && GoogleClientInfo.FromFile(ChosenClientFile) is null)
+        {
+            ShowGoogleProblem(Loc.T("Opt.GoogleClientBad"));
+            GoogleAdvanced.IsExpanded = true;
+            ClientOwn.Focus();
+            return;
+        }
         for (int i = 0; i < 3; i++)
         {
             _s.Presets[i].LongEdge = edges[i];
@@ -118,6 +306,9 @@ public partial class OptionsWindow : Window
         _s.AppMenu = AppMenuBox.IsChecked == true;
         _s.CheckUpdates = UpdatesBox.IsChecked == true;
         if (LangBox.SelectedItem is ComboBoxItem { Tag: string lang }) _s.Language = lang;
+        _s.GoogleKeepOriginals = GoogleKeepBox.IsChecked == true;
+        _s.GoogleIntoCopy = DestDoc.IsChecked != true;
+        _s.GoogleClientFile = ChosenClientFile;
         Close(true);
     }
 

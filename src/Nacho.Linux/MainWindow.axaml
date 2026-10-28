@@ -7,34 +7,24 @@
         WindowStartupLocation="CenterScreen"
         DragDrop.AllowDrop="True">
     <Window.Styles>
-        <!-- Tile buttons sit at the right, or under the text when the window is narrow (below 900 px). -->
-        <Style Selector="StackPanel.actions">
+        <!-- Card buttons sit at the right, or under the text when the window is narrow (below 900 px). -->
+        <Style Selector="WrapPanel.actions">
             <Setter Property="Grid.Row" Value="0" />
             <Setter Property="Grid.Column" Value="2" />
             <Setter Property="Orientation" Value="Vertical" />
-            <Setter Property="Width" Value="196" />
+            <Setter Property="Width" Value="215" />
             <Setter Property="Margin" Value="12,0,0,0" />
         </Style>
-        <Style Selector="Window.narrow StackPanel.actions">
+        <Style Selector="Window.narrow WrapPanel.actions">
             <Setter Property="Grid.Row" Value="1" />
             <Setter Property="Grid.Column" Value="1" />
             <Setter Property="Orientation" Value="Horizontal" />
             <Setter Property="Width" Value="NaN" />
             <Setter Property="Margin" Value="0,8,0,0" />
         </Style>
-        <Style Selector="StackPanel.actions > Button">
-            <Setter Property="Margin" Value="0,0,6,6" />
-            <Setter Property="Padding" Value="10,4" />
-            <Setter Property="HorizontalAlignment" Value="Stretch" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-        </Style>
-        <Style Selector="Window.narrow StackPanel.actions > Button">
-            <Setter Property="HorizontalAlignment" Value="Left" />
-        </Style>
-        <Style Selector="RadioButton.segment">
-            <Setter Property="MinHeight" Value="32" />
-            <Setter Property="Padding" Value="10,4" />
-            <Setter Property="Margin" Value="0,0,2,0" />
+        <Style Selector="Button.cmd">
+            <Setter Property="Margin" Value="0,4,8,4" />
+            <Setter Property="Padding" Value="12,5" />
         </Style>
         <Style Selector="TextBlock.cmp">
             <Setter Property="FontSize" Value="13" />
@@ -47,62 +37,117 @@
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="Margin" Value="0,0,0,5" />
         </Style>
+        <!-- Each result is a card; the selected one gets the accent border, like the choice cards. -->
+        <Style Selector="ListBox#Results ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0,0,4,10" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}" HorizontalContentAlignment="Stretch" />
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="Border.result">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="14,12" />
+            <Setter Property="Background" Value="{DynamicResource N.Card}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource N.CardStroke}" />
+        </Style>
+        <Style Selector="ListBoxItem:pointerover Border.result">
+            <Setter Property="BorderBrush" Value="{DynamicResource N.StrongStroke}" />
+        </Style>
+        <Style Selector="Border.result.error">
+            <Setter Property="BorderBrush" Value="{DynamicResource N.Caution}" />
+        </Style>
+        <Style Selector="ListBoxItem:selected Border.result">
+            <Setter Property="BorderBrush" Value="{DynamicResource N.Accent}" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="Padding" Value="13,11" />
+        </Style>
+        <Style Selector="Border.badge">
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="8,1" />
+            <Setter Property="Margin" Value="0,0,6,4" />
+            <Setter Property="Background" Value="{DynamicResource N.Subtle}" />
+        </Style>
     </Window.Styles>
 
     <Grid x:Name="Root" RowDefinitions="Auto,Auto,*,Auto">
-        <!-- Command bar -->
-        <WrapPanel Grid.Row="0" Margin="12,10,12,4" Orientation="Horizontal" ItemSpacing="0">
-            <Button x:Name="AddButton" Classes="accent" Click="Add_Click" Margin="3" Padding="12,5"
-                    ToolTip.Tip="Ctrl+O" AutomationProperties.Name="{l:L Cmd.Add}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <l:StrokeIcon Data="{StaticResource Icon.Add}" />
-                    <TextBlock x:Name="AddText" Text="{l:L Cmd.Add}" VerticalAlignment="Center" />
+        <!-- Header: the app, the commands for the list (once there is one), and the settings that apply everywhere -->
+        <Border Grid.Row="0" Classes="header">
+            <Grid x:Name="HeaderGrid" ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,4,20,4">
+                    <l:Logo Width="34" Height="34" AutomationProperties.Name="NACHO" />
+                    <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="NACHO" FontSize="17" FontWeight="Bold" />
+                        <TextBlock x:Name="Tagline" Text="{l:L Home.Tagline}" Classes="hint" />
+                    </StackPanel>
                 </StackPanel>
-            </Button>
-            <Button Click="Paste_Click" Margin="3" Padding="10,5" ToolTip.Tip="Ctrl+V" AutomationProperties.Name="{l:L Cmd.Paste}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <l:StrokeIcon Data="{StaticResource Icon.Paste}" />
-                    <TextBlock Text="{l:L Cmd.Paste}" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
-            <Border Width="1" Height="24" Margin="6,0" VerticalAlignment="Center" Background="{DynamicResource N.Divider}" />
-            <TextBlock Text="{l:L Cmd.Preset}" Classes="secondary" VerticalAlignment="Center" Margin="4,0,6,0" />
-            <StackPanel x:Name="PresetGroup" Orientation="Horizontal" Margin="0,4,4,4" AutomationProperties.Name="{l:L Cmd.Preset}">
-                <RadioButton x:Name="PresetSmall" Tag="small" GroupName="Preset" Classes="segment"
-                             Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Preset_Changed" />
-                <RadioButton x:Name="PresetBalanced" Tag="balanced" GroupName="Preset" Classes="segment"
-                             Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Preset_Changed" />
-                <RadioButton x:Name="PresetSharp" Tag="sharp" GroupName="Preset" Classes="segment"
-                             Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Preset_Changed" />
-            </StackPanel>
-            <Button Click="Options_Click" Margin="3" Padding="10,5" ToolTip.Tip="Ctrl+," AutomationProperties.Name="{l:L Cmd.Options}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <l:StrokeIcon Data="{StaticResource Icon.Options}" />
-                    <TextBlock Text="{l:L Cmd.Options}" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
-            <Button Click="Undo_Click" Margin="3" Padding="10,5" ToolTip.Tip="Ctrl+Z" AutomationProperties.Name="{l:L Cmd.Undo}">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <l:StrokeIcon Data="{StaticResource Icon.Undo}" />
-                    <TextBlock Text="{l:L Cmd.Undo}" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
-            <Button Click="Help_Click" Margin="3" Padding="8,5" MinWidth="32" ToolTip.Tip="F1" AutomationProperties.Name="{l:L Cmd.Help}">
-                <l:StrokeIcon Data="{StaticResource Icon.Help}" />
-            </Button>
-            <StackPanel Orientation="Horizontal" Margin="6,3,3,3" AutomationProperties.Name="{l:L Cmd.Language}" ToolTip.Tip="{l:L Cmd.Language}">
-                <l:StrokeIcon Data="{StaticResource Icon.Globe}" Foreground="{DynamicResource N.TextSecondary}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                <RadioButton x:Name="LangEn" Tag="en" GroupName="Lang" Content="EN" Classes="segment" MinWidth="40"
-                             AutomationProperties.Name="English" Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Language_Changed" />
-                <RadioButton x:Name="LangEs" Tag="es" GroupName="Lang" Content="ES" Classes="segment" MinWidth="40"
-                             AutomationProperties.Name="Español" Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Language_Changed" />
-                <RadioButton x:Name="LangHu" Tag="hu" GroupName="Lang" Content="HU" Classes="segment" MinWidth="40"
-                             AutomationProperties.Name="Magyar" Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Language_Changed" />
-            </StackPanel>
-        </WrapPanel>
+
+                <WrapPanel x:Name="ActionsPanel" Grid.Column="1" VerticalAlignment="Center">
+                    <Button x:Name="AddButton" Classes="accent cmd" Click="Add_Click" ToolTip.Tip="Ctrl+O" AutomationProperties.Name="{l:L Cmd.Add}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <l:StrokeIcon Data="{StaticResource Icon.Add}" />
+                            <TextBlock x:Name="AddText" Text="{l:L Cmd.Add}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="cmd" Click="Paste_Click" ToolTip.Tip="Ctrl+V" AutomationProperties.Name="{l:L Cmd.Paste}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <l:StrokeIcon Data="{StaticResource Icon.Paste}" />
+                            <TextBlock Text="{l:L Cmd.Paste}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="cmd" Click="GoogleDoc_Click" ToolTip.Tip="{l:L Cmd.GoogleDocTip}" BorderBrush="{DynamicResource N.Accent}"
+                            AutomationProperties.Name="{l:L Cmd.GoogleDoc}" AutomationProperties.HelpText="{l:L Cmd.GoogleDocTip}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <l:StrokeIcon Data="{StaticResource Icon.Document}" Foreground="{DynamicResource N.Accent}" />
+                            <TextBlock Text="{l:L Cmd.GoogleDoc}" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource N.Accent}" />
+                        </StackPanel>
+                    </Button>
+                    <StackPanel x:Name="PresetGroup" Orientation="Horizontal" Margin="4,4,8,4" AutomationProperties.Name="{l:L Cmd.Preset}">
+                        <RadioButton x:Name="PresetSmall" Tag="small" GroupName="Preset" Classes="seg first"
+                                     Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Preset_Changed" />
+                        <RadioButton x:Name="PresetBalanced" Tag="balanced" GroupName="Preset" Classes="seg"
+                                     Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Preset_Changed" />
+                        <RadioButton x:Name="PresetSharp" Tag="sharp" GroupName="Preset" Classes="seg last"
+                                     Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Preset_Changed" />
+                    </StackPanel>
+                    <Button Classes="cmd" Click="Undo_Click" ToolTip.Tip="Ctrl+Z" AutomationProperties.Name="{l:L Cmd.Undo}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <l:StrokeIcon Data="{StaticResource Icon.Undo}" />
+                            <TextBlock Text="{l:L Cmd.Undo}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
+
+                <WrapPanel x:Name="GlobalPanel" Grid.Column="2" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Margin="0,4,8,4" AutomationProperties.Name="{l:L Cmd.Language}" ToolTip.Tip="{l:L Cmd.Language}">
+                        <RadioButton x:Name="LangEn" Tag="en" GroupName="Lang" Content="EN" Classes="seg first" MinWidth="44"
+                                     AutomationProperties.Name="English" Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Language_Changed" />
+                        <RadioButton x:Name="LangEs" Tag="es" GroupName="Lang" Content="ES" Classes="seg" MinWidth="44"
+                                     AutomationProperties.Name="Español" Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Language_Changed" />
+                        <RadioButton x:Name="LangHu" Tag="hu" GroupName="Lang" Content="HU" Classes="seg last" MinWidth="44"
+                                     AutomationProperties.Name="Magyar" Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Language_Changed" />
+                    </StackPanel>
+                    <Button Classes="cmd" Click="Options_Click" ToolTip.Tip="Ctrl+," AutomationProperties.Name="{l:L Cmd.Options}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <l:StrokeIcon Data="{StaticResource Icon.Options}" />
+                            <TextBlock Text="{l:L Cmd.Options}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="cmd" Click="Help_Click" Margin="0,4,0,4" Padding="8,5" MinWidth="32" ToolTip.Tip="F1"
+                            AutomationProperties.Name="{l:L Cmd.Help}">
+                        <l:StrokeIcon Data="{StaticResource Icon.Help}" />
+                    </Button>
+                </WrapPanel>
+            </Grid>
+        </Border>
 
         <!-- A newer NACHO on GitHub: a link only, never a download -->
-        <Border x:Name="UpdateBar" Grid.Row="1" IsVisible="False" Margin="16,2,16,6" Padding="12,6" CornerRadius="6" BorderThickness="1"
+        <Border x:Name="UpdateBar" Grid.Row="1" IsVisible="False" Margin="24,12,24,0" Padding="12,6" CornerRadius="6" BorderThickness="1"
                 BorderBrush="{DynamicResource N.Accent}" Background="{DynamicResource N.Card}">
             <DockPanel>
                 <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Info}" Foreground="{DynamicResource N.Accent}" Margin="0,0,10,0" VerticalAlignment="Center" />
@@ -114,39 +159,163 @@
             </DockPanel>
         </Border>
 
-        <!-- Content -->
-        <Grid x:Name="ContentGrid" Grid.Row="2" Margin="16,4,16,12" ColumnDefinitions="*,Auto" RowDefinitions="*,Auto">
-            <Grid x:Name="LeftPane" RowDefinitions="Auto,Auto,*">
-                <Grid x:Name="DropZone" Margin="0,0,0,12" MinHeight="64">
-                    <Rectangle x:Name="DropRect" RadiusX="8" RadiusY="8" StrokeThickness="2" StrokeDashArray="4,3"
-                               Stroke="{DynamicResource N.StrongStroke}" Fill="{DynamicResource N.Card}" />
-                    <DockPanel Margin="16,10">
-                        <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Drop}" Width="26" Height="26" Thickness="1.75"
-                                      Foreground="{DynamicResource N.Accent}" Margin="0,0,14,0" VerticalAlignment="Center" />
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock x:Name="DropTitle" Text="{l:L Drop.Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                            <TextBlock x:Name="DropRelease" Text="{l:L Drop.Release}" FontWeight="SemiBold" TextWrapping="Wrap" IsVisible="False" />
-                            <TextBlock x:Name="DropSub" Text="{l:L Drop.Sub}" Classes="secondary" FontSize="13" TextWrapping="Wrap" />
+        <!-- Start: two equal ways in, shown while the list is empty -->
+        <ScrollViewer x:Name="HomePanel" Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid x:Name="HomeGrid" ColumnDefinitions="*,*" RowDefinitions="Auto,*,Auto">
+                <!-- the same safety strip as the Google Doc window -->
+                <Border Grid.ColumnSpan="2" Margin="24,16,24,0" Padding="14,8" CornerRadius="6" BorderThickness="1"
+                        Background="{DynamicResource N.SuccessBg}" BorderBrush="{DynamicResource N.Success}">
+                    <DockPanel>
+                        <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Shield}" Width="20" Height="20" Margin="0,0,12,0"
+                                      VerticalAlignment="Center" Foreground="{DynamicResource N.Success}" />
+                        <Button x:Name="HomeOpenFolder" DockPanel.Dock="Right" Classes="link" Content="{l:L Home.OpenFolder}" Click="OpenFolder_Click"
+                                Margin="12,0,0,0" VerticalAlignment="Center" />
+                        <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" FontSize="13">
+                            <Run Text="{l:L Home.Safe}" FontWeight="SemiBold" /><Run Text=" " /><Run x:Name="HomeSafeWhere" />
+                        </TextBlock>
+                    </DockPanel>
+                </Border>
+
+                <!-- Pictures and files -->
+                <Border x:Name="FilesCard" Grid.Row="1" Margin="24,16,8,16" Classes="card" Padding="22,20">
+                    <Grid RowDefinitions="Auto,*,Auto">
+                        <DockPanel Margin="0,0,0,16">
+                            <Border DockPanel.Dock="Left" Classes="icontile">
+                                <l:StrokeIcon Data="{StaticResource Icon.Picture}" Width="22" Height="22" Foreground="{DynamicResource N.Accent}"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{l:L Home.FilesTitle}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{l:L Home.FilesSub}" Classes="secondary" FontSize="13" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DockPanel>
+
+                        <Grid x:Name="DropZone" Grid.Row="1" MinHeight="190">
+                            <Rectangle x:Name="DropRect" RadiusX="8" RadiusY="8" StrokeThickness="2" StrokeDashArray="4,3"
+                                       Stroke="{DynamicResource N.StrongStroke}" Fill="Transparent" />
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20,16">
+                                <l:StrokeIcon Data="{StaticResource Icon.Drop}" Width="34" Height="34" Thickness="1.5" HorizontalAlignment="Center"
+                                              Foreground="{DynamicResource N.Accent}" />
+                                <TextBlock x:Name="DropTitle" Text="{l:L Home.DropTitle}" FontSize="16" FontWeight="SemiBold" Margin="0,10,0,0"
+                                           TextWrapping="Wrap" TextAlignment="Center" />
+                                <TextBlock x:Name="DropRelease" Text="{l:L Drop.Release}" FontSize="16" FontWeight="SemiBold" Margin="0,10,0,0"
+                                           TextWrapping="Wrap" TextAlignment="Center" IsVisible="False" Foreground="{DynamicResource N.Accent}" />
+                                <TextBlock x:Name="DropSub" Text="{l:L Drop.Sub}" Classes="secondary" FontSize="13" TextAlignment="Center" TextWrapping="Wrap"
+                                           Margin="0,4,0,0" />
+                                <WrapPanel HorizontalAlignment="Center" Margin="0,12,0,0">
+                                    <Button x:Name="HomeAdd" Classes="accent" Click="Add_Click" MinHeight="36" Padding="16,6" Margin="4"
+                                            ToolTip.Tip="Ctrl+O" AutomationProperties.Name="{l:L Cmd.Add}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <l:StrokeIcon Data="{StaticResource Icon.Add}" />
+                                            <TextBlock Text="{l:L Cmd.Add}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Click="Paste_Click" MinHeight="36" Padding="16,6" Margin="4" Content="{l:L Home.Paste}" />
+                                </WrapPanel>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Grid.Row="2" Margin="0,16,0,0">
+                            <TextBlock Text="{l:L Home.Size}" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6" />
+                            <UniformGrid Columns="3" AutomationProperties.Name="{l:L Home.Size}">
+                                <RadioButton x:Name="HomeSmall" Tag="small" GroupName="HomePreset" Classes="choice" Margin="0,0,8,0" IsCheckedChanged="Preset_Changed" />
+                                <RadioButton x:Name="HomeBalanced" Tag="balanced" GroupName="HomePreset" Classes="choice" Margin="0,0,8,0" IsCheckedChanged="Preset_Changed" />
+                                <RadioButton x:Name="HomeSharp" Tag="sharp" GroupName="HomePreset" Classes="choice" IsCheckedChanged="Preset_Changed" />
+                            </UniformGrid>
                         </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- A whole Google Doc -->
+                <Border x:Name="GoogleCard" Grid.Row="1" Grid.Column="1" Margin="8,16,24,16" Classes="card" Padding="21,19"
+                        BorderThickness="2" BorderBrush="{DynamicResource N.Accent}">
+                    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
+                        <DockPanel Margin="0,0,0,16">
+                            <Border DockPanel.Dock="Left" Classes="icontile">
+                                <l:StrokeIcon Data="{StaticResource Icon.Document}" Width="22" Height="22" Foreground="{DynamicResource N.Accent}"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <Border DockPanel.Dock="Right" VerticalAlignment="Top" CornerRadius="10" Padding="9,2" Margin="8,2,0,0"
+                                    Background="{DynamicResource N.Accent}">
+                                <TextBlock Text="{l:L Home.New}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource N.OnAccent}" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{l:L Home.GoogleTitle}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{l:L Home.GoogleSub}" Classes="secondary" FontSize="13" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </DockPanel>
+
+                        <StackPanel Grid.Row="1">
+                            <StackPanel x:Name="HomeSteps" />
+                            <DockPanel Margin="0,4,0,10">
+                                <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Lock}" Margin="2,2,12,0" VerticalAlignment="Top"
+                                              Foreground="{DynamicResource N.TextSecondary}" />
+                                <TextBlock Text="{l:L Gd.ChooseHint}" Classes="secondary" FontSize="13" TextWrapping="Wrap" />
+                            </DockPanel>
+                        </StackPanel>
+
+                        <Border x:Name="LastTimeBox" Grid.Row="2" Margin="0,6,0,0" Padding="14,6,6,6" CornerRadius="6"
+                                Background="{DynamicResource N.Subtle}" IsVisible="False">
+                            <DockPanel>
+                                <Button x:Name="LastTimeOpen" DockPanel.Dock="Right" Classes="link" Content="{l:L Gd.Open}"
+                                        Click="LastTimeOpen_Click" VerticalAlignment="Center" />
+                                <TextBlock x:Name="LastTimeText" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center" />
+                            </DockPanel>
+                        </Border>
+
+                        <WrapPanel Grid.Row="4" Margin="0,16,0,0">
+                            <Button x:Name="HomeChoose" Classes="accent" Click="GoogleDoc_Click" MinHeight="40" Padding="20,6" Margin="0,0,12,0"
+                                    Content="{l:L Gd.Choose}" ToolTip.Tip="{l:L Cmd.GoogleDocTip}" AutomationProperties.HelpText="{l:L Cmd.GoogleDocTip}" />
+                            <TextBlock Text="{l:L Home.ChooseHint}" Classes="secondary" FontSize="12" VerticalAlignment="Center" />
+                        </WrapPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Results -->
+        <Grid x:Name="ContentGrid" Grid.Row="2" Margin="24,16,24,12" ColumnDefinitions="*,Auto" RowDefinitions="*,Auto" IsVisible="False">
+            <Grid x:Name="LeftPane" RowDefinitions="Auto,Auto,*">
+                <!-- the list at a glance, with the same chips as the Google Doc check -->
+                <DockPanel x:Name="SummaryRow" Margin="0,0,0,10">
+                    <ToggleButton x:Name="PreviewToggle" DockPanel.Dock="Right" Content="{l:L Preview.Title}" IsVisible="False" VerticalAlignment="Top"
+                                  IsCheckedChanged="PreviewToggle_Changed" MinHeight="32" Padding="10,4" Margin="8,0,0,0" />
+                    <TextBlock x:Name="TotalText" DockPanel.Dock="Right" Classes="secondary" FontSize="13" VerticalAlignment="Center" Margin="8,0,0,0" />
+                    <WrapPanel VerticalAlignment="Center">
+                        <TextBlock FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,12,2" TextWrapping="Wrap">
+                            <Run Text="{l:L List.Header}" /><Run x:Name="CountRun" Text="" FontWeight="Normal" Foreground="{DynamicResource N.TextSecondary}" />
+                        </TextBlock>
+                        <Border x:Name="ChipShrunk" Classes="chip" Margin="0,2,8,2" VerticalAlignment="Center" BorderThickness="0" Background="{DynamicResource N.SuccessBg}">
+                            <TextBlock x:Name="ChipShrunkText" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource N.Success}" />
+                        </Border>
+                        <Border x:Name="ChipKept" Classes="chip" Margin="0,2,8,2" VerticalAlignment="Center">
+                            <TextBlock x:Name="ChipKeptText" FontSize="13" />
+                        </Border>
+                        <Border x:Name="ChipError" Classes="chip" Margin="0,2,8,2" VerticalAlignment="Center" BorderThickness="0" Background="{DynamicResource N.CautionBg}">
+                            <TextBlock x:Name="ChipErrorText" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource N.Caution}" />
+                        </Border>
+                    </WrapPanel>
+                </DockPanel>
+
+                <!-- the drop area stays, small, once there are results -->
+                <Grid x:Name="DropStrip" Grid.Row="1" Margin="0,0,0,12" MinHeight="40">
+                    <Rectangle x:Name="DropStripRect" RadiusX="8" RadiusY="8" StrokeThickness="2" StrokeDashArray="4,3"
+                               Stroke="{DynamicResource N.StrongStroke}" Fill="Transparent" />
+                    <DockPanel Margin="14,8">
+                        <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Drop}" Foreground="{DynamicResource N.Accent}" Margin="0,0,10,0"
+                                      VerticalAlignment="Center" />
+                        <TextBlock x:Name="DropStripText" Text="{l:L Main.DropMore}" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" />
                     </DockPanel>
                 </Grid>
 
-                <DockPanel Grid.Row="1" Margin="0,0,0,8">
-                    <ToggleButton x:Name="PreviewToggle" DockPanel.Dock="Right" Content="{l:L Preview.Title}" IsVisible="False"
-                                  IsCheckedChanged="PreviewToggle_Changed" MinHeight="32" Padding="10,4" />
-                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold">
-                        <Run Text="{l:L List.Header}" /><Run x:Name="CountRun" Text="" FontWeight="Normal" Foreground="{DynamicResource N.TextSecondary}" />
-                    </TextBlock>
-                </DockPanel>
-
-                <Grid Grid.Row="2">
-                    <ListBox x:Name="Results" Background="Transparent" BorderThickness="0"
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionMode="Single"
-                             SelectionChanged="Results_SelectionChanged" KeyDown="Results_KeyDown"
-                             AutomationProperties.Name="{l:L List.Header}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate x:DataType="l:ResultItem">
-                                <Grid Margin="0,4" ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" Background="Transparent">
+                <ListBox x:Name="Results" Grid.Row="2" Background="Transparent" BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionMode="Single"
+                         SelectionChanged="Results_SelectionChanged" KeyDown="Results_KeyDown"
+                         AutomationProperties.Name="{l:L List.Header}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="l:ResultItem">
+                            <Border Classes="result" Classes.error="{Binding IsError}">
+                                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" Background="Transparent">
                                     <Grid.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem Header="{l:L Tile.CopyFile}" InputGesture="Ctrl+Shift+C" Click="CtxCopyFile_Click" IsVisible="{Binding CanDeliver}" />
@@ -160,7 +329,7 @@
                                         </ContextMenu>
                                     </Grid.ContextMenu>
 
-                                    <StackPanel Grid.Column="0" Grid.RowSpan="2" Margin="0,0,12,0" VerticalAlignment="Center">
+                                    <StackPanel Grid.Column="0" Grid.RowSpan="2" Margin="0,0,14,0" VerticalAlignment="Center">
                                         <Border Width="96" Height="72" CornerRadius="6" BorderThickness="1" ClipToBounds="True" Cursor="Hand"
                                                 BorderBrush="{DynamicResource N.CardStroke}" Background="{DynamicResource N.Subtle}"
                                                 ToolTip.Tip="{Binding DragHint}" AutomationProperties.Name="{Binding DragName}"
@@ -170,8 +339,8 @@
                                                 <l:StrokeIcon Data="{StaticResource Icon.Document}" Width="32" Height="32" Thickness="1.25"
                                                               Foreground="{DynamicResource N.Accent}" IsVisible="{Binding ShowDocumentIcon}" />
                                                 <ProgressBar IsIndeterminate="True" Width="60" MinWidth="0" VerticalAlignment="Center" IsVisible="{Binding IsWorking}" />
-                                                <l:StrokeIcon Data="{StaticResource Icon.Error}" Width="28" Height="28" Thickness="1.5"
-                                                              Foreground="{DynamicResource N.Critical}" IsVisible="{Binding IsError}" />
+                                                <l:StrokeIcon Data="{StaticResource Icon.Warning}" Width="28" Height="28" Thickness="1.5"
+                                                              Foreground="{DynamicResource N.Caution}" IsVisible="{Binding IsError}" />
                                             </Grid>
                                         </Border>
                                         <TextBlock Text="{Binding DragHint}" FontSize="12" Classes="secondary" HorizontalAlignment="Center"
@@ -179,15 +348,21 @@
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Text="{l:L Tile.Working}" Classes="secondary" IsVisible="{Binding IsWorking}" />
+                                        <TextBlock Text="{Binding DisplayName}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{l:L Tile.Working}" Classes="secondary" FontSize="13" IsVisible="{Binding IsWorking}" />
                                         <StackPanel IsVisible="{Binding IsOk}">
-                                            <TextBlock TextWrapping="Wrap">
-                                                <Run Text="{Binding SizeText}" /><Run Text=" · " /><Run Text="{Binding SmallerText}" FontWeight="SemiBold"
-                                                                                                     Foreground="{DynamicResource N.Success}" />
-                                            </TextBlock>
+                                            <WrapPanel Margin="0,2,0,2">
+                                                <TextBlock VerticalAlignment="Center" Margin="0,0,10,0" AutomationProperties.Name="{Binding SizeText}">
+                                                    <Run Text="{Binding BeforeText}" FontSize="13" TextDecorations="Strikethrough"
+                                                         Foreground="{DynamicResource N.TextSecondary}" /><Run Text="  →  " FontSize="13" /><Run
+                                                         Text="{Binding AfterText}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource N.Success}" />
+                                                </TextBlock>
+                                                <Border CornerRadius="10" Padding="8,1" VerticalAlignment="Center" Background="{DynamicResource N.SuccessBg}">
+                                                    <TextBlock Text="{Binding SmallerText}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource N.Success}" />
+                                                </Border>
+                                            </WrapPanel>
                                             <TextBlock Text="{Binding PxText}" FontSize="12" Classes="secondary" TextWrapping="Wrap" />
-                                            <ItemsControl ItemsSource="{Binding Badges}" Margin="0,4,0,0">
+                                            <ItemsControl ItemsSource="{Binding Badges}" Margin="0,6,0,0">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
                                                         <WrapPanel />
@@ -195,8 +370,7 @@
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate x:DataType="x:String">
-                                                        <Border CornerRadius="10" Padding="8,1" Margin="0,0,6,4" BorderThickness="1"
-                                                                BorderBrush="{DynamicResource N.CardStroke}" Background="{DynamicResource N.Subtle}">
+                                                        <Border Classes="badge">
                                                             <TextBlock Text="{Binding}" FontSize="12" />
                                                         </Border>
                                                     </DataTemplate>
@@ -204,41 +378,39 @@
                                             </ItemsControl>
                                         </StackPanel>
                                         <StackPanel IsVisible="{Binding IsKept}">
-                                            <TextBlock Text="{l:L Tile.KeptTitle}" FontWeight="SemiBold" FontSize="13" />
-                                            <TextBlock Text="{Binding KeptBody}" TextWrapping="Wrap" FontSize="13" />
+                                            <TextBlock Text="{l:L Tile.KeptTitle}" FontWeight="SemiBold" FontSize="14" Margin="0,2,0,2" />
+                                            <TextBlock Text="{Binding KeptBody}" TextWrapping="Wrap" FontSize="13" Classes="secondary" />
                                         </StackPanel>
                                         <StackPanel IsVisible="{Binding IsError}">
-                                            <TextBlock Text="{l:L Err.Title}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource N.Critical}" />
+                                            <TextBlock Text="{l:L Err.Title}" FontWeight="SemiBold" FontSize="14" Margin="0,2,0,2" Foreground="{DynamicResource N.Caution}" />
                                             <TextBlock Text="{Binding ErrorBody}" TextWrapping="Wrap" FontSize="13" />
                                         </StackPanel>
                                     </StackPanel>
 
-                                    <StackPanel Classes="actions" VerticalAlignment="Center">
-                                        <Button Content="{l:L Tile.CopyFile}" Click="CopyFile_Click" ToolTip.Tip="Ctrl+Shift+C" IsVisible="{Binding CanDeliver}" />
-                                        <Button Content="{l:L Tile.ShowFolder}" Click="ShowFolder_Click" IsVisible="{Binding CanDeliver}" />
-                                        <Button Content="{l:L Tile.Remove}" Click="Remove_Click" IsVisible="{Binding IsError}" />
-                                    </StackPanel>
+                                    <WrapPanel Classes="actions" VerticalAlignment="Center">
+                                        <Button Content="{l:L Tile.CopyFile}" Click="CopyFile_Click" ToolTip.Tip="Ctrl+Shift+C" IsVisible="{Binding CanDeliver}"
+                                                MinWidth="150" Padding="12,5" Margin="0,0,6,4" HorizontalContentAlignment="Center" />
+                                        <Button Content="{l:L Tile.ShowFolder}" Click="ShowFolder_Click" Classes="link" Margin="0,0,6,0" IsVisible="{Binding CanDeliver}" />
+                                        <Button Content="{l:L Tile.Compare}" Click="CtxCompare_Click" Classes="link" Margin="0,0,6,0" ToolTip.Tip="Ctrl+D"
+                                                IsVisible="{Binding CanCompare}" />
+                                        <Button Content="{l:L Tile.Remove}" Click="Remove_Click" Padding="12,5" Margin="0,0,6,4" IsVisible="{Binding IsError}" />
+                                    </WrapPanel>
                                 </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-
-                    <StackPanel x:Name="EmptyState" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="440" Margin="16">
-                        <TextBlock Text="{l:L Empty.Title}" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                        <TextBlock Text="{l:L Empty.Body}" Classes="secondary" TextWrapping="Wrap" TextAlignment="Center" Margin="0,6,0,0" />
-                    </StackPanel>
-                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </Grid>
 
             <!-- Page-fit preview -->
             <Border x:Name="PreviewPanel" Grid.Column="1" Width="380" Margin="16,0,0,0" Classes="card">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel>
+                    <StackPanel Margin="0,0,10,0">
                         <DockPanel Margin="0,0,0,12">
                             <StackPanel x:Name="PageGroup" DockPanel.Dock="Right" Orientation="Horizontal" AutomationProperties.Name="{l:L Preview.PageSize}">
-                                <RadioButton x:Name="PageA4" Tag="A4" GroupName="Page" Content="{l:L Page.A4}" Classes="segment" MinWidth="60"
+                                <RadioButton x:Name="PageA4" Tag="A4" GroupName="Page" Content="{l:L Page.A4}" Classes="seg first" MinWidth="56" MinHeight="28" Padding="10,2"
                                              Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Page_Changed" />
-                                <RadioButton x:Name="PageLetter" Tag="Letter" GroupName="Page" Content="{l:L Page.Letter}" Classes="segment" MinWidth="60"
+                                <RadioButton x:Name="PageLetter" Tag="Letter" GroupName="Page" Content="{l:L Page.Letter}" Classes="seg last" MinWidth="56" MinHeight="28" Padding="10,2"
                                              Theme="{StaticResource {x:Type ToggleButton}}" IsCheckedChanged="Page_Changed" />
                             </StackPanel>
                             <TextBlock x:Name="PreviewHeading" Text="{l:L Preview.Title}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap" />
@@ -261,13 +433,6 @@
                                 </Border>
                             </Border>
                             <TextBlock x:Name="PreviewCaption" TextWrapping="Wrap" Margin="0,12,0,0" FontSize="13" LineHeight="19" />
-                            <Button x:Name="CompareButton" Click="Compare_Click" HorizontalAlignment="Left" Margin="0,12,0,0" Padding="12,5"
-                                    ToolTip.Tip="Ctrl+D" AutomationProperties.Name="{l:L Tile.Compare}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <l:StrokeIcon Data="{StaticResource Icon.Compare}" />
-                                    <TextBlock Text="{l:L Tile.Compare}" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </Button>
                             <TextBlock Text="{l:L Preview.TableCaption}" FontWeight="SemiBold" FontSize="13" Margin="0,14,0,6" />
                             <Grid x:Name="Compare" ColumnDefinitions="Auto,*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="{l:L Preview.ColDetail}" Classes="cmp secondary" FontWeight="SemiBold" Margin="0,0,12,6" />
@@ -275,10 +440,10 @@
                                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{l:L Preview.ColCopy}" Classes="cmp secondary" FontWeight="SemiBold" Margin="0,0,0,6" />
                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="{l:L Preview.RowSize}" Classes="cmp" Margin="0,0,12,6" />
                                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="CmpSizeA" Classes="cmp" />
-                                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="CmpSizeB" Classes="cmp" FontWeight="SemiBold" Margin="0,0,0,6" />
+                                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="CmpSizeB" Classes="cmp" FontWeight="SemiBold" Foreground="{DynamicResource N.Success}" Margin="0,0,0,6" />
                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="{l:L Preview.RowPixels}" Classes="cmp" Margin="0,0,12,6" />
                                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="CmpPxA" Classes="cmp" />
-                                <TextBlock Grid.Row="2" Grid.Column="2" x:Name="CmpPxB" Classes="cmp" Margin="0,0,0,6" />
+                                <TextBlock Grid.Row="2" Grid.Column="2" x:Name="CmpPxB" Classes="cmp" FontWeight="SemiBold" Margin="0,0,0,6" />
                                 <TextBlock Grid.Row="3" Grid.Column="0" Text="{l:L Preview.RowShape}" Classes="cmp" Margin="0,0,12,6" />
                                 <TextBlock Grid.Row="3" Grid.Column="1" x:Name="CmpShapeA" Classes="cmp" />
                                 <TextBlock Grid.Row="3" Grid.Column="2" x:Name="CmpShapeB" Classes="cmp" FontWeight="SemiBold" Margin="0,0,0,6" />
@@ -290,6 +455,13 @@
                                 <TextBlock Grid.Row="5" Grid.Column="2" x:Name="CmpLocB" Classes="cmp" Margin="0" />
                             </Grid>
                             <TextBlock x:Name="PreviewShapeNote" FontSize="13" TextWrapping="Wrap" Margin="0,12,0,0" LineHeight="19" />
+                            <Button x:Name="CompareButton" Click="Compare_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,14,0,0" Padding="12,5"
+                                    ToolTip.Tip="Ctrl+D" AutomationProperties.Name="{l:L Tile.Compare}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <l:StrokeIcon Data="{StaticResource Icon.Compare}" />
+                                    <TextBlock Text="{l:L Tile.Compare}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
                             <TextBlock Text="{l:L Preview.Untouched}" Classes="secondary" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" />
                         </StackPanel>
 
@@ -300,7 +472,7 @@
                                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{l:L Preview.ColCopy}" Classes="cmp secondary" FontWeight="SemiBold" Margin="0,0,0,6" />
                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="{l:L Doc.RowDocument}" Classes="cmp" Margin="0,0,12,6" MaxWidth="130" />
                                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="DocSizeA" Classes="cmp" />
-                                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="DocSizeB" Classes="cmp" FontWeight="SemiBold" Margin="0,0,0,6" />
+                                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="DocSizeB" Classes="cmp" FontWeight="SemiBold" Foreground="{DynamicResource N.Success}" Margin="0,0,0,6" />
                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="{l:L Doc.RowPictures}" Classes="cmp" Margin="0,0,12,0" MaxWidth="130" />
                                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="DocPicsA" Classes="cmp" Margin="0,0,8,0" />
                                 <TextBlock Grid.Row="2" Grid.Column="2" x:Name="DocPicsB" Classes="cmp" Margin="0" />
@@ -327,9 +499,10 @@
                             <TextBlock Text="{l:L Doc.Step2}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4" />
                             <TextBlock Text="{l:L Doc.Step3}" FontSize="13" TextWrapping="Wrap" />
                             <Border Margin="0,12,0,0" Padding="12,8" CornerRadius="6" BorderThickness="1"
-                                    BorderBrush="{DynamicResource N.CardStroke}" Background="{DynamicResource N.Subtle}">
+                                    BorderBrush="{DynamicResource N.Caution}" Background="{DynamicResource N.CautionBg}">
                                 <DockPanel>
-                                    <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Info}" VerticalAlignment="Top" Margin="0,1,10,0" />
+                                    <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Warning}" VerticalAlignment="Top" Margin="0,1,10,0"
+                                                  Foreground="{DynamicResource N.Caution}" />
                                     <TextBlock Text="{l:L Doc.Warning}" FontSize="13" TextWrapping="Wrap" />
                                 </DockPanel>
                             </Border>
@@ -344,9 +517,10 @@
                             </StackPanel>
                         </Border>
 
-                        <Border x:Name="PreviewError" IsVisible="False" Padding="16" CornerRadius="6" Background="{DynamicResource N.Subtle}">
+                        <Border x:Name="PreviewError" IsVisible="False" Padding="16" CornerRadius="6" BorderThickness="1"
+                                BorderBrush="{DynamicResource N.Caution}" Background="{DynamicResource N.CautionBg}">
                             <StackPanel>
-                                <TextBlock Text="{l:L Err.Title}" FontWeight="SemiBold" Foreground="{DynamicResource N.Critical}" TextWrapping="Wrap" />
+                                <TextBlock Text="{l:L Err.Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
                                 <TextBlock x:Name="PreviewErrorBody" TextWrapping="Wrap" FontSize="13" Margin="0,6,0,0" />
                             </StackPanel>
                         </Border>
@@ -357,9 +531,8 @@
             </Border>
         </Grid>
 
-        <!-- Status bar -->
-        <Border Grid.Row="3" BorderThickness="0,1,0,0" Padding="16,8"
-                BorderBrush="{DynamicResource N.Divider}" Background="{DynamicResource N.Layer}">
+        <!-- Status bar: the same bottom bar as every NACHO window -->
+        <Border Grid.Row="3" Classes="cmdbar" Padding="24,8">
             <DockPanel>
                 <TextBlock x:Name="SavingsText" DockPanel.Dock="Right" Classes="secondary" FontSize="13" Margin="16,0,0,0" VerticalAlignment="Center" />
                 <TextBlock x:Name="StatusText" FontSize="13" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"

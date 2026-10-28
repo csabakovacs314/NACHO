@@ -1,0 +1,392 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="using:Nacho.Linux"
+        x:Class="Nacho.Linux.GoogleDocWindow"
+        Title="{l:L Gd.Title}" Width="720" Height="860" MinWidth="480" MinHeight="520"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="True">
+    <Window.Styles>
+        <Style Selector="TextBlock.hint">
+            <Setter Property="Foreground" Value="{DynamicResource N.TextSecondary}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="Border.chip">
+            <Setter Property="Padding" Value="10,3" />
+            <Setter Property="Margin" Value="0,0,8,6" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource N.Card}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource N.CardStroke}" />
+        </Style>
+        <Style Selector="Button.link">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource N.Accent}" />
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource N.Subtle}" />
+            <Setter Property="Foreground" Value="{DynamicResource N.Accent}" />
+        </Style>
+        <Style Selector="Border.choice">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Background" Value="{DynamicResource N.Card}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource N.StrongStroke}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="Border.choice.selected">
+            <Setter Property="BorderBrush" Value="{DynamicResource N.Accent}" />
+            <Setter Property="BorderThickness" Value="2" />
+        </Style>
+    </Window.Styles>
+
+    <Grid x:Name="Root" RowDefinitions="*,Auto">
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="28,18,28,12">
+
+                <!-- H1: where am I, what comes next. Built in code (five steps, four lines). -->
+                <Grid x:Name="StepsGrid" Margin="0,0,0,16" AutomationProperties.Name="{l:L Gd.Steps}" />
+
+                <!-- What NACHO may change right now (shown while nothing can change) -->
+                <Border x:Name="SafeBar" Padding="14,10" CornerRadius="6" BorderThickness="1" Margin="0,0,0,14"
+                        Background="{DynamicResource N.SuccessBg}" BorderBrush="{DynamicResource N.Success}">
+                    <DockPanel>
+                        <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Shield}" Width="20" Height="20" Margin="0,0,12,0"
+                                      VerticalAlignment="Center" Foreground="{DynamicResource N.Success}" />
+                        <Border DockPanel.Dock="Right" CornerRadius="10" BorderThickness="1" Padding="10,2" Margin="12,0,0,0" VerticalAlignment="Center"
+                                BorderBrush="{DynamicResource N.Success}" Background="{DynamicResource N.Card}">
+                            <TextBlock x:Name="SafeTag" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource N.Success}" />
+                        </Border>
+                        <TextBlock x:Name="SafeText" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
+                    </DockPanel>
+                </Border>
+
+                <!-- Who is signed in -->
+                <Border x:Name="AccountCard" Classes="card" Padding="14,10" Margin="0,0,0,14">
+                    <DockPanel>
+                        <Button x:Name="OtherAccountButton" DockPanel.Dock="Right" Content="{l:L Gd.OtherAccount}" Click="OtherAccount_Click"
+                                Padding="12,4" Margin="12,0,0,0" VerticalAlignment="Center" />
+                        <Border DockPanel.Dock="Left" Width="32" Height="32" CornerRadius="16" Margin="0,0,12,0" Background="{DynamicResource N.Accent}">
+                            <TextBlock x:Name="AccountInitial" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" FontSize="14"
+                                       Foreground="{DynamicResource N.OnAccent}" />
+                        </Border>
+                        <TextBlock x:Name="AccountText" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="14" AutomationProperties.LiveSetting="Polite" />
+                    </DockPanel>
+                </Border>
+
+                <!-- 1 Choose -->
+                <StackPanel x:Name="ChoosePanel">
+                    <Border Classes="card" Padding="22,20" Margin="0,0,0,16">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Left" Width="60" Height="74" CornerRadius="6" Margin="0,0,20,0" VerticalAlignment="Top"
+                                    Background="{DynamicResource N.AttentionBg}" BorderThickness="1" BorderBrush="{DynamicResource N.CardStroke}">
+                                <l:StrokeIcon Data="{StaticResource Icon.Picture}" Width="30" Height="30" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Foreground="{DynamicResource N.Accent}" />
+                            </Border>
+                            <StackPanel>
+                                <TextBlock Text="{l:L Gd.Which}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,6" />
+                                <TextBlock Text="{l:L Gd.ChooseHint}" FontSize="14" TextWrapping="Wrap" Classes="secondary" Margin="0,0,0,12" />
+                                <Button x:Name="ChooseButton" Classes="accent" Content="{l:L Gd.Choose}" Click="Choose_Click" HorizontalAlignment="Left"
+                                        MinHeight="40" Padding="20,6" FontSize="14" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+
+                    <Label Content="{l:L Gd.LinkLabel}" Target="{Binding #LinkBox}" Padding="0" Margin="2,0,0,6" FontWeight="SemiBold" FontSize="14" />
+                    <DockPanel Margin="2,0,2,0">
+                        <Button x:Name="CheckLinkButton" DockPanel.Dock="Right" Content="{l:L Gd.CheckLink}" Click="CheckLink_Click" MinHeight="34" Padding="14,4" Margin="8,0,0,0" />
+                        <TextBox x:Name="LinkBox" TextChanged="LinkBox_TextChanged" MinHeight="34" VerticalContentAlignment="Center"
+                                 AutomationProperties.HelpText="{l:L Gd.LinkHint}" />
+                    </DockPanel>
+                    <TextBlock Text="{l:L Gd.LinkHint}" Classes="hint" Margin="2,6,0,0" />
+                    <TextBlock x:Name="LinkError" IsVisible="False" TextWrapping="Wrap" Margin="2,6,0,0" FontSize="13"
+                               Foreground="{DynamicResource N.Critical}" AutomationProperties.LiveSetting="Assertive" />
+
+                    <StackPanel x:Name="RecentPanel" Margin="0,18,0,0">
+                        <TextBlock Text="{l:L Gd.Recent}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+                        <StackPanel x:Name="RecentList" />
+                    </StackPanel>
+
+                    <WrapPanel Margin="0,18,0,0">
+                        <Border Classes="chip"><TextBlock x:Name="PresetChip" FontSize="12" /></Border>
+                        <Border Classes="chip"><TextBlock x:Name="OriginalsChip" FontSize="12" /></Border>
+                        <Button Classes="link" Content="{l:L Gd.Change}" Click="Change_Click" FontSize="12" Margin="0,0,0,6" />
+                    </WrapPanel>
+                </StackPanel>
+
+                <!-- The Doc being worked on (steps 2 and 3) -->
+                <Border x:Name="DocCard" Classes="card" Margin="0,0,0,14" IsVisible="False">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Classes="link" Content="{l:L Gd.OpenBrowser}" Click="OpenOriginal_Click" VerticalAlignment="Center" />
+                        <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Document}" Width="24" Height="24" Margin="0,0,14,0"
+                                      VerticalAlignment="Center" Foreground="{DynamicResource N.Accent}" />
+                        <StackPanel>
+                            <TextBlock x:Name="DocTitle" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <TextBlock x:Name="DocInfo" Classes="hint" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- 2 Check -->
+                <StackPanel x:Name="CheckPanel" IsVisible="False">
+                    <Border Classes="card" Padding="18,16" Margin="0,0,0,14">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,10">
+                                <TextBlock x:Name="CheckLeft" DockPanel.Dock="Right" Classes="hint" FontSize="13" VerticalAlignment="Bottom" />
+                                <TextBlock x:Name="CheckTitle" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+                            </DockPanel>
+                            <ProgressBar x:Name="CheckBar" Height="8" Minimum="0" Maximum="1" Margin="0,0,0,12"
+                                         AutomationProperties.LabeledBy="{Binding #CheckTitle}" />
+                            <UniformGrid x:Name="Tiles" Columns="24" Margin="0,0,0,10" />
+                            <WrapPanel x:Name="Legend" Margin="0,0,0,6" />
+                            <Border x:Name="LastBorder" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource N.Divider}" Padding="0,8,0,0">
+                                <TextBlock x:Name="LastLine" FontSize="13" TextWrapping="Wrap" />
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                    <UniformGrid x:Name="ResourceGrid" Columns="2" Margin="0,0,0,10">
+                        <Border Classes="card" Padding="14,10" Margin="0,0,6,0">
+                            <StackPanel>
+                                <TextBlock Text="{l:L Gd.Space}" Classes="hint" />
+                                <TextBlock x:Name="SpaceText" FontSize="14" TextWrapping="Wrap" Margin="0,2,0,0" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="card" Padding="14,10" Margin="6,0,0,0">
+                            <StackPanel>
+                                <TextBlock Text="{l:L Gd.Conn}" Classes="hint" />
+                                <TextBlock x:Name="ConnText" FontSize="14" TextWrapping="Wrap" Margin="0,2,0,0" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                    <TextBlock Text="{l:L Gd.KeepUsing}" Classes="hint" />
+                </StackPanel>
+
+                <!-- 3 Decide -->
+                <StackPanel x:Name="DecidePanel" IsVisible="False">
+                    <Border Classes="card" Padding="18,14" Margin="0,0,0,14">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,10">
+                                <TextBlock x:Name="CheckedAt" DockPanel.Dock="Right" Classes="hint" VerticalAlignment="Bottom" Margin="10,0,0,0" />
+                                <TextBlock x:Name="ResultTitle" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            </DockPanel>
+                            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" Margin="0,0,0,10">
+                                <TextBlock Text="{l:L Gd.BarNow}" Classes="hint" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,6" MinWidth="54" />
+                                <Border Grid.Column="1" Height="14" CornerRadius="3" Margin="0,0,10,6" Background="{DynamicResource N.StrongStroke}" />
+                                <TextBlock x:Name="BeforeText" Grid.Column="2" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Right" Margin="0,0,0,6" MinWidth="70" TextAlignment="Right" />
+                                <TextBlock Grid.Row="1" Text="{l:L Gd.BarAfter}" Classes="hint" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <Grid x:Name="AfterBar" Grid.Row="1" Grid.Column="1" ColumnDefinitions="5*,95*" Margin="0,0,10,0">
+                                    <Border Height="14" CornerRadius="3" MinWidth="6" Background="{DynamicResource N.Success}" />
+                                </Grid>
+                                <TextBlock x:Name="AfterText" Grid.Row="1" Grid.Column="2" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Right" TextAlignment="Right"
+                                           Foreground="{DynamicResource N.Success}" />
+                            </Grid>
+                            <WrapPanel x:Name="CountChips" />
+                            <Expander x:Name="AllPictures" Header="{l:L Gd.SeeAll}" Margin="0,4,0,0" HorizontalAlignment="Stretch">
+                                <ListBox x:Name="PictureList" MaxHeight="220" Margin="0,6,0,0" AutomationProperties.Name="{l:L Gd.SeeAll}" />
+                            </Expander>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock x:Name="NothingText" Text="{l:L Gd.Nothing}" IsVisible="False" TextWrapping="Wrap" FontSize="14" Margin="0,0,0,12" />
+
+                    <StackPanel x:Name="WherePanel">
+                        <TextBlock Text="{l:L Gd.WhereQ}" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,8" />
+                        <Border x:Name="CopyCard" Classes="choice" Margin="0,0,0,10">
+                            <RadioButton x:Name="CopyRadio" GroupName="Dest" IsCheckedChanged="Dest_Changed" Margin="16,12" HorizontalContentAlignment="Stretch"
+                                         AutomationProperties.HelpText="{l:L Gd.CopyPro1}">
+                                <StackPanel Margin="4,0,0,0">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="{l:L Gd.IntoCopy}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                        <Border CornerRadius="10" Padding="8,1" Margin="10,0,0,0" VerticalAlignment="Center" Background="{DynamicResource N.Accent}">
+                                            <TextBlock Text="{l:L Gd.Recommended}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource N.OnAccent}" />
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock x:Name="CopySub" Classes="hint" FontSize="13" Margin="0,0,0,8" />
+                                    <UniformGrid Columns="2">
+                                        <DockPanel Margin="0,0,10,4"><l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Check}" Width="14" Height="14" Margin="0,2,6,0" VerticalAlignment="Top" Foreground="{DynamicResource N.Success}" /><TextBlock Text="{l:L Gd.CopyPro1}" FontSize="13" TextWrapping="Wrap" /></DockPanel>
+                                        <DockPanel Margin="0,0,0,4"><l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Check}" Width="14" Height="14" Margin="0,2,6,0" VerticalAlignment="Top" Foreground="{DynamicResource N.Success}" /><TextBlock Text="{l:L Gd.CopyPro2}" FontSize="13" TextWrapping="Wrap" /></DockPanel>
+                                        <DockPanel Margin="0,0,10,0"><l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Info}" Width="14" Height="14" Margin="0,2,6,0" VerticalAlignment="Top" Foreground="{DynamicResource N.Caution}" /><TextBlock Text="{l:L Gd.CopyCon1}" FontSize="13" TextWrapping="Wrap" /></DockPanel>
+                                        <DockPanel><l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Info}" Width="14" Height="14" Margin="0,2,6,0" VerticalAlignment="Top" Foreground="{DynamicResource N.Caution}" /><TextBlock Text="{l:L Gd.CopyCon2}" FontSize="13" TextWrapping="Wrap" /></DockPanel>
+                                    </UniformGrid>
+                                </StackPanel>
+                            </RadioButton>
+                        </Border>
+                        <Border x:Name="DocChoiceCard" Classes="choice" Margin="0,0,0,12">
+                            <RadioButton x:Name="DocRadio" GroupName="Dest" Margin="16,12" HorizontalContentAlignment="Stretch"
+                                         AutomationProperties.HelpText="{l:L Gd.DocPro1}">
+                                <StackPanel Margin="4,0,0,0">
+                                    <TextBlock Text="{l:L Gd.IntoDoc}" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <TextBlock Text="{l:L Gd.IntoDocSub}" Classes="hint" FontSize="13" Margin="0,0,0,8" />
+                                    <UniformGrid Columns="2">
+                                        <DockPanel Margin="0,0,10,4"><l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Check}" Width="14" Height="14" Margin="0,2,6,0" VerticalAlignment="Top" Foreground="{DynamicResource N.Success}" /><TextBlock Text="{l:L Gd.DocPro1}" FontSize="13" TextWrapping="Wrap" /></DockPanel>
+                                        <DockPanel Margin="0,0,0,4"><l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Check}" Width="14" Height="14" Margin="0,2,6,0" VerticalAlignment="Top" Foreground="{DynamicResource N.Success}" /><TextBlock Text="{l:L Gd.DocPro2}" FontSize="13" TextWrapping="Wrap" /></DockPanel>
+                                        <DockPanel Margin="0,0,10,0"><l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Info}" Width="14" Height="14" Margin="0,2,6,0" VerticalAlignment="Top" Foreground="{DynamicResource N.Caution}" /><TextBlock Text="{l:L Gd.DocCon1}" FontSize="13" TextWrapping="Wrap" /></DockPanel>
+                                        <DockPanel><l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Info}" Width="14" Height="14" Margin="0,2,6,0" VerticalAlignment="Top" Foreground="{DynamicResource N.Caution}" /><TextBlock Text="{l:L Gd.DocCon2}" FontSize="13" TextWrapping="Wrap" /></DockPanel>
+                                    </UniformGrid>
+                                </StackPanel>
+                            </RadioButton>
+                        </Border>
+
+                        <Border x:Name="WillBanner" Padding="14,10" CornerRadius="6" BorderThickness="1" Margin="0,0,0,10">
+                            <DockPanel>
+                                <l:StrokeIcon x:Name="WillIcon" DockPanel.Dock="Left" Data="{StaticResource Icon.Pen}" Width="20" Height="20" Margin="0,0,12,0" VerticalAlignment="Center" />
+                                <TextBlock x:Name="WillText" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
+                            </DockPanel>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock x:Name="EstimateText" Classes="hint" Margin="0,0,0,4" />
+                    <TextBlock Text="{l:L Gd.ShareNote}" Classes="hint" />
+                </StackPanel>
+
+                <!-- 4 Replace -->
+                <StackPanel x:Name="ReplacePanel" IsVisible="False">
+                    <Grid x:Name="CardsGrid" ColumnDefinitions="*,*" Margin="0,0,0,14">
+                        <Border x:Name="OriginalCard" Classes="card" Margin="0,0,6,0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <l:StrokeIcon x:Name="OriginalTagIcon" Data="{StaticResource Icon.Lock}" Margin="0,0,8,0" />
+                                    <TextBlock x:Name="OriginalTag" FontSize="11" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock x:Name="OriginalName" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock x:Name="OriginalBody" Classes="hint" Margin="0,2,0,0" />
+                            </StackPanel>
+                        </Border>
+                        <Border x:Name="CopyWriteCard" Grid.Column="1" Classes="card" Margin="6,0,0,0" BorderThickness="2" BorderBrush="{DynamicResource N.Accent}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <l:StrokeIcon Data="{StaticResource Icon.Pen}" Margin="0,0,8,0" Foreground="{DynamicResource N.Accent}" />
+                                    <TextBlock Text="{l:L Gd.TagCopy}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource N.Accent}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock x:Name="CopyName" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <WrapPanel Margin="0,2,0,0">
+                                    <TextBlock x:Name="CopyBody" Classes="hint" VerticalAlignment="Center" />
+                                    <Button x:Name="OpenNowButton" Classes="link" Content="{l:L Gd.OpenNow}" Click="OpenCopy_Click" FontSize="12" Padding="6,0" MinHeight="20" />
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Border Classes="card" Padding="18,16" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock x:Name="ReplaceTitle" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,12" AutomationProperties.LiveSetting="Polite" />
+                            <DockPanel x:Name="PhaseCopy" Margin="0,0,0,12">
+                                <l:StrokeIcon x:Name="PhaseCopyIcon" DockPanel.Dock="Left" Width="20" Height="20" Margin="0,0,12,0" VerticalAlignment="Top" />
+                                <StackPanel>
+                                    <TextBlock x:Name="PhaseCopyText" FontSize="14" TextWrapping="Wrap" />
+                                    <TextBlock x:Name="PhaseCopyDetail" Classes="hint" />
+                                </StackPanel>
+                            </DockPanel>
+                            <DockPanel Margin="0,0,0,12">
+                                <l:StrokeIcon x:Name="PhaseReplaceIcon" DockPanel.Dock="Left" Width="20" Height="20" Margin="0,0,12,0" VerticalAlignment="Top" />
+                                <StackPanel>
+                                    <DockPanel>
+                                        <TextBlock x:Name="ReplaceLeft" DockPanel.Dock="Right" Classes="hint" FontSize="13" />
+                                        <TextBlock Text="{l:L Gd.PhReplace}" FontSize="14" FontWeight="SemiBold" />
+                                    </DockPanel>
+                                    <ProgressBar x:Name="ReplaceBar" Height="8" Minimum="0" Maximum="1" Margin="0,8,0,6" AutomationProperties.LabeledBy="{Binding #ReplaceTitle}" />
+                                    <TextBlock x:Name="GroupText" Classes="hint" />
+                                </StackPanel>
+                            </DockPanel>
+                            <DockPanel Margin="0,0,0,12">
+                                <l:StrokeIcon x:Name="PhaseCleanIcon" DockPanel.Dock="Left" Width="20" Height="20" Margin="0,0,12,0" VerticalAlignment="Top" />
+                                <TextBlock Text="{l:L Gd.PhClean}" FontSize="14" TextWrapping="Wrap" Classes="secondary" />
+                            </DockPanel>
+                            <Border x:Name="LogBox" Padding="12,8" CornerRadius="6" Background="{DynamicResource N.Subtle}">
+                                <StackPanel x:Name="LogLines" />
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="card" Padding="14,10">
+                        <DockPanel>
+                            <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Clock}" Margin="0,0,10,0" VerticalAlignment="Top" Foreground="{DynamicResource N.TextSecondary}" />
+                            <TextBlock x:Name="StopSafeText" FontSize="13" TextWrapping="Wrap" />
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- 5 Done -->
+                <StackPanel x:Name="DonePanel" IsVisible="False">
+                    <Border Classes="card" Padding="24,22" Margin="0,0,0,14">
+                        <StackPanel HorizontalAlignment="Center">
+                            <l:StrokeIcon x:Name="DoneIcon" Data="{StaticResource Icon.CheckCircle}" Width="48" Height="48" Thickness="1.4" HorizontalAlignment="Center" Margin="0,0,0,8" />
+                            <TextBlock x:Name="DoneTitle" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                                       AutomationProperties.LiveSetting="Assertive" />
+                            <TextBlock x:Name="DoneSub" FontSize="14" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,4,0,8" Classes="secondary" />
+                            <StackPanel x:Name="DoneNumbers" Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock x:Name="DoneBefore" FontSize="26" TextDecorations="Strikethrough" VerticalAlignment="Center" Classes="secondary" />
+                                <l:StrokeIcon Data="{StaticResource Icon.Arrow}" Width="20" Height="20" Margin="14,0" VerticalAlignment="Center" Foreground="{DynamicResource N.Text}" />
+                                <TextBlock x:Name="DoneAfter" FontSize="32" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource N.Success}" />
+                                <Border CornerRadius="12" Padding="10,2" Margin="14,0,0,0" VerticalAlignment="Center" Background="{DynamicResource N.SuccessBg}">
+                                    <TextBlock x:Name="DonePct" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource N.Success}" />
+                                </Border>
+                            </StackPanel>
+                            <TextBlock x:Name="DoneChanged" FontSize="13" TextWrapping="Wrap" TextAlignment="Center" Margin="0,10,0,0" />
+                            <TextBlock x:Name="DoneFailed" FontSize="13" TextWrapping="Wrap" TextAlignment="Center" Margin="0,4,0,0" Foreground="{DynamicResource N.Critical}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="card" Padding="0" Margin="0,0,0,14">
+                        <StackPanel>
+                            <DockPanel x:Name="RowCopy" Margin="16,12">
+                                <Button DockPanel.Dock="Right" Content="{l:L Gd.CopyLink}" Click="CopyLink_Click" Padding="12,4" VerticalAlignment="Center" />
+                                <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Document}" Width="20" Height="20" Margin="0,0,14,0" VerticalAlignment="Center" Foreground="{DynamicResource N.Accent}" />
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock x:Name="RowCopyName" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                    <TextBlock Text="{l:L Gd.RowCopySub}" Classes="hint" />
+                                </StackPanel>
+                            </DockPanel>
+                            <Border x:Name="RowCopyLine" Height="1" Background="{DynamicResource N.Divider}" />
+                            <DockPanel Margin="16,12">
+                                <Button x:Name="RowOriginalButton" DockPanel.Dock="Right" Classes="link" Click="OpenOriginal_Click" VerticalAlignment="Center" />
+                                <l:StrokeIcon x:Name="RowOriginalIcon" DockPanel.Dock="Left" Width="20" Height="20" Margin="0,0,14,0" VerticalAlignment="Center" />
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock x:Name="RowOriginalName" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                    <TextBlock x:Name="RowOriginalSub" Classes="hint" />
+                                </StackPanel>
+                            </DockPanel>
+                            <Border x:Name="RowPcLine" Height="1" Background="{DynamicResource N.Divider}" />
+                            <DockPanel x:Name="RowPc" Margin="16,12">
+                                <Button DockPanel.Dock="Right" Classes="link" Content="{l:L Gd.Show}" Click="Originals_Click" VerticalAlignment="Center" />
+                                <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Folder}" Width="20" Height="20" Margin="0,0,14,0" VerticalAlignment="Center" Foreground="{DynamicResource N.TextSecondary}" />
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock x:Name="RowPcTitle" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                    <TextBlock x:Name="RowPcPath" Classes="hint" />
+                                </StackPanel>
+                            </DockPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Padding="14,10" CornerRadius="6" BorderThickness="1" Background="{DynamicResource N.AttentionBg}" BorderBrush="{DynamicResource N.CardStroke}">
+                        <DockPanel>
+                            <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Info}" Margin="0,1,10,0" VerticalAlignment="Top" Foreground="{DynamicResource N.Accent}" />
+                            <TextBlock x:Name="DoneNote" FontSize="13" TextWrapping="Wrap" />
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Problems, in plain words -->
+                <Border x:Name="ErrorPanel" IsVisible="False" Padding="14,10" CornerRadius="6" BorderThickness="1" Margin="0,14,0,0"
+                        BorderBrush="{DynamicResource N.Critical}" Background="{DynamicResource N.CriticalBg}">
+                    <DockPanel>
+                        <l:StrokeIcon DockPanel.Dock="Left" Data="{StaticResource Icon.Error}" VerticalAlignment="Top" Margin="0,1,10,0" Foreground="{DynamicResource N.Critical}" />
+                        <TextBlock x:Name="ErrorText" TextWrapping="Wrap" FontSize="13" AutomationProperties.LiveSetting="Assertive" />
+                    </DockPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Commands: the main action on the right, Close/Cancel/Stop last -->
+        <Border Grid.Row="1" Padding="28,12" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource N.Divider}" Background="{DynamicResource N.Layer}">
+            <DockPanel>
+                <Button x:Name="LeftButton" DockPanel.Dock="Left" Click="Left_Click" Padding="12,4" Margin="0,0,12,0" IsVisible="False" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button x:Name="PrimaryButton" Classes="accent" Click="Primary_Click" MinWidth="96" Padding="16,4" Margin="0,0,8,0" />
+                    <Button x:Name="CloseButton" IsCancel="True" Click="Close_Click" MinWidth="96" Padding="12,4" />
+                </StackPanel>
+                <TextBlock x:Name="HintText" Classes="hint" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

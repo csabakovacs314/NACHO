@@ -23,6 +23,21 @@ public sealed class AppSettings
     public string SavingsMonth { get; set; } = "";
     public long SavingsBytes { get; set; }
 
+    /// <summary>Google Docs in place: keep copies of the original pictures in Docs-Ready.</summary>
+    public bool GoogleKeepOriginals { get; set; } = true;
+
+    /// <summary>The user's own Google client file, or "" for the client built into NACHO.</summary>
+    public string GoogleClientFile { get; set; } = "";
+
+    /// <summary>Who is signed in, for display only (the sign-in itself is kept encrypted elsewhere).</summary>
+    public string GoogleEmail { get; set; } = "";
+
+    /// <summary>Where the smaller pictures go: a new copy of the Doc (true, the safe default) or the Doc itself.</summary>
+    public bool GoogleIntoCopy { get; set; } = true;
+
+    /// <summary>The last Docs NACHO shrank, newest first, for the "Recently shrunk" list.</summary>
+    public List<Nacho.Core.Google.GoogleRecent> GoogleRecent { get; set; } = new();
+
     /// <summary>The self-test points this at its own folder so it never touches the real settings.</summary>
     public static string? PathOverride { get; set; }
 
@@ -70,6 +85,11 @@ public sealed class AppSettings
 
     public void Normalise()
     {
+        // Only well-formed Doc IDs come back from the file: the list opens them in the browser.
+        GoogleRecent = (GoogleRecent ?? new())
+            .Where(r => r is not null && !string.IsNullOrEmpty(r.DocId)
+                && Nacho.Core.Google.GoogleDocLink.TryGetId(Nacho.Core.Google.GoogleDocLink.EditUrl(r.DocId)) == r.DocId)
+            .Take(Nacho.Core.Google.GoogleRecent.Keep).ToList();
         if (!Strings.Languages.Contains(Language))
         {
             Language = InstallerLanguage() ?? Strings.Normalise(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);

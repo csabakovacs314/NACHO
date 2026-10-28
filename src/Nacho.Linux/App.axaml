@@ -20,6 +20,13 @@
                     <SolidColorBrush x:Key="N.Accent" Color="#005FB8" />
                     <SolidColorBrush x:Key="N.Success" Color="#0A6B0A" />
                     <SolidColorBrush x:Key="N.Critical" Color="#B42619" />
+                    <SolidColorBrush x:Key="N.Caution" Color="#9D5D00" />
+                    <SolidColorBrush x:Key="N.SuccessBg" Color="#DFF6DD" />
+                    <SolidColorBrush x:Key="N.CautionBg" Color="#FFF4CE" />
+                    <SolidColorBrush x:Key="N.AttentionBg" Color="#EAF2FB" />
+                    <SolidColorBrush x:Key="N.CriticalBg" Color="#FDE7E9" />
+                    <SolidColorBrush x:Key="N.OnAccent" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="N.Waiting" Color="#D1D1D1" />
                     <!-- Light buttons with a thin border, like Windows 11 and the mockup, instead of Avalonia's grey. -->
                     <SolidColorBrush x:Key="ButtonBackground" Color="#FBFBFB" />
                     <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#F4F4F4" />
@@ -51,6 +58,13 @@
                     <SolidColorBrush x:Key="N.Accent" Color="#60CDFF" />
                     <SolidColorBrush x:Key="N.Success" Color="#6CCB5F" />
                     <SolidColorBrush x:Key="N.Critical" Color="#FF99A4" />
+                    <SolidColorBrush x:Key="N.Caution" Color="#FCE100" />
+                    <SolidColorBrush x:Key="N.SuccessBg" Color="#2A3A27" />
+                    <SolidColorBrush x:Key="N.CautionBg" Color="#3F361A" />
+                    <SolidColorBrush x:Key="N.AttentionBg" Color="#22303D" />
+                    <SolidColorBrush x:Key="N.CriticalBg" Color="#442726" />
+                    <SolidColorBrush x:Key="N.OnAccent" Color="#000000" />
+                    <SolidColorBrush x:Key="N.Waiting" Color="#4A4A4A" />
                     <SolidColorBrush x:Key="ButtonBackground" Color="#2D2D2D" />
                     <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#353535" />
                     <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#282828" />
@@ -90,6 +104,20 @@
             <StreamGeometry x:Key="Icon.Compare">M2.5,3 H13.5 V13 H2.5 Z M8,1.5 V14.5 M4.25,8 H6.25 M9.75,8 H11.75</StreamGeometry>
             <StreamGeometry x:Key="Icon.Info">M8,1.5 A6.5,6.5 0 1 1 7.99,1.5 Z M8,7.25 V11.5 M8,4.75 V5</StreamGeometry>
             <StreamGeometry x:Key="Icon.Chevrons">M6,4.5 L2.5,8 L6,11.5 M10,4.5 L13.5,8 L10,11.5</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Cloud">M4.5,12.5 A3,3 0 0 1 4.6,6.5 A4,4 0 0 1 12.2,7.2 A2.65,2.65 0 0 1 11.75,12.5 Z</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Account">M8,2 A2.75,2.75 0 1 1 7.99,2 Z M2.75,14 C3.25,10.75 5.25,9.5 8,9.5 C10.75,9.5 12.75,10.75 13.25,14</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Check">M2.75,8.5 L6.25,12 L13.25,4.5</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Lock">M4,7.5 H12 V14 H4 Z M5.75,7.5 V5 A2.25,2.25 0 0 1 10.25,5 V7.5</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Pen">M2.5,13.5 H5 L13,5.5 L10.5,3 L2.5,11 Z M9,4.5 L11.5,7</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Shield">M8,1.75 L13,3.75 V7.5 C13,10.6 10.9,13.1 8,14.25 C5.1,13.1 3,10.6 3,7.5 V3.75 Z M5.75,8 L7.25,9.5 L10.25,6.25</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Folder">M1.75,4 H6.25 L7.75,5.5 H14.25 V13 H1.75 Z</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Clock">M8,1.5 A6.5,6.5 0 1 1 7.99,1.5 Z M8,4.5 V8 L10.25,9.5</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Arrow">M2,8 H13.5 M9.5,4 L13.5,8 L9.5,12</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Picture">M2,3 H14 V13 H2 Z M2.5,11.5 L6,7.5 L8.5,10 L10.25,8.5 L13.5,11.5 M10.75,5.75 A0.75,0.75 0 1 1 10.74,5.75</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Circle">M8,2 A6,6 0 1 1 7.99,2 Z</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Sync">M13,8 A5,5 0 1 1 11.5,4.4 M11.5,1.75 V4.6 H8.65</StreamGeometry>
+            <StreamGeometry x:Key="Icon.Warning">M8,2 L14.5,13.5 H1.5 Z M8,6.25 V9.5 M8,11.5 V11.75</StreamGeometry>
+            <StreamGeometry x:Key="Icon.CheckCircle">M8,1.5 A6.5,6.5 0 1 1 7.99,1.5 Z M5,8.25 L7,10.25 L11,6</StreamGeometry>
             <StreamGeometry x:Key="Icon.Error">M8,1.5 A6.5,6.5 0 1 1 7.99,1.5 Z M5.75,5.75 L10.25,10.25 M10.25,5.75 L5.75,10.25</StreamGeometry>
         </ResourceDictionary>
     </Application.Resources>
@@ -118,6 +146,155 @@
         </Style>
         <Style Selector="Button">
             <Setter Property="MinHeight" Value="32" />
+        </Style>
+
+        <!-- One look for every NACHO window (the same as the Windows app): cards, chips, segments, links, the bottom bar. -->
+        <Style Selector="TextBlock.hint">
+            <Setter Property="Foreground" Value="{DynamicResource N.TextSecondary}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="TextBlock.heading">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style Selector="Border.chip">
+            <Setter Property="Padding" Value="10,3" />
+            <Setter Property="Margin" Value="0,0,8,6" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource N.Card}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource N.CardStroke}" />
+        </Style>
+        <Style Selector="Border.stepdot">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource N.StrongStroke}" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+        </Style>
+        <Style Selector="Border.icontile">
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Background" Value="{DynamicResource N.AttentionBg}" />
+        </Style>
+        <Style Selector="Border.cmdbar">
+            <Setter Property="Padding" Value="24,12" />
+            <Setter Property="BorderThickness" Value="0,1,0,0" />
+            <Setter Property="BorderBrush" Value="{DynamicResource N.Divider}" />
+            <Setter Property="Background" Value="{DynamicResource N.Layer}" />
+        </Style>
+        <Style Selector="Border.header">
+            <Setter Property="Padding" Value="24,8" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource N.Divider}" />
+            <Setter Property="Background" Value="{DynamicResource N.Layer}" />
+        </Style>
+
+        <!-- A text-like button (Open, Show in folder, Compare…) -->
+        <Style Selector="Button.link">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource N.Accent}" />
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource N.Subtle}" />
+            <Setter Property="Foreground" Value="{DynamicResource N.Accent}" />
+        </Style>
+        <Style Selector="Button.link:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource N.Subtle}" />
+            <Setter Property="Foreground" Value="{DynamicResource N.Accent}" />
+        </Style>
+
+        <!-- Segments of a segmented choice (preset, language, paper, zoom): joined, rounded at both ends. -->
+        <Style Selector="RadioButton.seg">
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="Padding" Value="12,4" />
+            <Setter Property="Margin" Value="-1,0,0,0" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="RadioButton.seg.first">
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="CornerRadius" Value="6,0,0,6" />
+        </Style>
+        <Style Selector="RadioButton.seg.last">
+            <Setter Property="CornerRadius" Value="0,6,6,0" />
+        </Style>
+        <Style Selector="RadioButton.seg:checked">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <!-- A choice shown as a card (the preset cards on the start screen): accent border when chosen -->
+        <Style Selector="RadioButton.choice">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="Ring" CornerRadius="8" BorderThickness="2" BorderBrush="Transparent" Padding="0">
+                        <Border Name="Bd" CornerRadius="6" BorderThickness="1" Padding="10,8"
+                                Background="{DynamicResource N.Card}" BorderBrush="{DynamicResource N.CardStroke}">
+                            <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
+                        </Border>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="RadioButton.choice:pointerover /template/ Border#Bd">
+            <Setter Property="BorderBrush" Value="{DynamicResource N.StrongStroke}" />
+        </Style>
+        <Style Selector="RadioButton.choice:checked /template/ Border#Bd">
+            <Setter Property="BorderBrush" Value="{DynamicResource N.Accent}" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="Padding" Value="9,7" />
+            <Setter Property="Background" Value="{DynamicResource N.AttentionBg}" />
+        </Style>
+        <Style Selector="RadioButton.choice:focus-visible /template/ Border#Ring">
+            <Setter Property="BorderBrush" Value="{DynamicResource N.Text}" />
+        </Style>
+
+        <!-- An entry in a section list (More options): an accent bar and bold text mark where you are -->
+        <Style Selector="RadioButton.nav">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Margin" Value="0,0,0,2" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="Bd" CornerRadius="4" BorderThickness="2" BorderBrush="Transparent" Background="Transparent" Padding="8,6">
+                        <DockPanel>
+                            <Border Name="Bar" DockPanel.Dock="Left" Width="3" Height="16" CornerRadius="1.5" Margin="0,0,8,0"
+                                    Background="{DynamicResource N.Accent}" Opacity="0" />
+                            <ContentPresenter Content="{TemplateBinding Content}" VerticalAlignment="Center" />
+                        </DockPanel>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="RadioButton.nav:pointerover /template/ Border#Bd">
+            <Setter Property="Background" Value="{DynamicResource N.Subtle}" />
+        </Style>
+        <Style Selector="RadioButton.nav:checked /template/ Border#Bd">
+            <Setter Property="Background" Value="{DynamicResource N.Subtle}" />
+        </Style>
+        <Style Selector="RadioButton.nav:checked /template/ Border#Bar">
+            <Setter Property="Opacity" Value="1" />
+        </Style>
+        <Style Selector="RadioButton.nav:checked">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="RadioButton.nav:focus-visible /template/ Border#Bd">
+            <Setter Property="BorderBrush" Value="{DynamicResource N.Text}" />
         </Style>
     </Application.Styles>
 </Application>

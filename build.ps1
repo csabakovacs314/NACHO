@@ -2,7 +2,10 @@
 # Steps: icon, unit tests, portable and small exe, installer, self-test, source zip, package zip.
 # Needs: .NET 10 SDK, Inno Setup 6 (winget install JRSoftware.InnoSetup --scope user).
 # -LinuxDir: a folder with the Linux packages made by build-linux.sh; they go into the release's Linux folder.
-param([string]$Version = "0.7.0", [string]$LinuxDir = "")
+# -GoogleClient: the Google "Desktop app" client file built into NACHO for Google Docs in place. It is read from
+#   outside the source folder and never copied into the source zip. Without it, users load their own client file.
+param([string]$Version = "0.11.0", [string]$LinuxDir = "",
+      [string]$GoogleClient = (Join-Path $env:USERPROFILE "Downloads\NACHO\google-client\client.json"))
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
 $release = Join-Path $env:USERPROFILE "Downloads\NACHO\NACHO-$Version"
@@ -10,6 +13,15 @@ if (Test-Path $release) { throw "Release folder already exists: $release. A new 
 $iscc = @("$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe", "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe") |
     Where-Object { Test-Path $_ } | Select-Object -First 1
 if (-not $iscc) { throw "Inno Setup 6 not found. Install it: winget install JRSoftware.InnoSetup --scope user" }
+$gcArg = @()
+if ($GoogleClient -and (Test-Path $GoogleClient)) {
+    $GoogleClient = (Resolve-Path $GoogleClient).Path
+    if ($GoogleClient.StartsWith($root, [System.StringComparison]::OrdinalIgnoreCase)) { throw "Keep the Google client file outside the source folder." }
+    $gcArg = @("-p:NachoGoogleClient=$GoogleClient")
+    Write-Host "Google client: built in from $GoogleClient"
+} else {
+    Write-Host "Google client: none (users will need their own client file)"
+}
 if ($LinuxDir -and -not (Test-Path (Join-Path $LinuxDir "SHA256SUMS.txt"))) { throw "No Linux packages in $LinuxDir (run build-linux.sh on Linux first)." }
 
 Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
@@ -46,14 +58,14 @@ Write-Host "3/7 Publish portable, small and installer payload"
 $out = Join-Path $root "out"
 $app = Join-Path $root "src\Nacho\Nacho.csproj"
 dotnet publish $app -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true `
-    -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o (Join-Path $out "portable") -nologo
+    -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o (Join-Path $out "portable") -nologo @gcArg
 if ($LASTEXITCODE -ne 0) { throw "Portable publish failed." }
 dotnet publish $app -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true `
-    -p:IncludeNativeLibrariesForSelfExtract=true -o (Join-Path $out "small") -nologo
+    -p:IncludeNativeLibrariesForSelfExtract=true -o (Join-Path $out "small") -nologo @gcArg
 if ($LASTEXITCODE -ne 0) { throw "Small publish failed." }
 $payload = Join-Path $out "installer-payload"
 if (Test-Path $payload) { Remove-Item $payload -Recurse -Force }
-dotnet publish $app -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o $payload -nologo
+dotnet publish $app -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o $payload -nologo @gcArg
 if ($LASTEXITCODE -ne 0) { throw "Installer payload publish failed." }
 Get-ChildItem $payload -Filter *.pdb | Remove-Item
 
@@ -85,7 +97,7 @@ Write-Host "7/7 Zips"
 $stage = Join-Path $out "source-stage"
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 New-Item -ItemType Directory -Path $stage | Out-Null
-foreach ($item in "src", "tests", "tools", "installer", "packaging", "licenses", "Directory.Build.props", "build.ps1", "build-linux.sh", "README.txt", "CHANGELOG.md") {
+foreach ($item in "src", "tests", "tools", "installer", "packaging", "licenses", "docs", "Directory.Build.props", "build.ps1", "build-linux.sh", "README.txt", "CHANGELOG.md") {
     Copy-Item (Join-Path $root $item) $stage -Recurse
 }
 Get-ChildItem $stage -Recurse -Directory | Where-Object { $_.Name -in "bin", "obj" } | Remove-Item -Recurse -Force

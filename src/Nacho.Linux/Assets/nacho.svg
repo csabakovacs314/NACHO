@@ -1,5 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 20 20">
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128">
   <title>NACHO</title>
-  <polygon points="10,2 19,17 1,17" fill="#E8A33D" stroke="#8A5000" stroke-width="1.5" stroke-linejoin="round"/>
-  <polygon points="10,9 13.5,15 6.5,15" fill="#FFFFFF"/>
+  <path d="M64 16L114 106H14Z" fill="#F2B33D" stroke="#F2B33D" stroke-width="16" stroke-linejoin="round"/>
+  <circle cx="77" cy="58" r="7" fill="#005FB8"/>
+  <path d="M33 96L53 67L65 82L75 71L96 96Z" fill="#005FB8"/>
 </svg>

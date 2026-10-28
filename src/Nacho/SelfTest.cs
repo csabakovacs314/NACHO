@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Nacho.Core;
+using Nacho.Core.Google;
 
 namespace Nacho;
 
@@ -21,7 +22,7 @@ public static class SelfTest
         "CardStrokeColorDefaultBrush", "SystemFillColorSuccessBrush", "SystemFillColorCriticalBrush",
         "ControlStrongStrokeColorDefaultBrush", "ControlStrokeColorDefaultBrush", "SubtleFillColorSecondaryBrush",
         "AccentFillColorDefaultBrush", "AccentTextFillColorPrimaryBrush", "DividerStrokeColorDefaultBrush",
-        "LayerFillColorDefaultBrush", "AccentButtonStyle",
+        "LayerFillColorDefaultBrush", "AccentButtonStyle", "SystemFillColorCautionBrush",
     };
 
     public static async Task<int> RunAsync(string outDir)
@@ -44,6 +45,7 @@ public static class SelfTest
             Check(settings.Language == installerLanguage, "first run uses the installer's language: " + settings.Language);
         }
         log.AppendLine($"INFO  exe: {Environment.ProcessPath}");
+        log.AppendLine("INFO  built-in Google client: " + (GoogleClientInfo.BuiltIn is { } gci ? "present, id ends " + gci.ClientId[^30..] : "none"));
         log.AppendLine($"INFO  right-click menu on: {ShellIntegration.IsContextMenuOn()}, Send to on: {ShellIntegration.IsSendToOn()}");
         settings.Language = "en";
         settings.PageSize = "A4";
@@ -70,6 +72,20 @@ public static class SelfTest
         };
         w.Show();
         await Settle();
+
+        // 0.11.0: one design everywhere; an empty list shows the start screen with both ways in.
+        Check(w.HomeVisible, "start screen shows while the list is empty");
+        Shot(w, Path.Combine(outDir, "main-en-home.png"), dark: false);
+        App.ApplyTheme("Dark");
+        await Settle();
+        Shot(w, Path.Combine(outDir, "main-en-home-dark.png"), dark: true);
+        App.ApplyTheme("Light");
+        w.Width = 420;
+        await Settle();
+        Shot(w, Path.Combine(outDir, "main-en-home-narrow.png"), dark: false);
+        w.Width = 1240;
+        await Settle();
+
         await w.AddFilesAsync(samples.All);
         await w.WaitIdleAsync();
         await Settle();
@@ -77,6 +93,7 @@ public static class SelfTest
         var byName = w.Items.ToDictionary(i => Path.GetFileName(i.SourcePath));
         ResultItem Get(string path) => byName[Path.GetFileName(path)];
         Check(w.Items.Count == 9, "9 tiles in the list");
+        Check(!w.HomeVisible, "the results replace the start screen");
         Check(w.Items.All(i => !i.IsWorking), "every tile finished");
         Check(Get(samples.Photo).Result?.Kind == ResultKind.Shrunk && Get(samples.Photo).Result?.OutputFormat == "JPEG", "phone photo shrunk to JPEG");
         Check(Get(samples.Photo).Badges.Contains("Location removed"), "phone photo shows Location removed");
@@ -271,6 +288,141 @@ public static class SelfTest
         Loc.Instance.Set("en");
         await Settle();
 
+        // 0.8.0 to 0.10.0: a Google Doc, into a new copy or in place, against a pretend Google (nothing goes over the network).
+        var fake = new SampleGoogle().WithBook();
+        fake.Picked = new HashSet<string>(); // drive.file: only the Docs picked in Google's picker open
+        var session = new GoogleSession(new MemoryTokenStore(), fake)
+        {
+            Client = new GoogleClientInfo("123-selftest.apps.googleusercontent.com", "GOCSPX-selftest"),
+            OpenBrowser = SampleGoogle.AnswerSignIn,
+            Delay = (_, _) => Task.CompletedTask,
+        };
+        GoogleUi.Session = session;
+        GoogleUi.SelfTestClient = true;
+        Check(!session.HasSignIn, "Google: starts signed out");
+        var go = new OptionsWindow(settings) { ShowActivated = false, ShowInTaskbar = false, WindowStartupLocation = WindowStartupLocation.Manual, Left = -20000, Top = 0 };
+        go.Show();
+        await Settle();
+        Check(go.GoogleStatusText == "Not signed in", "Google: Options shows Not signed in: " + go.GoogleStatusText);
+        await go.SignInAsync();
+        await Settle();
+        Check(session.HasSignIn && settings.GoogleEmail == "tester@example.com", "Google: signed in through the browser step: " + settings.GoogleEmail);
+        Check(go.GoogleStatusText == "Signed in as tester@example.com", "Google: Options shows the account: " + go.GoogleStatusText);
+        go.ScrollToGoogle();
+        await Settle();
+        Shot(go, Path.Combine(outDir, "options-google-en.png"), dark: false);
+        go.Close();
+
+        string link = "https://docs.google.com/document/d/1Go0DSEPjSepxQ5O5w-R7YEh55xUJCXDhGRB16mPWo9Y/edit?usp=sharing";
+        try
+        {
+            Clipboard.SetText(link);
+            Check(MainWindow.ClipboardDocsLink() == link, "Google: a Docs link on the clipboard is recognised");
+        }
+        catch (System.Runtime.InteropServices.ExternalException ex)
+        {
+            log.AppendLine("INFO  clipboard busy: " + ex.Message);
+        }
+        // The Google Doc button and Ctrl+G start at Choose even with a Docs link on the clipboard (0.10.0 bug fix).
+        var g0 = w.OpenGoogleDoc(null, activate: false);
+        await Settle();
+        Check(g0.StageName == "Link" && !g0.IsWorking && g0.PrimaryLabel == Loc.T("Gd.Choose") && fake.Picked.Count == 0,
+            $"Google: the button opens at Choose and checks nothing ({g0.StageName}, {g0.PrimaryLabel})");
+        g0.Close();
+        await Settle();
+
+        var gw = w.OpenGoogleDoc(link, activate: false);
+        await Until(() => gw.Plan is not null && !gw.IsWorking, 120);
+        var gplan = gw.Plan;
+        string docId = "1Go0DSEPjSepxQ5O5w-R7YEh55xUJCXDhGRB16mPWo9Y";
+        Check(gplan is not null, $"Google: the link opened the window and the check ran by itself (error: {gw.Error ?? "none"}, busy: {gw.Busy})");
+        Check(fake.Picked.Contains(docId), "Google: a Doc not given to NACHO yet opened the picker for that Doc, then the check ran");
+        if (gplan is not null)
+        {
+            Check(gw.StageName == "Summary" && gw.IntoCopy, "Google: after the check NACHO waits at Decide, with a new copy chosen: " + gw.StageName);
+            Check(gplan.Jobs.Count == 6 && gplan.ToReplace == 4, $"Google: 6 pictures found, 4 to shrink ({gplan.Jobs.Count}, {gplan.ToReplace})");
+            Check(gplan.Count(GooglePictureState.Kept) == 1 && gplan.Count(GooglePictureState.Skipped) == 1, "Google: small picture kept, drawing left alone");
+            Check(fake.Files.Count == 0 && fake.Replaced.Count == 0 && fake.Copies.Count == 0, "Google: the check changed nothing in the Doc or Drive");
+            Check(gplan.OriginalsFolder is { } of && Directory.GetFiles(of).Length == 5, "Google: 5 originals saved in " + gplan.OriginalsFolder);
+            Check(gplan.BytesAfter < gplan.BytesBefore / 4, $"Google: pictures {gplan.BytesBefore} to {gplan.BytesAfter} bytes");
+            Check(gw.PrimaryLabel == Loc.T("Gd.MakeCopy"), "Google: the main button says " + gw.PrimaryLabel);
+            await Settle();
+            Shot(gw, Path.Combine(outDir, "google-en-decide.png"), dark: false);
+            Loc.Instance.Set("hu");
+            await Settle();
+            Shot(gw, Path.Combine(outDir, "google-hu-decide.png"), dark: false);
+            Loc.Instance.Set("es");
+            await Settle();
+            Shot(gw, Path.Combine(outDir, "google-es-decide.png"), dark: false);
+            Loc.Instance.Set("en");
+            await Settle();
+
+            // Into a new copy (the default): the original is only read.
+            await gw.ReplaceAsync();
+            await Settle();
+            var made = fake.Copies.FirstOrDefault();
+            Check(fake.Copies.Count == 1 && made.Source == docId && made.Name == "Plantas no nativas (sample) (smaller)",
+                $"Google: one copy made, next to the original ({fake.Copies.Count}, {made.Name})");
+            Check(fake.Replaced.Count == 4 && fake.ReplacedIn.All(d => d == made.Id) && fake.Files.Count == 0,
+                $"Google: 4 pictures replaced in the copy, none in the original, no temporary file left ({fake.Replaced.Count}, {string.Join(",", fake.ReplacedIn.Distinct())})");
+            Check(gw.Done == Loc.T("Gd.DoneCopyTitle") && gw.DoneDetail.StartsWith("4 of 4 pictures replaced", StringComparison.Ordinal), "Google: done message: " + gw.Done + " / " + gw.DoneDetail);
+            Check(w.StatusMessage.Contains("4 pictures replaced", StringComparison.Ordinal), "Google: main window status: " + w.StatusMessage);
+            Check(settings.GoogleRecent.Count == 1 && settings.GoogleRecent[0].Copy && settings.GoogleRecent[0].DocId == made.Id, "Google: the copy is listed under Recently shrunk");
+            Shot(gw, Path.Combine(outDir, "google-en-done.png"), dark: false);
+
+            // Into this Doc: the user's other choice.
+            await gw.UseLinkAsync(link, autoCheck: true);
+            await Until(() => gw.Plan is not null && !gw.IsWorking, 120);
+            gw.IntoCopy = false;
+            await Settle();
+            Check(gw.PrimaryLabel == Loc.F("Gd.ReplaceN", 4), "Google: in-place button: " + gw.PrimaryLabel);
+            Shot(gw, Path.Combine(outDir, "google-en-decide-doc.png"), dark: false);
+            await gw.ReplaceAsync();
+            await Settle();
+            Check(fake.Replaced.Count == 8 && fake.ReplacedIn.Skip(4).All(d => d == docId) && fake.Copies.Count == 1,
+                "Google: in place, 4 more pictures replaced in the Doc itself and no copy made");
+            Check(gw.Done == Loc.T("Gd.DoneDocTitle"), "Google: in-place done message: " + gw.Done);
+
+            await gw.UseLinkAsync("https://example.com/not-a-doc", autoCheck: false);
+            await gw.CheckAsync();
+            await Settle();
+            Check(gw.LinkErrorShown && gw.Plan is null, "Google: a wrong link is explained, nothing checked");
+
+            // No link at all: the main button opens Google's picker and checks the Doc picked there.
+            await gw.UseLinkAsync("", autoCheck: false);
+            await Settle();
+            Check(gw.PrimaryLabel == Loc.T("Gd.Choose"), "Google: with no link the main button is " + gw.PrimaryLabel);
+            Check(!gw.LinkErrorShown, "Google: emptying the link box clears the wrong-link message");
+            Check(gw.RecentCount == 2, "Google: Recently shrunk lists both runs: " + gw.RecentCount);
+            Check(gw.SafeLine.Contains(Loc.T("Gd.SafeTitle"), StringComparison.Ordinal), "Google: the read-only line is shown before anything changes");
+            Shot(gw, Path.Combine(outDir, "google-en-choose.png"), dark: false);
+            await gw.CheckAsync();
+            await Until(() => !gw.IsWorking, 120);
+            Check(gw.DocId == SampleGoogle.PickerDefault && gw.Plan is not null && fake.Picked.Contains(SampleGoogle.PickerDefault),
+                $"Google: the picker's Doc was checked ({gw.DocId}, error: {gw.Error ?? "none"})");
+            Check(fake.Replaced.Count == 8, "Google: picking and checking changed nothing");
+
+            // A full Drive: the copy can't be made, nothing changes, the user is told and can choose again.
+            fake.CopyFails = """{"error":{"code":403,"message":"The user's Drive storage quota has been exceeded.","errors":[{"reason":"storageQuotaExceeded"}]}}""";
+            gw.IntoCopy = true;
+            await gw.ReplaceAsync();
+            await Settle();
+            Check(gw.Error == Loc.T("Gd.ErrDriveFull") && gw.StageName == "Summary" && fake.Copies.Count == 1 && fake.Replaced.Count == 8,
+                $"Google: a full Drive is explained and nothing changes ({gw.StageName}, {gw.Error})");
+            Shot(gw, Path.Combine(outDir, "google-en-drivefull.png"), dark: false);
+            fake.CopyFails = null;
+
+            fake.ReadOnly = true;
+            gw.IntoCopy = false;
+            await gw.ReplaceAsync();
+            await Settle();
+            Check(gw.Error == Loc.T("Gd.ErrReadOnly") && gw.StageName == "Summary", $"Google: a view-only Doc gets a clear message and the choice again ({gw.StageName}): " + gw.Error);
+            Check(fake.Files.Count == 0, "Google: no temporary file left after the refusal");
+            Shot(gw, Path.Combine(outDir, "google-en-readonly.png"), dark: false);
+            fake.ReadOnly = false;
+        }
+        gw.Close();
+
         foreach (string lang in Strings.Languages)
         {
             Loc.Instance.Set(lang);
@@ -280,7 +432,7 @@ public static class SelfTest
             Shot(o, Path.Combine(outDir, $"options-{lang}.png"), dark: false);
             o.Close();
         }
-        foreach (string lang in new[] { "es", "hu" })
+        foreach (string lang in new[] { "en", "es", "hu" })
         {
             Loc.Instance.Set(lang);
             var about = new AboutWindow(settings) { ShowActivated = false, ShowInTaskbar = false, WindowStartupLocation = WindowStartupLocation.Manual, Left = -20000, Top = 0 };
@@ -292,7 +444,7 @@ public static class SelfTest
         Loc.Instance.Set("en");
 
         w.Close();
-        foreach (string shot in new[] { "main-en-light", "main-es-light", "main-hu-light", "main-es-dark", "main-en-narrow", "main-en-doc", "main-en-pdf", "compare-en-pdf", "main-en-update", "compare-en-copy", "compare-en-256", "compare-hu-256", "compare-en-photo-dark", "options-en", "options-es", "options-hu", "about-es", "about-hu" })
+        foreach (string shot in new[] { "main-en-light", "main-es-light", "main-hu-light", "main-es-dark", "main-en-narrow", "main-en-doc", "main-en-pdf", "compare-en-pdf", "main-en-update", "compare-en-copy", "compare-en-256", "compare-hu-256", "compare-en-photo-dark", "options-en", "options-es", "options-hu", "about-en", "about-es", "about-hu", "main-en-home", "main-en-home-dark", "main-en-home-narrow", "options-google-en", "google-en-choose", "google-en-decide", "google-hu-decide", "google-es-decide", "google-en-decide-doc", "google-en-done", "google-en-drivefull", "google-en-readonly" })
         {
             var f = new FileInfo(Path.Combine(outDir, shot + ".png"));
             Check(f.Exists && f.Length > 10_000, $"screenshot {shot}.png saved");
@@ -302,6 +454,13 @@ public static class SelfTest
         log.AppendLine(fails == 0 ? "ALL PASSED" : $"{fails} FAILED");
         await File.WriteAllTextAsync(Path.Combine(outDir, "selftest-report.txt"), log.ToString());
         return fails == 0 ? 0 : 1;
+    }
+
+    private static async Task Until(Func<bool> done, int seconds)
+    {
+        var until = DateTime.UtcNow.AddSeconds(seconds);
+        while (!done() && DateTime.UtcNow < until) await Task.Delay(200);
+        await Settle();
     }
 
     private static async Task Settle()

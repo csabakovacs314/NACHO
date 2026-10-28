@@ -2,74 +2,101 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:l="using:Nacho.Linux"
         x:Class="Nacho.Linux.AboutWindow"
-        Title="{l:L About.Title}" Width="580" SizeToContent="Height" MinWidth="420" MaxHeight="700"
+        Title="{l:L About.Title}" Width="640" SizeToContent="Height" MinWidth="420" MaxHeight="820"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False" CanResize="False">
     <Window.Styles>
-        <Style Selector="TextBlock.step">
-            <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="Margin" Value="0,0,0,6" />
+        <Style Selector="Border.card">
+            <Setter Property="Margin" Value="0,0,0,14" />
+            <Setter Property="Padding" Value="18,16" />
         </Style>
-        <Style Selector="TextBlock.h">
-            <Setter Property="FontSize" Value="16" />
+        <Style Selector="TextBlock.body">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="LineHeight" Value="19" />
+        </Style>
+        <Style Selector="TextBlock.sub">
+            <Setter Property="FontSize" Value="14" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Margin" Value="0,12,0,8" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,0,0,4" />
         </Style>
     </Window.Styles>
 
     <Grid x:Name="Root" RowDefinitions="*,Auto">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="True">
-        <StackPanel Margin="24,20,24,16">
-            <DockPanel>
-                <Viewbox DockPanel.Dock="Left" Width="56" Height="56" VerticalAlignment="Top">
-                    <Canvas Width="20" Height="20">
-                        <Polygon Points="10,2 19,17 1,17" Fill="#E8A33D" Stroke="#8A5000" StrokeThickness="1.5" StrokeJoin="Round" />
-                        <Polygon Points="10,9 13.5,15 6.5,15" Fill="White" />
-                    </Canvas>
-                </Viewbox>
-                <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="NACHO" FontSize="26" FontWeight="SemiBold" />
-                    <TextBlock Text="{l:L App.Expansion}" FontSize="15" TextWrapping="Wrap" />
-                    <TextBlock x:Name="OtherExpansion" Classes="secondary" FontStyle="Italic" FontSize="13" TextWrapping="Wrap" />
-                </StackPanel>
-            </DockPanel>
-            <DockPanel Margin="0,12,0,6">
-                <Button x:Name="CheckButton" DockPanel.Dock="Right" Content="{l:L Update.CheckNow}" Click="Check_Click" Padding="12,5" VerticalAlignment="Top" />
-                <StackPanel>
-                    <TextBlock x:Name="VersionText" Classes="secondary" FontSize="13" />
-                    <TextBlock x:Name="CheckText" FontSize="13" TextWrapping="Wrap" Margin="0,4,12,0" IsVisible="False" AutomationProperties.LiveSetting="Polite" />
-                    <Button x:Name="ReleaseButton" Classes="accent" Content="{l:L Update.Open}" Click="Release_Click" Padding="12,5"
-                            Margin="0,6,0,0" IsVisible="False" />
-                </StackPanel>
-            </DockPanel>
+            <StackPanel Margin="24,22,24,10">
+                <DockPanel Margin="0,0,0,14">
+                    <l:Logo DockPanel.Dock="Left" Width="64" Height="64" VerticalAlignment="Top" AutomationProperties.Name="NACHO" />
+                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="NACHO" FontSize="26" FontWeight="Bold" />
+                        <TextBlock Text="{l:L App.Expansion}" FontSize="14" TextWrapping="Wrap" />
+                        <TextBlock x:Name="OtherExpansion" Classes="secondary" FontStyle="Italic" FontSize="12" TextWrapping="Wrap" />
+                    </StackPanel>
+                </DockPanel>
 
-            <TextBlock Text="{l:L About.How}" Classes="h" />
-            <TextBlock Classes="step"><Run Text="1. " /><Run Text="{l:L About.Way1}" /></TextBlock>
-            <TextBlock Classes="step"><Run Text="2. " /><Run Text="{l:L About.Way2}" /></TextBlock>
-            <TextBlock Classes="step"><Run Text="3. " /><Run Text="{l:L About.Way3}" /></TextBlock>
-            <TextBlock Classes="step"><Run Text="4. " /><Run Text="{l:L About.Way4}" /></TextBlock>
+                <!-- Version: neutral until checked, then green (newest), blue (newer one out) or amber (could not check) -->
+                <Border x:Name="VersionStrip" Padding="14,8" Margin="0,0,0,14" CornerRadius="6" BorderThickness="1"
+                        Background="{DynamicResource N.Card}" BorderBrush="{DynamicResource N.CardStroke}">
+                    <DockPanel>
+                        <l:StrokeIcon x:Name="VersionIcon" DockPanel.Dock="Left" Data="{StaticResource Icon.Info}" Width="18" Height="18" Margin="0,0,12,0"
+                                      VerticalAlignment="Center" Foreground="{DynamicResource N.TextSecondary}" />
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Spacing="8">
+                            <Button x:Name="ReleaseButton" Classes="accent" Content="{l:L Update.Open}" Click="Release_Click" Padding="12,5" IsVisible="False" />
+                            <Button x:Name="CheckButton" Content="{l:L Update.CheckNow}" Click="Check_Click" Padding="12,5" />
+                        </StackPanel>
+                        <StackPanel VerticalAlignment="Center" Margin="0,0,8,0">
+                            <TextBlock x:Name="VersionText" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock x:Name="CheckText" Classes="body" IsVisible="False" AutomationProperties.LiveSetting="Polite" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
 
-            <TextBlock Text="{l:L About.Replace}" Classes="h" />
-            <TextBlock Text="{l:L About.ReplaceBody}" TextWrapping="Wrap" />
+                <Border Classes="card" BorderThickness="2" BorderBrush="{DynamicResource N.Accent}" Padding="17,15">
+                    <StackPanel>
+                        <TextBlock Text="{l:L About.Google}" Classes="heading" />
+                        <TextBlock Text="{l:L About.GoogleBody}" Classes="body" />
+                    </StackPanel>
+                </Border>
 
-            <TextBlock Text="{l:L About.Doc}" Classes="h" />
-            <TextBlock Text="{l:L About.DocBody}" TextWrapping="Wrap" />
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Text="{l:L About.How}" Classes="heading" />
+                        <StackPanel x:Name="WaysList" />
+                    </StackPanel>
+                </Border>
 
-            <TextBlock Text="{l:L About.Pdf}" Classes="h" />
-            <TextBlock Text="{l:L About.PdfBody}" TextWrapping="Wrap" />
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Text="{l:L About.Replace}" Classes="sub" />
+                        <TextBlock Text="{l:L About.ReplaceBody}" Classes="body" Margin="0,0,0,12" />
+                        <TextBlock Text="{l:L About.Doc}" Classes="sub" />
+                        <TextBlock Text="{l:L About.DocBody}" Classes="body" Margin="0,0,0,12" />
+                        <TextBlock Text="{l:L About.Pdf}" Classes="sub" />
+                        <TextBlock Text="{l:L About.PdfBody}" Classes="body" />
+                    </StackPanel>
+                </Border>
 
-            <TextBlock Text="{l:L About.Keys}" Classes="h" />
-            <TextBlock Text="{l:L About.KeysList}" TextWrapping="Wrap" FontSize="13" />
+                <Border Classes="card">
+                    <StackPanel>
+                        <TextBlock Text="{l:L About.Keys}" Classes="heading" />
+                        <UniformGrid x:Name="KeysGrid" Columns="2" />
+                    </StackPanel>
+                </Border>
 
-            <TextBlock Text="{l:L About.Credits}" Classes="secondary" FontSize="13" Margin="0,18,0,0" />
-        </StackPanel>
+                <WrapPanel Margin="2,2,0,0">
+                    <TextBlock Text="{l:L About.Credits}" Classes="secondary" FontSize="12" VerticalAlignment="Center" />
+                    <TextBlock Text=" · " Classes="secondary" FontSize="12" VerticalAlignment="Center" />
+                    <Button x:Name="PrivacyLink" Classes="link" Content="{l:L About.Privacy}" Click="Privacy_Click" FontSize="12" Padding="2,0" MinHeight="24" />
+                </WrapPanel>
+            </StackPanel>
         </ScrollViewer>
 
-        <Border Grid.Row="1" Padding="24,12" BorderThickness="0,1,0,0"
-                BorderBrush="{DynamicResource N.Divider}" Background="{DynamicResource N.Layer}">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                <Button Content="{l:L About.OpenFolder}" Click="OpenFolder_Click" Padding="12,4" />
-                <Button Content="{l:L About.Close}" IsDefault="True" IsCancel="True" Click="Close_Click" MinWidth="96" Padding="12,4" Classes="accent" />
-            </StackPanel>
+        <Border Grid.Row="1" Classes="cmdbar">
+            <DockPanel>
+                <Button DockPanel.Dock="Left" Content="{l:L About.OpenFolder}" Click="OpenFolder_Click" Padding="12,4" />
+                <Button DockPanel.Dock="Right" Content="{l:L About.Close}" IsDefault="True" IsCancel="True" Click="Close_Click" MinWidth="96" Padding="12,4"
+                        HorizontalAlignment="Right" />
+            </DockPanel>
         </Border>
     </Grid>
 </Window>

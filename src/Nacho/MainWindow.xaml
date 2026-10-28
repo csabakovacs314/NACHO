@@ -8,13 +8,27 @@
         PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="Vis" />
-        <Style x:Key="Secondary" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+        <Style x:Key="CmdButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Margin" Value="0,4,8,4" />
+            <Setter Property="Padding" Value="12,4" />
+            <Setter Property="MinHeight" Value="32" />
         </Style>
-        <Style x:Key="Icon" TargetType="TextBlock">
-            <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+        <Style x:Key="IconText" TargetType="TextBlock" BasedOn="{StaticResource Icon}">
             <Setter Property="Margin" Value="0,0,8,0" />
+        </Style>
+        <!-- A small coloured count in the results summary -->
+        <Style x:Key="CountChip" TargetType="Border" BasedOn="{StaticResource Chip}">
+            <Setter Property="Margin" Value="0,2,8,2" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <!-- The square icon at the top of each start card -->
+        <Style x:Key="IconTile" TargetType="Border">
+            <Setter Property="Width" Value="40" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Background" Value="{DynamicResource SystemFillColorAttentionBackgroundBrush}" />
         </Style>
     </Window.Resources>
 
@@ -26,67 +40,101 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Command bar -->
-        <WrapPanel Grid.Row="0" Margin="12,10,12,4" Orientation="Horizontal" KeyboardNavigation.TabNavigation="Local">
-            <Button x:Name="AddButton" Click="Add_Click" Margin="4" Padding="14,5" MinHeight="32"
-                    Style="{DynamicResource AccentButtonStyle}" ToolTip="Ctrl+O"
-                    AutomationProperties.Name="{l:L Cmd.Add}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Style="{StaticResource Icon}" Text="&#xE710;" />
-                    <TextBlock Text="{l:L Cmd.Add}" />
+        <!-- Header: the app, the commands for the list (once there is one), and the settings that apply everywhere -->
+        <Border Grid.Row="0" Padding="24,8" BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" Background="{DynamicResource LayerFillColorDefaultBrush}">
+            <Grid x:Name="HeaderGrid">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,4,20,4">
+                    <Image Source="{StaticResource Logo}" Width="34" Height="34" AutomationProperties.Name="NACHO" />
+                    <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="NACHO" FontSize="17" FontWeight="Bold" />
+                        <TextBlock x:Name="Tagline" Text="{l:L Home.Tagline}" Style="{StaticResource Secondary}" />
+                    </StackPanel>
                 </StackPanel>
-            </Button>
-            <Button Click="Paste_Click" Margin="4" Padding="12,5" MinHeight="32" ToolTip="Ctrl+V"
-                    AutomationProperties.Name="{l:L Cmd.Paste}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Style="{StaticResource Icon}" Text="&#xE77F;" />
-                    <TextBlock Text="{l:L Cmd.Paste}" />
-                </StackPanel>
-            </Button>
-            <Border Width="1" Height="24" Margin="8,0" VerticalAlignment="Center" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
-            <TextBlock Text="{l:L Cmd.Preset}" Style="{StaticResource Secondary}" VerticalAlignment="Center" Margin="4,0,6,0" />
-            <StackPanel x:Name="PresetGroup" Orientation="Horizontal" Margin="0,4,4,4" AutomationProperties.Name="{l:L Cmd.Preset}">
-                <RadioButton x:Name="PresetSmall" Tag="small" GroupName="Preset" Checked="Preset_Checked"
-                             Style="{DynamicResource {x:Type ToggleButton}}" MinHeight="32" Padding="12,4" Margin="0,0,2,0" />
-                <RadioButton x:Name="PresetBalanced" Tag="balanced" GroupName="Preset" Checked="Preset_Checked"
-                             Style="{DynamicResource {x:Type ToggleButton}}" MinHeight="32" Padding="12,4" Margin="0,0,2,0" />
-                <RadioButton x:Name="PresetSharp" Tag="sharp" GroupName="Preset" Checked="Preset_Checked"
-                             Style="{DynamicResource {x:Type ToggleButton}}" MinHeight="32" Padding="12,4" />
-            </StackPanel>
-            <Button Click="Options_Click" Margin="4" Padding="12,5" MinHeight="32" ToolTip="Ctrl+,"
-                    AutomationProperties.Name="{l:L Cmd.Options}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Style="{StaticResource Icon}" Text="&#xE713;" />
-                    <TextBlock Text="{l:L Cmd.Options}" />
-                </StackPanel>
-            </Button>
-            <Button Click="Undo_Click" Margin="4" Padding="12,5" MinHeight="32" ToolTip="Ctrl+Z"
-                    AutomationProperties.Name="{l:L Cmd.Undo}">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Style="{StaticResource Icon}" Text="&#xE7A7;" />
-                    <TextBlock Text="{l:L Cmd.Undo}" />
-                </StackPanel>
-            </Button>
-            <Button Click="Help_Click" Margin="4" Padding="10,5" MinHeight="32" MinWidth="32" ToolTip="F1"
-                    AutomationProperties.Name="{l:L Cmd.Help}">
-                <TextBlock Style="{StaticResource Icon}" Margin="0" Text="&#xE897;" />
-            </Button>
-            <StackPanel Orientation="Horizontal" Margin="4" AutomationProperties.Name="{l:L Cmd.Language}" ToolTip="{l:L Cmd.Language}">
-                <TextBlock Style="{StaticResource Icon}" Text="&#xE774;" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                <RadioButton x:Name="LangEn" Tag="en" GroupName="Lang" Content="EN" Checked="Language_Checked"
-                             AutomationProperties.Name="English" Style="{DynamicResource {x:Type ToggleButton}}"
-                             MinHeight="32" MinWidth="44" Padding="10,4" Margin="0,0,2,0" />
-                <RadioButton x:Name="LangEs" Tag="es" GroupName="Lang" Content="ES" Checked="Language_Checked"
-                             AutomationProperties.Name="Español" Style="{DynamicResource {x:Type ToggleButton}}"
-                             MinHeight="32" MinWidth="44" Padding="10,4" Margin="0,0,2,0" />
-                <RadioButton x:Name="LangHu" Tag="hu" GroupName="Lang" Content="HU" Checked="Language_Checked"
-                             AutomationProperties.Name="Magyar" Style="{DynamicResource {x:Type ToggleButton}}"
-                             MinHeight="32" MinWidth="44" Padding="10,4" />
-            </StackPanel>
-        </WrapPanel>
+
+                <WrapPanel x:Name="ActionsPanel" Grid.Column="1" VerticalAlignment="Center" KeyboardNavigation.TabNavigation="Local">
+                    <Button x:Name="AddButton" Click="Add_Click" Style="{DynamicResource AccentButtonStyle}" Margin="0,4,8,4" Padding="12,4" MinHeight="32"
+                            ToolTip="Ctrl+O" AutomationProperties.Name="{l:L Cmd.Add}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource IconText}" Text="&#xE710;" />
+                            <TextBlock Text="{l:L Cmd.Add}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Click="Paste_Click" Style="{StaticResource CmdButton}" ToolTip="Ctrl+V" AutomationProperties.Name="{l:L Cmd.Paste}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource IconText}" Text="&#xE77F;" />
+                            <TextBlock Text="{l:L Cmd.Paste}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Click="GoogleDoc_Click" Style="{StaticResource CmdButton}" ToolTip="{l:L Cmd.GoogleDocTip}"
+                            BorderBrush="{DynamicResource AccentFillColorDefaultBrush}"
+                            AutomationProperties.Name="{l:L Cmd.GoogleDoc}" AutomationProperties.HelpText="{l:L Cmd.GoogleDocTip}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource IconText}" Text="&#xE8A5;" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                            <TextBlock Text="{l:L Cmd.GoogleDoc}" FontWeight="SemiBold" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                        </StackPanel>
+                    </Button>
+                    <Border Style="{StaticResource SegmentFrame}" Margin="4,4,8,4" Background="{DynamicResource ControlStrokeColorDefaultBrush}"
+                            ToolTip="{l:L Cmd.Preset}">
+                        <StackPanel x:Name="PresetGroup" Orientation="Horizontal" AutomationProperties.Name="{l:L Cmd.Preset}">
+                            <RadioButton x:Name="PresetSmall" Tag="small" GroupName="Preset" Checked="Preset_Checked" Style="{StaticResource Segment}"
+                                         l:Seg.Corner="5,0,0,5" />
+                            <RadioButton x:Name="PresetBalanced" Tag="balanced" GroupName="Preset" Checked="Preset_Checked" Style="{StaticResource Segment}"
+                                         Margin="1,0,0,0" />
+                            <RadioButton x:Name="PresetSharp" Tag="sharp" GroupName="Preset" Checked="Preset_Checked" Style="{StaticResource Segment}"
+                                         Margin="1,0,0,0" l:Seg.Corner="0,5,5,0" />
+                        </StackPanel>
+                    </Border>
+                    <Button Click="Undo_Click" Style="{StaticResource CmdButton}" ToolTip="Ctrl+Z" AutomationProperties.Name="{l:L Cmd.Undo}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource IconText}" Text="&#xE7A7;" />
+                            <TextBlock Text="{l:L Cmd.Undo}" />
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
+
+                <WrapPanel x:Name="GlobalPanel" Grid.Column="2" VerticalAlignment="Center" KeyboardNavigation.TabNavigation="Local">
+                    <Border Style="{StaticResource SegmentFrame}" Margin="0,4,8,4" Background="{DynamicResource ControlStrokeColorDefaultBrush}"
+                            ToolTip="{l:L Cmd.Language}">
+                        <StackPanel Orientation="Horizontal" AutomationProperties.Name="{l:L Cmd.Language}">
+                            <RadioButton x:Name="LangEn" Tag="en" GroupName="Lang" Content="EN" Checked="Language_Checked"
+                                         AutomationProperties.Name="English" Style="{StaticResource Segment}" MinWidth="44" Padding="10,4"
+                                         l:Seg.Corner="5,0,0,5" />
+                            <RadioButton x:Name="LangEs" Tag="es" GroupName="Lang" Content="ES" Checked="Language_Checked"
+                                         AutomationProperties.Name="Español" Style="{StaticResource Segment}" MinWidth="44" Padding="10,4"
+                                         Margin="1,0,0,0" />
+                            <RadioButton x:Name="LangHu" Tag="hu" GroupName="Lang" Content="HU" Checked="Language_Checked"
+                                         AutomationProperties.Name="Magyar" Style="{StaticResource Segment}" MinWidth="44" Padding="10,4"
+                                         Margin="1,0,0,0" l:Seg.Corner="0,5,5,0" />
+                        </StackPanel>
+                    </Border>
+                    <Button Click="Options_Click" Style="{StaticResource CmdButton}" ToolTip="Ctrl+," AutomationProperties.Name="{l:L Cmd.Options}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource IconText}" Text="&#xE713;" />
+                            <TextBlock Text="{l:L Cmd.Options}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Click="Help_Click" Style="{StaticResource CmdButton}" Margin="0,4,0,4" Padding="8,4" MinWidth="32" ToolTip="F1"
+                            AutomationProperties.Name="{l:L Cmd.Help}">
+                        <TextBlock Style="{StaticResource Icon}" Text="&#xE897;" />
+                    </Button>
+                </WrapPanel>
+            </Grid>
+        </Border>
 
         <!-- A newer NACHO on GitHub: a link only, never a download -->
-        <Border x:Name="UpdateBar" Grid.Row="1" Visibility="Collapsed" Margin="16,2,16,6" Padding="12,6" CornerRadius="6" BorderThickness="1"
+        <Border x:Name="UpdateBar" Grid.Row="1" Visibility="Collapsed" Margin="24,12,24,0" Padding="12,6" CornerRadius="6" BorderThickness="1"
                 BorderBrush="{DynamicResource AccentFillColorDefaultBrush}" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
             <DockPanel>
                 <TextBlock DockPanel.Dock="Left" Style="{StaticResource Icon}" Text="&#xE946;" Margin="0,0,10,0"
@@ -100,8 +148,144 @@
             </DockPanel>
         </Border>
 
-        <!-- Content -->
-        <Grid x:Name="ContentGrid" Grid.Row="2" Margin="16,4,16,12">
+        <!-- Start: two equal ways in, shown while the list is empty -->
+        <ScrollViewer x:Name="HomePanel" Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+            <Grid x:Name="HomeGrid" MinHeight="{Binding ViewportHeight, ElementName=HomePanel}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- the same safety strip as the Google Doc window -->
+                <Border Grid.ColumnSpan="2" Margin="24,16,24,0" Padding="14,8" CornerRadius="6" BorderThickness="1"
+                        Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}" BorderBrush="{DynamicResource SystemFillColorSuccessBrush}">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Left" Style="{StaticResource IconText}" Text="&#xEA18;" FontSize="18" Margin="0,0,12,0"
+                                   Foreground="{DynamicResource SystemFillColorSuccessBrush}" />
+                        <Button x:Name="HomeOpenFolder" DockPanel.Dock="Right" Style="{StaticResource LinkButton}" Content="{l:L Home.OpenFolder}"
+                                Click="OpenFolder_Click" Margin="12,0,0,0" />
+                        <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" FontSize="13">
+                            <Run Text="{l:L Home.Safe}" FontWeight="SemiBold" /><Run Text=" " /><Run x:Name="HomeSafeWhere" />
+                        </TextBlock>
+                    </DockPanel>
+                </Border>
+
+                <!-- Pictures and files -->
+                <Border x:Name="FilesCard" Grid.Row="1" Margin="24,16,8,16" Style="{StaticResource Card}" Padding="22,20">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <DockPanel Margin="0,0,0,16">
+                            <Border DockPanel.Dock="Left" Style="{StaticResource IconTile}">
+                                <TextBlock Style="{StaticResource Icon}" Text="&#xEB9F;" FontSize="20" HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{l:L Home.FilesTitle}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{l:L Home.FilesSub}" Style="{StaticResource Secondary}" FontSize="13" />
+                            </StackPanel>
+                        </DockPanel>
+
+                        <Grid x:Name="DropZone" Grid.Row="1" MinHeight="190">
+                            <Rectangle x:Name="DropRect" RadiusX="8" RadiusY="8" StrokeThickness="2" StrokeDashArray="4 3"
+                                       Stroke="{DynamicResource ControlStrongStrokeColorDefaultBrush}" Fill="Transparent" />
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20,16">
+                                <TextBlock Style="{StaticResource Icon}" FontSize="34" Text="&#xE896;" HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock x:Name="DropTitle" Text="{l:L Home.DropTitle}" FontSize="16" FontWeight="SemiBold" Margin="0,10,0,0"
+                                           TextWrapping="Wrap" TextAlignment="Center" />
+                                <TextBlock x:Name="DropRelease" Text="{l:L Drop.Release}" FontSize="16" FontWeight="SemiBold" Margin="0,10,0,0"
+                                           TextWrapping="Wrap" TextAlignment="Center" Visibility="Collapsed" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{l:L Drop.Sub}" Style="{StaticResource Secondary}" FontSize="13" TextAlignment="Center" Margin="0,4,0,0" />
+                                <WrapPanel HorizontalAlignment="Center" Margin="0,12,0,0">
+                                    <Button x:Name="HomeAdd" Click="Add_Click" Style="{DynamicResource AccentButtonStyle}" MinHeight="36" Padding="16,4" Margin="4"
+                                            ToolTip="Ctrl+O" AutomationProperties.Name="{l:L Cmd.Add}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Style="{StaticResource IconText}" Text="&#xE710;" />
+                                            <TextBlock Text="{l:L Cmd.Add}" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Click="Paste_Click" MinHeight="36" Padding="16,4" Margin="4" Content="{l:L Home.Paste}" />
+                                </WrapPanel>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Grid.Row="2" Margin="0,16,0,0">
+                            <TextBlock x:Name="HomeSizeLabel" Text="{l:L Home.Size}" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6" />
+                            <UniformGrid Columns="3" AutomationProperties.Name="{l:L Home.Size}">
+                                <RadioButton x:Name="HomeSmall" Tag="small" GroupName="HomePreset" Checked="Preset_Checked" Style="{StaticResource ChoiceCard}" Margin="0,0,8,0" />
+                                <RadioButton x:Name="HomeBalanced" Tag="balanced" GroupName="HomePreset" Checked="Preset_Checked" Style="{StaticResource ChoiceCard}" Margin="0,0,8,0" />
+                                <RadioButton x:Name="HomeSharp" Tag="sharp" GroupName="HomePreset" Checked="Preset_Checked" Style="{StaticResource ChoiceCard}" />
+                            </UniformGrid>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- A whole Google Doc -->
+                <Border x:Name="GoogleCard" Grid.Row="1" Grid.Column="1" Margin="8,16,24,16" Style="{StaticResource Card}" Padding="21,19"
+                        BorderThickness="2" BorderBrush="{DynamicResource AccentFillColorDefaultBrush}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <DockPanel Margin="0,0,0,16">
+                            <Border DockPanel.Dock="Left" Style="{StaticResource IconTile}">
+                                <TextBlock Style="{StaticResource Icon}" Text="&#xE8A5;" FontSize="20" HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                            </Border>
+                            <Border DockPanel.Dock="Right" VerticalAlignment="Top" CornerRadius="10" Padding="9,2" Margin="8,2,0,0"
+                                    Background="{DynamicResource AccentFillColorDefaultBrush}">
+                                <TextBlock Text="{l:L Home.New}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{l:L Home.GoogleTitle}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                <TextBlock Text="{l:L Home.GoogleSub}" Style="{StaticResource Secondary}" FontSize="13" />
+                            </StackPanel>
+                        </DockPanel>
+
+                        <StackPanel Grid.Row="1">
+                            <StackPanel x:Name="HomeSteps" />
+                            <DockPanel Margin="0,4,0,10">
+                                <TextBlock DockPanel.Dock="Left" Style="{StaticResource IconText}" Text="&#xE72E;" VerticalAlignment="Top" Margin="2,2,12,0"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="{l:L Gd.ChooseHint}" Style="{StaticResource Secondary}" FontSize="13" />
+                            </DockPanel>
+                        </StackPanel>
+
+                        <Border x:Name="LastTimeBox" Grid.Row="2" Margin="0,6,0,0" Padding="14,6,6,6" CornerRadius="6"
+                                Background="{DynamicResource SubtleFillColorSecondaryBrush}" Visibility="Collapsed">
+                            <DockPanel>
+                                <Button x:Name="LastTimeOpen" DockPanel.Dock="Right" Style="{StaticResource LinkButton}" Content="{l:L Gd.Open}"
+                                        Click="LastTimeOpen_Click" VerticalAlignment="Center" />
+                                <TextBlock x:Name="LastTimeText" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center" />
+                            </DockPanel>
+                        </Border>
+
+                        <WrapPanel Grid.Row="4" Margin="0,16,0,0">
+                            <Button x:Name="HomeChoose" Click="GoogleDoc_Click" Style="{DynamicResource AccentButtonStyle}" MinHeight="40" Padding="20,4"
+                                    Margin="0,0,12,0" Content="{l:L Gd.Choose}" ToolTip="{l:L Cmd.GoogleDocTip}"
+                                    AutomationProperties.HelpText="{l:L Cmd.GoogleDocTip}" />
+                            <TextBlock Text="{l:L Home.ChooseHint}" Style="{StaticResource Secondary}" VerticalAlignment="Center" />
+                        </WrapPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Results -->
+        <Grid x:Name="ContentGrid" Grid.Row="2" Margin="24,16,24,12" Visibility="Collapsed">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -118,183 +302,230 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <Grid x:Name="DropZone" Margin="0,0,0,12" MinHeight="64">
-                    <Rectangle x:Name="DropRect" RadiusX="8" RadiusY="8" StrokeThickness="2" StrokeDashArray="4 3"
-                               Stroke="{DynamicResource ControlStrongStrokeColorDefaultBrush}"
-                               Fill="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
-                    <DockPanel Margin="16,10">
-                        <TextBlock DockPanel.Dock="Left" Style="{StaticResource Icon}" Margin="0,0,14,0" FontSize="24" Text="&#xE896;"
+                <!-- the list at a glance, with the same chips as the Google Doc check -->
+                <DockPanel Margin="0,0,0,10">
+                    <ToggleButton x:Name="PreviewToggle" DockPanel.Dock="Right" Content="{l:L Preview.Title}" Visibility="Collapsed" VerticalAlignment="Top"
+                                  Checked="PreviewToggle_Changed" Unchecked="PreviewToggle_Changed" MinHeight="32" Padding="10,4" Margin="8,0,0,0" />
+                    <TextBlock x:Name="TotalText" DockPanel.Dock="Right" Style="{StaticResource Secondary}" FontSize="13" VerticalAlignment="Center"
+                               TextWrapping="NoWrap" Margin="8,0,0,0" />
+                    <WrapPanel VerticalAlignment="Center">
+                        <TextBlock FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,12,2" TextWrapping="Wrap">
+                            <Run Text="{l:L List.Header}" /><Run x:Name="CountRun" Text="" FontWeight="Normal" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </TextBlock>
+                        <Border x:Name="ChipShrunk" Style="{StaticResource CountChip}" Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}" BorderThickness="0">
+                            <TextBlock x:Name="ChipShrunkText" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource SystemFillColorSuccessBrush}" />
+                        </Border>
+                        <Border x:Name="ChipKept" Style="{StaticResource CountChip}">
+                            <TextBlock x:Name="ChipKeptText" FontSize="13" />
+                        </Border>
+                        <Border x:Name="ChipError" Style="{StaticResource CountChip}" Background="{DynamicResource SystemFillColorCautionBackgroundBrush}" BorderThickness="0">
+                            <TextBlock x:Name="ChipErrorText" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource SystemFillColorCautionBrush}" />
+                        </Border>
+                    </WrapPanel>
+                </DockPanel>
+
+                <!-- the drop area stays, small, once there are results -->
+                <Grid x:Name="DropStrip" Grid.Row="1" Margin="0,0,0,12" MinHeight="40">
+                    <Rectangle x:Name="DropStripRect" RadiusX="8" RadiusY="8" StrokeThickness="2" StrokeDashArray="4 3"
+                               Stroke="{DynamicResource ControlStrongStrokeColorDefaultBrush}" Fill="Transparent" />
+                    <DockPanel Margin="14,8">
+                        <TextBlock DockPanel.Dock="Left" Style="{StaticResource IconText}" Text="&#xE896;" FontSize="16" Margin="0,0,10,0"
                                    Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock x:Name="DropTitle" Text="{l:L Drop.Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                            <TextBlock x:Name="DropRelease" Text="{l:L Drop.Release}" FontWeight="SemiBold" TextWrapping="Wrap" Visibility="Collapsed" />
-                            <TextBlock Text="{l:L Drop.Sub}" Style="{StaticResource Secondary}" FontSize="13" TextWrapping="Wrap" />
-                        </StackPanel>
+                        <TextBlock x:Name="DropStripText" Text="{l:L Main.DropMore}" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" />
                     </DockPanel>
                 </Grid>
 
-                <DockPanel Grid.Row="1" Margin="0,0,0,8">
-                    <ToggleButton x:Name="PreviewToggle" DockPanel.Dock="Right" Content="{l:L Preview.Title}" Visibility="Collapsed"
-                                  Checked="PreviewToggle_Changed" Unchecked="PreviewToggle_Changed" MinHeight="32" Padding="10,4" />
-                    <TextBlock FontWeight="SemiBold" VerticalAlignment="Center">
-                        <Run Text="{l:L List.Header}" /><Run x:Name="CountRun" Text="" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontWeight="Normal" />
-                    </TextBlock>
-                </DockPanel>
-
-                <Grid Grid.Row="2">
-                    <ListBox x:Name="Results" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Stretch"
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionMode="Single"
-                             VirtualizingPanel.ScrollUnit="Pixel"
-                             SelectionChanged="Results_SelectionChanged" KeyDown="Results_KeyDown"
-                             AutomationProperties.Name="{l:L List.Header}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate DataType="{x:Type l:ResultItem}">
-                                <Grid Margin="0,4">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="{l:L Tile.CopyFile}" InputGestureText="Ctrl+Shift+C" Click="CtxCopyFile_Click"
-                                                      Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
-                                            <MenuItem Header="{l:L Tile.Compare}" InputGestureText="Ctrl+D" Click="CtxCompare_Click"
-                                                      Visibility="{Binding CanCompare, Converter={StaticResource Vis}}" />
-                                            <MenuItem Header="{l:L Tile.CopyPicture}" Click="CtxCopyPicture_Click"
-                                                      Visibility="{Binding CanCopyPicture, Converter={StaticResource Vis}}" />
-                                            <MenuItem Header="{l:L Tile.CopyPath}" Click="CtxCopyPath_Click"
-                                                      Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
-                                            <MenuItem Header="{l:L Tile.ShowFolder}" Click="CtxShowFolder_Click"
-                                                      Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
-                                            <MenuItem Header="{l:L Tile.OpenOriginal}" Click="CtxOpenOriginal_Click" />
-                                            <Separator />
-                                            <MenuItem Header="{l:L Tile.Remove}" InputGestureText="Delete" Click="CtxRemove_Click" />
-                                        </ContextMenu>
-                                    </Grid.ContextMenu>
-
-                                    <StackPanel Grid.Column="0" Grid.RowSpan="2" Margin="0,0,12,0" VerticalAlignment="Center">
-                                        <Border Width="96" Height="72" CornerRadius="6" BorderThickness="1" ClipToBounds="True" Cursor="Hand"
-                                                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-                                                Background="{DynamicResource SubtleFillColorSecondaryBrush}"
-                                                ToolTip="{Binding DragHint}" AutomationProperties.Name="{Binding DragName}"
-                                                PreviewMouseLeftButtonDown="Thumb_MouseDown" MouseMove="Thumb_MouseMove">
-                                            <Grid>
-                                                <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" />
-                                                <TextBlock Style="{StaticResource Icon}" Margin="0" FontSize="32" Text="&#xE8A5;"
-                                                           HorizontalAlignment="Center" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
-                                                           Visibility="{Binding ShowDocumentIcon, Converter={StaticResource Vis}}" />
-                                                <ProgressBar IsIndeterminate="True" Width="60" VerticalAlignment="Center"
-                                                             Visibility="{Binding IsWorking, Converter={StaticResource Vis}}" />
-                                                <TextBlock Style="{StaticResource Icon}" Margin="0" FontSize="28" Text="&#xE783;"
-                                                           HorizontalAlignment="Center" Foreground="{DynamicResource SystemFillColorCriticalBrush}"
-                                                           Visibility="{Binding IsError, Converter={StaticResource Vis}}" />
-                                            </Grid>
+                <ListBox x:Name="Results" Grid.Row="2" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Stretch"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionMode="Single"
+                         VirtualizingPanel.ScrollUnit="Pixel"
+                         SelectionChanged="Results_SelectionChanged" KeyDown="Results_KeyDown"
+                         AutomationProperties.Name="{l:L List.Header}">
+                    <ListBox.ItemContainerStyle>
+                        <!-- each result is a card; the selected one gets the accent border, like the choice cards -->
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Margin" Value="0,0,4,10" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="AutomationProperties.Name" Value="{Binding DisplayName}" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="Bd" CornerRadius="8" BorderThickness="1" Padding="14,12"
+                                                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                                                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+                                            <ContentPresenter />
                                         </Border>
-                                        <TextBlock Text="{Binding DragHint}" FontSize="12" Style="{StaticResource Secondary}"
-                                                   HorizontalAlignment="Center" Margin="0,4,0,0"
-                                                   Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
-                                    </StackPanel>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource ControlStrongStrokeColorDefaultBrush}" />
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding IsError}" Value="True">
+                                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource SystemFillColorCautionBrush}" />
+                                            </DataTrigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                                                <Setter TargetName="Bd" Property="BorderThickness" Value="2" />
+                                                <Setter TargetName="Bd" Property="Padding" Value="13,11" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type l:ResultItem}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="{l:L Tile.CopyFile}" InputGestureText="Ctrl+Shift+C" Click="CtxCopyFile_Click"
+                                                  Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
+                                        <MenuItem Header="{l:L Tile.Compare}" InputGestureText="Ctrl+D" Click="CtxCompare_Click"
+                                                  Visibility="{Binding CanCompare, Converter={StaticResource Vis}}" />
+                                        <MenuItem Header="{l:L Tile.CopyPicture}" Click="CtxCopyPicture_Click"
+                                                  Visibility="{Binding CanCopyPicture, Converter={StaticResource Vis}}" />
+                                        <MenuItem Header="{l:L Tile.CopyPath}" Click="CtxCopyPath_Click"
+                                                  Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
+                                        <MenuItem Header="{l:L Tile.ShowFolder}" Click="CtxShowFolder_Click"
+                                                  Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
+                                        <MenuItem Header="{l:L Tile.OpenOriginal}" Click="CtxOpenOriginal_Click" />
+                                        <Separator />
+                                        <MenuItem Header="{l:L Tile.Remove}" InputGestureText="Delete" Click="CtxRemove_Click" />
+                                    </ContextMenu>
+                                </Grid.ContextMenu>
 
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Text="{l:L Tile.Working}" Style="{StaticResource Secondary}"
-                                                   Visibility="{Binding IsWorking, Converter={StaticResource Vis}}" />
-                                        <StackPanel Visibility="{Binding IsOk, Converter={StaticResource Vis}}">
-                                            <TextBlock TextWrapping="Wrap">
-                                                <Run Text="{Binding SizeText, Mode=OneWay}" /><Run Text=" · " /><Run
-                                                     Text="{Binding SmallerText, Mode=OneWay}" FontWeight="SemiBold"
+                                <StackPanel Grid.Column="0" Grid.RowSpan="2" Margin="0,0,14,0" VerticalAlignment="Center">
+                                    <Border Width="96" Height="72" CornerRadius="6" BorderThickness="1" ClipToBounds="True" Cursor="Hand"
+                                            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                            Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                                            ToolTip="{Binding DragHint}" AutomationProperties.Name="{Binding DragName}"
+                                            PreviewMouseLeftButtonDown="Thumb_MouseDown" MouseMove="Thumb_MouseMove">
+                                        <Grid>
+                                            <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" />
+                                            <TextBlock Style="{StaticResource Icon}" FontSize="32" Text="&#xE8A5;"
+                                                       HorizontalAlignment="Center" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                                       Visibility="{Binding ShowDocumentIcon, Converter={StaticResource Vis}}" />
+                                            <ProgressBar IsIndeterminate="True" Width="60" VerticalAlignment="Center"
+                                                         Visibility="{Binding IsWorking, Converter={StaticResource Vis}}" />
+                                            <TextBlock Style="{StaticResource Icon}" FontSize="28" Text="&#xE7BA;"
+                                                       HorizontalAlignment="Center" Foreground="{DynamicResource SystemFillColorCautionBrush}"
+                                                       Visibility="{Binding IsError, Converter={StaticResource Vis}}" />
+                                        </Grid>
+                                    </Border>
+                                    <TextBlock Text="{Binding DragHint}" FontSize="12" Style="{StaticResource Secondary}"
+                                               HorizontalAlignment="Center" Margin="0,4,0,0"
+                                               Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding DisplayName}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{l:L Tile.Working}" Style="{StaticResource Secondary}" FontSize="13"
+                                               Visibility="{Binding IsWorking, Converter={StaticResource Vis}}" />
+                                    <StackPanel Visibility="{Binding IsOk, Converter={StaticResource Vis}}">
+                                        <WrapPanel Margin="0,2,0,2">
+                                            <TextBlock VerticalAlignment="Center" Margin="0,0,10,0" AutomationProperties.Name="{Binding SizeText}">
+                                                <Run Text="{Binding BeforeText, Mode=OneWay}" FontSize="13" TextDecorations="Strikethrough"
+                                                     Foreground="{DynamicResource TextFillColorSecondaryBrush}" /><Run Text="  →  " FontSize="13" /><Run
+                                                     Text="{Binding AfterText, Mode=OneWay}" FontSize="18" FontWeight="Bold"
                                                      Foreground="{DynamicResource SystemFillColorSuccessBrush}" />
                                             </TextBlock>
-                                            <TextBlock Text="{Binding PxText}" FontSize="12" Style="{StaticResource Secondary}" TextWrapping="Wrap" />
-                                            <ItemsControl ItemsSource="{Binding Badges}" Margin="0,4,0,0" Focusable="False">
-                                                <ItemsControl.ItemsPanel>
-                                                    <ItemsPanelTemplate>
-                                                        <WrapPanel />
-                                                    </ItemsPanelTemplate>
-                                                </ItemsControl.ItemsPanel>
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Border CornerRadius="10" Padding="8,1" Margin="0,0,6,4" BorderThickness="1"
-                                                                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                                                                Background="{DynamicResource SubtleFillColorSecondaryBrush}">
-                                                            <TextBlock Text="{Binding}" FontSize="12" />
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </StackPanel>
-                                        <StackPanel Visibility="{Binding IsKept, Converter={StaticResource Vis}}">
-                                            <TextBlock Text="{l:L Tile.KeptTitle}" FontWeight="SemiBold" FontSize="13" />
-                                            <TextBlock Text="{Binding KeptBody}" TextWrapping="Wrap" FontSize="13" />
-                                        </StackPanel>
-                                        <StackPanel Visibility="{Binding IsError, Converter={StaticResource Vis}}">
-                                            <TextBlock Text="{l:L Err.Title}" FontWeight="SemiBold" FontSize="13"
-                                                       Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
-                                            <TextBlock Text="{Binding ErrorBody}" TextWrapping="Wrap" FontSize="13" />
-                                        </StackPanel>
+                                            <Border CornerRadius="10" Padding="8,1" VerticalAlignment="Center"
+                                                    Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}">
+                                                <TextBlock Text="{Binding SmallerText}" FontSize="12" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource SystemFillColorSuccessBrush}" />
+                                            </Border>
+                                        </WrapPanel>
+                                        <TextBlock Text="{Binding PxText}" FontSize="12" Style="{StaticResource Secondary}" />
+                                        <ItemsControl ItemsSource="{Binding Badges}" Margin="0,6,0,0" Focusable="False">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border CornerRadius="10" Padding="8,1" Margin="0,0,6,4"
+                                                            Background="{DynamicResource SubtleFillColorSecondaryBrush}">
+                                                        <TextBlock Text="{Binding}" FontSize="12" />
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
                                     </StackPanel>
-
-                                    <StackPanel VerticalAlignment="Center">
-                                        <StackPanel.Style>
-                                            <Style TargetType="StackPanel">
-                                                <Setter Property="Grid.Row" Value="0" />
-                                                <Setter Property="Grid.Column" Value="2" />
-                                                <Setter Property="Orientation" Value="Vertical" />
-                                                <Setter Property="Width" Value="176" />
-                                                <Setter Property="Margin" Value="12,0,0,0" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsNarrow, RelativeSource={RelativeSource AncestorType=l:MainWindow}}" Value="True">
-                                                        <Setter Property="Grid.Row" Value="1" />
-                                                        <Setter Property="Grid.Column" Value="1" />
-                                                        <Setter Property="Orientation" Value="Horizontal" />
-                                                        <Setter Property="Width" Value="NaN" />
-                                                        <Setter Property="Margin" Value="0,8,0,0" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </StackPanel.Style>
-                                        <Button Content="{l:L Tile.CopyFile}" Click="CopyFile_Click" MinHeight="32" Margin="0,0,6,6"
-                                                Padding="10,4" ToolTip="Ctrl+Shift+C"
-                                                Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
-                                        <Button Content="{l:L Tile.ShowFolder}" Click="ShowFolder_Click" MinHeight="32" Margin="0,0,6,6"
-                                                Padding="10,4"
-                                                Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
-                                        <Button Content="{l:L Tile.Remove}" Click="Remove_Click" MinHeight="32" Margin="0,0,6,6"
-                                                Padding="10,4"
-                                                Visibility="{Binding IsError, Converter={StaticResource Vis}}" />
+                                    <StackPanel Visibility="{Binding IsKept, Converter={StaticResource Vis}}">
+                                        <TextBlock Text="{l:L Tile.KeptTitle}" FontWeight="SemiBold" FontSize="14" Margin="0,2,0,2" />
+                                        <TextBlock Text="{Binding KeptBody}" TextWrapping="Wrap" FontSize="13" Style="{StaticResource Secondary}" />
                                     </StackPanel>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                                    <StackPanel Visibility="{Binding IsError, Converter={StaticResource Vis}}">
+                                        <TextBlock Text="{l:L Err.Title}" FontWeight="SemiBold" FontSize="14" Margin="0,2,0,2"
+                                                   Foreground="{DynamicResource SystemFillColorCautionBrush}" />
+                                        <TextBlock Text="{Binding ErrorBody}" TextWrapping="Wrap" FontSize="13" />
+                                    </StackPanel>
+                                </StackPanel>
 
-                    <StackPanel x:Name="EmptyState" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="440" Margin="16">
-                        <TextBlock Text="{l:L Empty.Title}" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                        <TextBlock Text="{l:L Empty.Body}" Style="{StaticResource Secondary}" TextWrapping="Wrap"
-                                   TextAlignment="Center" Margin="0,6,0,0" />
-                    </StackPanel>
-                </Grid>
+                                <WrapPanel VerticalAlignment="Center">
+                                    <WrapPanel.Style>
+                                        <Style TargetType="WrapPanel">
+                                            <Setter Property="Grid.Row" Value="0" />
+                                            <Setter Property="Grid.Column" Value="2" />
+                                            <Setter Property="Orientation" Value="Vertical" />
+                                            <Setter Property="Width" Value="215" />
+                                            <Setter Property="Margin" Value="12,0,0,0" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsNarrow, RelativeSource={RelativeSource AncestorType=l:MainWindow}}" Value="True">
+                                                    <Setter Property="Grid.Row" Value="1" />
+                                                    <Setter Property="Grid.Column" Value="1" />
+                                                    <Setter Property="Orientation" Value="Horizontal" />
+                                                    <Setter Property="Width" Value="NaN" />
+                                                    <Setter Property="Margin" Value="0,8,0,0" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </WrapPanel.Style>
+                                    <Button Content="{l:L Tile.CopyFile}" Click="CopyFile_Click" MinHeight="32" Margin="0,0,6,4" MinWidth="150"
+                                            Padding="12,4" ToolTip="Ctrl+Shift+C"
+                                            Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
+                                    <Button Content="{l:L Tile.ShowFolder}" Click="ShowFolder_Click" Style="{StaticResource LinkButton}"
+                                            Margin="0,0,6,0" HorizontalAlignment="Left"
+                                            Visibility="{Binding CanDeliver, Converter={StaticResource Vis}}" />
+                                    <Button Content="{l:L Tile.Compare}" Click="CtxCompare_Click" Style="{StaticResource LinkButton}"
+                                            Margin="0,0,6,0" HorizontalAlignment="Left" ToolTip="Ctrl+D"
+                                            Visibility="{Binding CanCompare, Converter={StaticResource Vis}}" />
+                                    <Button Content="{l:L Tile.Remove}" Click="Remove_Click" MinHeight="32" Margin="0,0,6,4"
+                                            Padding="12,4"
+                                            Visibility="{Binding IsError, Converter={StaticResource Vis}}" />
+                                </WrapPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </Grid>
 
             <!-- Page-fit preview -->
-            <Border x:Name="PreviewPanel" Grid.Column="1" Width="380" Margin="16,0,0,0" Padding="16" CornerRadius="8" BorderThickness="1"
-                    Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+            <Border x:Name="PreviewPanel" Grid.Column="1" Width="380" Margin="16,0,0,0" Style="{StaticResource Card}" Padding="16">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
-                    <StackPanel>
+                    <StackPanel Margin="0,0,10,0">
                         <DockPanel Margin="0,0,0,12">
-                            <StackPanel x:Name="PageGroup" DockPanel.Dock="Right" Orientation="Horizontal" AutomationProperties.Name="{l:L Preview.PageSize}">
-                                <RadioButton x:Name="PageA4" Tag="A4" GroupName="Page" Content="{l:L Page.A4}" Checked="Page_Checked"
-                                             Style="{DynamicResource {x:Type ToggleButton}}" MinWidth="60" MinHeight="28" Padding="10,2" Margin="0,0,2,0" />
-                                <RadioButton x:Name="PageLetter" Tag="Letter" GroupName="Page" Content="{l:L Page.Letter}" Checked="Page_Checked"
-                                             Style="{DynamicResource {x:Type ToggleButton}}" MinWidth="60" MinHeight="28" Padding="10,2" />
-                            </StackPanel>
-                            <TextBlock x:Name="PreviewHeading" Text="{l:L Preview.Title}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap" />
+                            <Border DockPanel.Dock="Right" Style="{StaticResource SegmentFrame}" Background="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                    Visibility="{Binding Visibility, ElementName=PageGroup}">
+                                <StackPanel x:Name="PageGroup" Orientation="Horizontal" AutomationProperties.Name="{l:L Preview.PageSize}">
+                                    <RadioButton x:Name="PageA4" Tag="A4" GroupName="Page" Content="{l:L Page.A4}" Checked="Page_Checked"
+                                                 Style="{StaticResource Segment}" MinWidth="56" MinHeight="28" Padding="10,2" l:Seg.Corner="5,0,0,5" />
+                                    <RadioButton x:Name="PageLetter" Tag="Letter" GroupName="Page" Content="{l:L Page.Letter}" Checked="Page_Checked"
+                                                 Style="{StaticResource Segment}" MinWidth="56" MinHeight="28" Padding="10,2" Margin="1,0,0,0"
+                                                 l:Seg.Corner="0,5,5,0" />
+                                </StackPanel>
+                            </Border>
+                            <TextBlock x:Name="PreviewHeading" Text="{l:L Preview.Title}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"
+                                       TextWrapping="Wrap" Margin="0,0,8,0" />
                         </DockPanel>
 
                         <StackPanel x:Name="PreviewOk" Visibility="Collapsed">
@@ -314,13 +545,6 @@
                                 </Border>
                             </Border>
                             <TextBlock x:Name="PreviewCaption" TextWrapping="Wrap" Margin="0,12,0,0" FontSize="13" LineHeight="19" />
-                            <Button x:Name="CompareButton" Click="Compare_Click" HorizontalAlignment="Left" Margin="0,12,0,0"
-                                    MinHeight="32" Padding="12,4" ToolTip="Ctrl+D" AutomationProperties.Name="{l:L Tile.Compare}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Style="{StaticResource Icon}" Text="&#xE89F;" />
-                                    <TextBlock Text="{l:L Tile.Compare}" />
-                                </StackPanel>
-                            </Button>
                             <TextBlock Text="{l:L Preview.TableCaption}" FontWeight="SemiBold" FontSize="13" Margin="0,14,0,6" />
                             <Grid x:Name="Compare">
                                 <Grid.ColumnDefinitions>
@@ -339,24 +563,32 @@
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="{l:L Preview.ColDetail}" Style="{StaticResource Secondary}" FontSize="13" FontWeight="SemiBold" Margin="0,0,12,6" />
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{l:L Preview.ColOriginal}" Style="{StaticResource Secondary}" FontSize="13" FontWeight="SemiBold" Margin="0,0,8,6" />
                                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{l:L Preview.ColCopy}" Style="{StaticResource Secondary}" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6" />
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{l:L Preview.RowSize}" FontSize="13" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{l:L Preview.RowSize}" Style="{StaticResource Secondary}" FontSize="13" Margin="0,0,12,6" />
                                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="CmpSizeA" FontSize="13" Margin="0,0,8,6" />
-                                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="CmpSizeB" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6" />
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{l:L Preview.RowPixels}" FontSize="13" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="CmpSizeB" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6"
+                                           Foreground="{DynamicResource SystemFillColorSuccessBrush}" />
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{l:L Preview.RowPixels}" Style="{StaticResource Secondary}" FontSize="13" Margin="0,0,12,6" />
                                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="CmpPxA" FontSize="13" Margin="0,0,8,6" />
-                                <TextBlock Grid.Row="2" Grid.Column="2" x:Name="CmpPxB" FontSize="13" Margin="0,0,0,6" />
-                                <TextBlock Grid.Row="3" Grid.Column="0" Text="{l:L Preview.RowShape}" FontSize="13" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="2" Grid.Column="2" x:Name="CmpPxB" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6" />
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="{l:L Preview.RowShape}" Style="{StaticResource Secondary}" FontSize="13" Margin="0,0,12,6" />
                                 <TextBlock Grid.Row="3" Grid.Column="1" x:Name="CmpShapeA" FontSize="13" Margin="0,0,8,6" />
                                 <TextBlock Grid.Row="3" Grid.Column="2" x:Name="CmpShapeB" FontSize="13" Margin="0,0,0,6" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                <TextBlock Grid.Row="4" Grid.Column="0" Text="{l:L Preview.RowFormat}" FontSize="13" Margin="0,0,12,6" />
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="{l:L Preview.RowFormat}" Style="{StaticResource Secondary}" FontSize="13" Margin="0,0,12,6" />
                                 <TextBlock Grid.Row="4" Grid.Column="1" x:Name="CmpFmtA" FontSize="13" Margin="0,0,8,6" />
                                 <TextBlock Grid.Row="4" Grid.Column="2" x:Name="CmpFmtB" FontSize="13" Margin="0,0,0,6" />
-                                <TextBlock Grid.Row="5" Grid.Column="0" Text="{l:L Preview.RowLocation}" FontSize="13" Margin="0,0,12,0" TextWrapping="Wrap" MaxWidth="120" />
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="{l:L Preview.RowLocation}" Style="{StaticResource Secondary}" FontSize="13" Margin="0,0,12,0" MaxWidth="120" />
                                 <TextBlock Grid.Row="5" Grid.Column="1" x:Name="CmpLocA" FontSize="13" Margin="0,0,8,0" />
                                 <TextBlock Grid.Row="5" Grid.Column="2" x:Name="CmpLocB" FontSize="13" />
                             </Grid>
                             <TextBlock x:Name="PreviewShapeNote" FontSize="13" TextWrapping="Wrap" Margin="0,12,0,0" LineHeight="19" />
-                            <TextBlock Text="{l:L Preview.Untouched}" Style="{StaticResource Secondary}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            <Button x:Name="CompareButton" Click="Compare_Click" HorizontalAlignment="Stretch" Margin="0,14,0,0"
+                                    MinHeight="32" Padding="12,4" ToolTip="Ctrl+D" AutomationProperties.Name="{l:L Tile.Compare}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource IconText}" Text="&#xE89F;" />
+                                    <TextBlock Text="{l:L Tile.Compare}" />
+                                </StackPanel>
+                            </Button>
+                            <TextBlock Text="{l:L Preview.Untouched}" Style="{StaticResource Secondary}" Margin="0,8,0,0" />
                         </StackPanel>
 
                         <StackPanel x:Name="PreviewDoc" Visibility="Collapsed">
@@ -375,13 +607,14 @@
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="{l:L Preview.ColDetail}" Style="{StaticResource Secondary}" FontSize="13" FontWeight="SemiBold" Margin="0,0,12,6" />
                                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{l:L Preview.ColOriginal}" Style="{StaticResource Secondary}" FontSize="13" FontWeight="SemiBold" Margin="0,0,8,6" />
                                 <TextBlock Grid.Row="0" Grid.Column="2" Text="{l:L Preview.ColCopy}" Style="{StaticResource Secondary}" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6" />
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{l:L Doc.RowDocument}" FontSize="13" Margin="0,0,12,6" TextWrapping="Wrap" MaxWidth="130" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{l:L Doc.RowDocument}" Style="{StaticResource Secondary}" FontSize="13" Margin="0,0,12,6" MaxWidth="130" />
                                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="DocSizeA" FontSize="13" Margin="0,0,8,6" />
-                                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="DocSizeB" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6" />
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{l:L Doc.RowPictures}" FontSize="13" Margin="0,0,12,0" TextWrapping="Wrap" MaxWidth="130" />
+                                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="DocSizeB" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6"
+                                           Foreground="{DynamicResource SystemFillColorSuccessBrush}" />
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="{l:L Doc.RowPictures}" Style="{StaticResource Secondary}" FontSize="13" Margin="0,0,12,0" MaxWidth="130" />
                                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="DocPicsA" FontSize="13" Margin="0,0,8,0" />
                                 <TextBlock Grid.Row="2" Grid.Column="2" x:Name="DocPicsB" FontSize="13" />
-                                <TextBlock Grid.Row="3" Grid.Column="0" x:Name="DocPagesLabel" Text="{l:L Doc.RowPages}" FontSize="13" Margin="0,6,12,0" />
+                                <TextBlock Grid.Row="3" Grid.Column="0" x:Name="DocPagesLabel" Text="{l:L Doc.RowPages}" Style="{StaticResource Secondary}" FontSize="13" Margin="0,6,12,0" />
                                 <TextBlock Grid.Row="3" Grid.Column="1" x:Name="DocPagesA" FontSize="13" Margin="0,6,8,0" />
                                 <TextBlock Grid.Row="3" Grid.Column="2" x:Name="DocPagesB" FontSize="13" Margin="0,6,0,0" />
                             </Grid>
@@ -389,61 +622,61 @@
                             <TextBlock x:Name="DocSkipped" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,0" />
                             <StackPanel x:Name="PdfPart" Visibility="Collapsed">
                                 <TextBlock x:Name="DocDpiNote" FontSize="13" TextWrapping="Wrap" Margin="0,8,0,0" LineHeight="19" />
-                                <Button x:Name="DocCompareButton" Click="Compare_Click" HorizontalAlignment="Left" Margin="0,12,0,0"
+                                <Button x:Name="DocCompareButton" Click="Compare_Click" HorizontalAlignment="Stretch" Margin="0,12,0,0"
                                         MinHeight="32" Padding="12,4" ToolTip="Ctrl+D" AutomationProperties.Name="{l:L Tile.Compare}">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Style="{StaticResource Icon}" Text="&#xE89F;" />
+                                        <TextBlock Style="{StaticResource IconText}" Text="&#xE89F;" />
                                         <TextBlock Text="{l:L Tile.Compare}" />
                                     </StackPanel>
                                 </Button>
-                                <TextBlock Text="{l:L Doc.PdfUntouched}" Style="{StaticResource Secondary}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" />
+                                <TextBlock Text="{l:L Doc.PdfUntouched}" Style="{StaticResource Secondary}" Margin="0,8,0,0" />
                             </StackPanel>
                             <StackPanel x:Name="DocxPart">
-                            <TextBlock Text="{l:L Doc.Steps}" FontWeight="SemiBold" FontSize="13" Margin="0,14,0,6" />
-                            <TextBlock Text="{l:L Doc.Step1}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4" />
-                            <TextBlock Text="{l:L Doc.Step2}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4" />
-                            <TextBlock Text="{l:L Doc.Step3}" FontSize="13" TextWrapping="Wrap" />
-                            <Border Margin="0,12,0,0" Padding="12,8" CornerRadius="6" BorderThickness="1"
-                                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                                    Background="{DynamicResource SubtleFillColorSecondaryBrush}">
-                                <DockPanel>
-                                    <TextBlock DockPanel.Dock="Left" Style="{StaticResource Icon}" VerticalAlignment="Top" Margin="0,2,10,0" Text="&#xE946;" />
-                                    <TextBlock Text="{l:L Doc.Warning}" FontSize="13" TextWrapping="Wrap" />
-                                </DockPanel>
-                            </Border>
-                            <TextBlock Text="{l:L Doc.Untouched}" Style="{StaticResource Secondary}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" />
+                                <TextBlock Text="{l:L Doc.Steps}" FontWeight="SemiBold" FontSize="13" Margin="0,14,0,6" />
+                                <TextBlock Text="{l:L Doc.Step1}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4" />
+                                <TextBlock Text="{l:L Doc.Step2}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4" />
+                                <TextBlock Text="{l:L Doc.Step3}" FontSize="13" TextWrapping="Wrap" />
+                                <Border Margin="0,12,0,0" Padding="12,8" CornerRadius="6" BorderThickness="1"
+                                        BorderBrush="{DynamicResource SystemFillColorCautionBrush}"
+                                        Background="{DynamicResource SystemFillColorCautionBackgroundBrush}">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Left" Style="{StaticResource Icon}" VerticalAlignment="Top" Margin="0,2,10,0" Text="&#xE7BA;"
+                                                   Foreground="{DynamicResource SystemFillColorCautionBrush}" />
+                                        <TextBlock Text="{l:L Doc.Warning}" FontSize="13" TextWrapping="Wrap" />
+                                    </DockPanel>
+                                </Border>
+                                <TextBlock Text="{l:L Doc.Untouched}" Style="{StaticResource Secondary}" Margin="0,8,0,0" />
                             </StackPanel>
                         </StackPanel>
 
                         <Border x:Name="PreviewKept" Visibility="Collapsed" Padding="16" CornerRadius="6"
                                 Background="{DynamicResource SubtleFillColorSecondaryBrush}">
                             <StackPanel>
-                                <TextBlock Text="{l:L Preview.KeptTitle}" FontWeight="SemiBold" />
+                                <TextBlock Text="{l:L Preview.KeptTitle}" FontWeight="SemiBold" TextWrapping="Wrap" />
                                 <TextBlock x:Name="PreviewKeptBody" TextWrapping="Wrap" FontSize="13" Margin="0,6,0,0" />
                             </StackPanel>
                         </Border>
 
-                        <Border x:Name="PreviewError" Visibility="Collapsed" Padding="16" CornerRadius="6"
-                                Background="{DynamicResource SubtleFillColorSecondaryBrush}">
+                        <Border x:Name="PreviewError" Visibility="Collapsed" Padding="16" CornerRadius="6" BorderThickness="1"
+                                BorderBrush="{DynamicResource SystemFillColorCautionBrush}"
+                                Background="{DynamicResource SystemFillColorCautionBackgroundBrush}">
                             <StackPanel>
-                                <TextBlock Text="{l:L Err.Title}" FontWeight="SemiBold" Foreground="{DynamicResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" />
+                                <TextBlock Text="{l:L Err.Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
                                 <TextBlock x:Name="PreviewErrorBody" TextWrapping="Wrap" FontSize="13" Margin="0,6,0,0" />
                             </StackPanel>
                         </Border>
 
-                        <TextBlock x:Name="PreviewEmpty" Style="{StaticResource Secondary}" TextWrapping="Wrap" />
+                        <TextBlock x:Name="PreviewEmpty" Style="{StaticResource Secondary}" FontSize="14" />
                     </StackPanel>
                 </ScrollViewer>
             </Border>
         </Grid>
 
-        <!-- Status bar -->
-        <Border Grid.Row="3" BorderThickness="0,1,0,0" Padding="16,8"
-                BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
-                Background="{DynamicResource LayerFillColorDefaultBrush}">
+        <!-- Status bar: the same bottom bar as every NACHO window -->
+        <Border Grid.Row="3" Style="{StaticResource CommandBar}" Padding="24,8">
             <DockPanel>
                 <TextBlock x:Name="SavingsText" DockPanel.Dock="Right" Style="{StaticResource Secondary}" FontSize="13"
-                           Margin="16,0,0,0" VerticalAlignment="Center" />
+                           Margin="16,0,0,0" VerticalAlignment="Center" TextWrapping="NoWrap" />
                 <TextBlock x:Name="StatusText" FontSize="13" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                            AutomationProperties.LiveSetting="Polite" />
             </DockPanel>

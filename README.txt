@@ -1,26 +1,67 @@
-NACHO 0.7.0
+NACHO 0.11.0
 Normalise, Adjust, Compress, Hand Over
 (Spanish: Normaliza, Ajusta, Comprime y Honra el Original)
 (Hungarian: Normalizál, Arányt tart, Csökkent és Hűen Odaad)
 
-NACHO makes a small, Docs-ready copy of an image before it goes into a Google Doc. It also
+A Google Doc that is slow to open, or eats your Drive storage, because of big pictures?
+NACHO makes every picture in it smaller, keeps each one in its place, and by default puts the
+result in a new copy of the Doc, so your original stays exactly as it is. A real 410-page book
+with 251 photos went from 524 MB to 39 MB. See SHRINK A WHOLE GOOGLE DOC just below.
+
+NACHO opens on a start screen with both ways in side by side: Pictures and files on the left
+(drop them, Add files or Paste, and pick Small, Balanced or Sharp), A whole Google Doc on the right.
+
+NACHO also makes a small, Docs-ready copy of a single image before it goes into a Google Doc,
 shrinks every picture in a Word document (.docx) at once, and makes smaller PDFs.
-Your original file is never changed. The copy goes to Pictures\Docs-Ready.
+Your original files are never changed. Copies go to Pictures\Docs-Ready.
 NACHO runs on Windows 10 and 11, and on 64-bit Linux (see LINUX below).
 
+SHRINK A WHOLE GOOGLE DOC
+  Press Google Doc (Ctrl+G). Five steps, always shown at the top of the window:
+  1 Choose   Press Choose a Google Doc. Google opens in your browser: sign in the first time, allow
+             NACHO, and pick the Doc. Or paste the Doc's link (Ctrl+V anywhere in NACHO, or drag the
+             link onto the window); Google then asks once to confirm that Doc for NACHO.
+  2 Check    NACHO downloads the pictures and makes the smaller ones on this computer. Nothing in
+             Google changes yet: the window says READ ONLY. You see each picture as it is done, the
+             time left, the free disk space and the connection.
+  3 Decide   Where should the smaller pictures go?
+             Into a new copy (recommended, the default): "<title> (smaller)", in the same Drive
+               folder. The original is not touched; to undo, delete the copy. The copy has its own
+               link and is private to you; comments, suggestions and sharing are not copied.
+             Into this Doc: same link, sharing, comments and history. Readers see the change at
+               once; to undo, open the Doc and use File > Version history.
+  4 Replace  Both Docs are on screen: the original marked NOT TOUCHED, the copy BEING WRITTEN.
+             For each picture NACHO puts the smaller one in your Drive for a few seconds, shared as
+             "anyone with the link" so Google Docs can copy it, replaces the picture and deletes the
+             file. Stop (Esc) is safe at any moment.
+  5 Done     Open the copy, copy its link, open the original, or show the original pictures saved
+             on this computer. Recently shrunk (in step 1) lists your last five Docs.
+  Each picture keeps its size on the page and its wrapping. A Docs crop is cut into the smaller
+  picture, so it looks the same. Left as they are: drawings, charts linked from Sheets, and pictures
+  with Docs effects (brightness, contrast, transparency, rotation).
+  What NACHO can reach: only the Docs you pick and the files it makes itself in your Drive (Google's
+  drive.file permission). It never sees your password and never deletes a Doc. A view-only Doc
+  works too: choose Into a new copy, and the copy is yours.
+  Copies of the original pictures are saved in Docs-Ready\Google Docs originals (turn that off in
+  More options > Google Docs). Use another account (step 1) lets you pick a different Google account.
+  Your sign-in is kept encrypted for your Windows user (%APPDATA%\NACHO\google-signin.bin; on
+  Linux ~/.config/nacho/google-signin, readable only by you). Sign out in More options removes it and
+  tells Google. You can also remove NACHO's access at myaccount.google.com > Security >
+  Third-party connections.
+
 FILES
-  NACHO-0.7.0-setup.exe      Windows installer (recommended). English, Spanish or Hungarian, no admin rights needed.
+  NACHO-0.11.0-setup.exe      Windows installer (recommended). English, Spanish or Hungarian, no admin rights needed.
   NACHO.exe                  Windows portable. Runs on Windows 10 or 11 (x64) with nothing to install.
   Small\NACHO.exe            Same Windows app, much smaller, needs the .NET 10 Desktop Runtime.
-  Linux\NACHO-0.7.0-x86_64.AppImage     Linux, one file: make it executable and run it.
-  Linux\nacho-0.7.0-linux-x64.tar.gz    Linux, with install.sh (app menu, Open With, right-click entries).
+  Linux\NACHO-0.11.0-x86_64.AppImage     Linux, one file: make it executable and run it.
+  Linux\nacho-0.11.0-linux-x64.tar.gz    Linux, with install.sh (app menu, Open With, right-click entries).
   Linux\SHA256SUMS.txt                  Checksums for the two Linux files.
-  NACHO-0.7.0-source.zip     Source, unit tests, build.ps1 (Windows) and build-linux.sh (Linux).
-  NACHO-0.7.0.zip            Everything above in one package.
+  NACHO-0.11.0-source.zip     Source, unit tests, build.ps1 (Windows) and build-linux.sh (Linux).
+  NACHO-0.11.0.zip            Everything above in one package.
   licenses\                  Licences of the software NACHO includes (PDFium and its parts).
 
 INSTALLER
-  Run NACHO-0.7.0-setup.exe, pick English, Español or Magyar, then "Install for me only" (no admin
+  Run NACHO-0.11.0-setup.exe, pick English, Español or Magyar, then "Install for me only" (no admin
   rights; goes to %LOCALAPPDATA%\Programs\NACHO) or "Install for all users" (Program Files).
   Options on the way: the right-click entry (on by default), Send to, a desktop shortcut.
   NACHO then starts in the language you picked. You get a Start menu entry, and NACHO appears
@@ -38,14 +79,14 @@ LINUX
   The window, presets, languages, preview and buttons are the same as on Windows.
 
   AppImage (quickest):
-    chmod +x NACHO-0.7.0-x86_64.AppImage
-    ./NACHO-0.7.0-x86_64.AppImage
+    chmod +x NACHO-0.11.0-x86_64.AppImage
+    ./NACHO-0.11.0-x86_64.AppImage
   In More options you can add it to the app menu, to Open With and to the right-click menu.
   Those point at the AppImage file, so put it where it will live first.
 
   Install (adds NACHO to the app menu, Open With and the right-click menu at once):
-    tar xzf nacho-0.7.0-linux-x64.tar.gz
-    cd nacho-0.7.0-linux-x64
+    tar xzf nacho-0.11.0-linux-x64.tar.gz
+    cd nacho-0.11.0-linux-x64
     ./install.sh                 (or ./install.sh --lang hu, --lang es)
   It goes to ~/.local/share/nacho, with the command ~/.local/bin/nacho.
   Remove it with ~/.local/share/nacho/uninstall.sh (settings and Docs-Ready pictures stay; the oxipng
@@ -60,7 +101,7 @@ LINUX
   translated name). Problems are logged in ~/.config/nacho/nacho.log.
   Needs the ICU library (libicu), which desktop distros have. If NACHO does not start, install it:
   Ubuntu, Debian, Mint: sudo apt install libicu-dev     Fedora, AlmaLinux: sudo dnf install libicu
-  Self-test: nacho --selftest /tmp/nacho-test   (or ./NACHO-0.7.0-x86_64.AppImage --selftest ...)
+  Self-test: nacho --selftest /tmp/nacho-test   (or ./NACHO-0.11.0-x86_64.AppImage --selftest ...)
 
 FIRST RUN (WINDOWS)
   The exe is not code-signed, so Windows SmartScreen may say "Windows protected your PC".
@@ -73,6 +114,8 @@ FOUR WAYS IN
   3. Right-click an image in Explorer > Make Docs-ready (setup offers it, or turn it on in More options).
   4. Send to > NACHO (setup offers it, or turn it on in More options).
   A Word document (.docx) works the same way: see A WHOLE DOC AT ONCE below.
+  A Google Doc already full of pictures: press Google Doc (Ctrl+G), or copy its link and press
+  Ctrl+V. See SHRINK A WHOLE GOOGLE DOC above.
   Then drag the thumbnail into your Google Doc, or press Copy file and Ctrl+V in the Doc.
 
 PRESETS
@@ -149,7 +192,7 @@ A SMALLER PDF
 
 UPDATES
   Once a day NACHO asks GitHub whether a newer release exists (turn it off in More options). It
-  sends nothing about you: GitHub sees an ordinary request from "NACHO/0.7.0". When a newer version
+  sends nothing about you: GitHub sees an ordinary request from "NACHO/0.11.0". When a newer version
   is out, a bar says so, with Open release page and Not now. NACHO never downloads or installs
   anything by itself. About > Check for updates asks straight away.
 
@@ -160,6 +203,7 @@ RIGHT-CLICK MENU AND SEND TO
 
 FILES NACHO KEEPS
   Settings: %APPDATA%\NACHO\settings.json
+  Google:   %APPDATA%\NACHO\google-signin.bin (only after you sign in; encrypted for your user)
   Log:      %APPDATA%\NACHO\nacho.log (only written when something goes wrong)
   Copies:   Pictures\Docs-Ready (change it in More options)
 

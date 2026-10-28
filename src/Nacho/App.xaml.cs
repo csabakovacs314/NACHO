@@ -72,6 +72,7 @@ public partial class App : Application
             if (SystemParameters.HighContrast)
             {
                 Current.ThemeMode = ThemeMode.None;
+                Current.Resources.MergedDictionaries.Add(HighContrastBrushes.Create());
                 return;
             }
             Current.ThemeMode = mode switch

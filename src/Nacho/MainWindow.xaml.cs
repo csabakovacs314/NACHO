@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -13,6 +14,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using Nacho.Core;
+using Nacho.Core.Google;
 using Path = System.IO.Path;
 
 namespace Nacho;
@@ -35,6 +37,7 @@ public partial class MainWindow : Window
     private bool _loading = true;
     private Func<string> _status = () => "";
     private UpdateInfo? _update;
+    private GoogleDocWindow? _googleWindow;
 
     public static readonly DependencyProperty IsNarrowProperty =
         DependencyProperty.Register(nameof(IsNarrow), typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
@@ -208,6 +211,7 @@ public partial class MainWindow : Window
                     return (r, path is null ? null : Images.Load(path, 192), path is null ? null : Images.Load(path, 600));
                 });
                 item.SetResult(result, thumb, preview);
+                UpdateCounts();
                 if (result.Kind == ResultKind.Shrunk) _s.AddSavings(result.OriginalBytes - result.OutputBytes);
                 if (ReferenceEquals(Results.SelectedItem, item)) UpdatePreview();
             }
@@ -233,6 +237,55 @@ public partial class MainWindow : Window
     private void Options_Click(object sender, RoutedEventArgs e) => OpenOptions();
     private void Undo_Click(object sender, RoutedEventArgs e) => Undo();
     private void Help_Click(object sender, RoutedEventArgs e) => OpenAbout();
+    // The button and Ctrl+G always start at Choose (Google's picker). Only an explicit paste or drop of a Docs link
+    // checks that Doc straight away; a link that merely sits on the clipboard from earlier is not used.
+    private void GoogleDoc_Click(object sender, RoutedEventArgs e) => OpenGoogleDoc(null);
+
+    /// <summary>Opens (or brings back) the Google Doc window; with a link, NACHO checks that Doc straight away.</summary>
+    public GoogleDocWindow OpenGoogleDoc(string? link, bool activate = true)
+    {
+        if (_googleWindow is null)
+        {
+            var w = new GoogleDocWindow(_s, link) { Owner = this, ShowActivated = activate };
+            _googleWindow = w;
+            w.Finished += GoogleFinished;
+            w.OptionsRequested += () => OpenOptions(google: true);
+            w.Closed += (_, _) => _googleWindow = null;
+            // Hooked before Show: WPF may raise Loaded while Show is still running.
+            if (link is not null) w.Loaded += async (_, _) => await w.UseLinkAsync(link, autoCheck: true);
+            w.Show();
+        }
+        else
+        {
+            if (activate) _googleWindow.Activate();
+            if (link is not null) _ = _googleWindow.UseLinkAsync(link, autoCheck: true);
+        }
+        return _googleWindow;
+    }
+
+    private void GoogleFinished(GoogleDocPlan plan)
+    {
+        int replaced = plan.Count(GooglePictureState.Replaced);
+        long saved = plan.Jobs.Where(j => j.State == GooglePictureState.Replaced).Sum(j => j.OriginalBytes - j.NewBytes);
+        _s.AddSavings(saved);
+        _s.Save();
+        UpdateSavings();
+        string title = plan.CopyName ?? plan.Doc.Title.Trim();
+        SetStatus(() => Loc.F("Status.GoogleDone", title, replaced, Loc.Bytes(saved)));
+        RenderHome();
+    }
+
+    public static string? ClipboardDocsLink()
+    {
+        try
+        {
+            return Clipboard.ContainsText() && GoogleDocLink.TryGetId(Clipboard.GetText()) is not null ? Clipboard.GetText().Trim() : null;
+        }
+        catch (ExternalException)
+        {
+            return null;
+        }
+    }
 
     private async void AddImages()
     {
@@ -249,6 +302,11 @@ public partial class MainWindow : Window
     {
         try
         {
+            if (ClipboardDocsLink() is { } link)
+            {
+                OpenGoogleDoc(link);
+                return;
+            }
             if (Clipboard.ContainsFileDropList())
             {
                 var files = Clipboard.GetFileDropList().Cast<string>().ToList();
@@ -312,10 +370,11 @@ public partial class MainWindow : Window
         SetStatus(() => Loc.F("Status.Undone", deleted));
     }
 
-    private void OpenOptions()
+    private void OpenOptions(bool google = false)
     {
         string before = _s.Language;
-        var w = new OptionsWindow(_s) { Owner = this };
+        var w = new OptionsWindow(_s) { Owner = google && _googleWindow is not null ? _googleWindow : this };
+        if (google) w.Loaded += (_, _) => w.ScrollToGoogle();
         if (w.ShowDialog() != true) return;
         _s.Save();
         if (_s.Language != before) Loc.Instance.Set(_s.Language);
@@ -349,6 +408,9 @@ public partial class MainWindow : Window
         if (_loading || sender is not FrameworkElement { Tag: string id } || _s.CurrentPreset == id) return;
         _s.CurrentPreset = id;
         _s.Save();
+        _loading = true;
+        SelectPresetButton();
+        _loading = false;
         var p = _s.GetPreset();
         string Message() => Loc.F("Status.PresetSet", Loc.T("Preset." + id), p.LongEdge, p.BudgetKB);
 
@@ -403,6 +465,7 @@ public partial class MainWindow : Window
         else if (mods == ModifierKeys.Control && e.Key == Key.Z) { Undo(); e.Handled = true; }
         else if (mods == ModifierKeys.Control && e.Key == Key.D) { OpenCompare(Results.SelectedItem as ResultItem); e.Handled = true; }
         else if (mods == ModifierKeys.Control && e.Key == Key.OemComma) { OpenOptions(); e.Handled = true; }
+        else if (mods == ModifierKeys.Control && e.Key == Key.G) { OpenGoogleDoc(null); e.Handled = true; }
         else if (mods == ModifierKeys.None && e.Key == Key.F1) { OpenAbout(); e.Handled = true; }
     }
 
@@ -568,19 +631,39 @@ public partial class MainWindow : Window
         ShowDropHighlight(false);
         if (_draggingOut) return;
         if (e.Data.GetData(DataFormats.FileDrop) is string[] files) await AddFilesAsync(files);
+        else if (DroppedDocsLink(e.Data) is { } link) OpenGoogleDoc(link);
     }
 
     private void SetDragEffects(DragEventArgs e)
     {
-        e.Effects = !_draggingOut && e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Effects = !_draggingOut && (e.Data.GetDataPresent(DataFormats.FileDrop) || DroppedDocsLink(e.Data) is not null)
+            ? DragDropEffects.Copy : DragDropEffects.None;
         e.Handled = true;
+    }
+
+    /// <summary>A Google Docs link dragged from the browser's address bar or a page.</summary>
+    private static string? DroppedDocsLink(IDataObject data)
+    {
+        try
+        {
+            string? text = data.GetDataPresent(DataFormats.UnicodeText) ? data.GetData(DataFormats.UnicodeText) as string : null;
+            return GoogleDocLink.TryGetId(text) is not null ? text!.Trim() : null;
+        }
+        catch (Exception ex) when (ex is ExternalException or InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     private void ShowDropHighlight(bool on)
     {
-        DropRect.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, on ? "AccentFillColorDefaultBrush" : "ControlStrongStrokeColorDefaultBrush");
+        string stroke = on ? "AccentFillColorDefaultBrush" : "ControlStrongStrokeColorDefaultBrush";
+        DropRect.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, stroke);
+        DropStripRect.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, stroke);
+        DropRect.StrokeThickness = DropStripRect.StrokeThickness = on ? 3 : 2;
         DropTitle.Visibility = on ? Visibility.Collapsed : Visibility.Visible;
         DropRelease.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+        DropStripText.Text = Loc.T(on ? "Drop.Release" : "Main.DropMore");
     }
 
     // ---------- view updates ----------
@@ -590,6 +673,7 @@ public partial class MainWindow : Window
     private void SelectPresetButton()
     {
         (_s.CurrentPreset switch { "small" => PresetSmall, "sharp" => PresetSharp, _ => PresetBalanced }).IsChecked = true;
+        (_s.CurrentPreset switch { "small" => HomeSmall, "sharp" => HomeSharp, _ => HomeBalanced }).IsChecked = true;
     }
 
     private void SyncLanguageButtons()
@@ -607,9 +691,17 @@ public partial class MainWindow : Window
         SyncLanguageButtons();
         RenderStatus();
         Title = "NACHO · " + Loc.T("App.Expansion");
-        PresetSmall.Content = PresetLabel(_s.Presets[0]);
-        PresetBalanced.Content = PresetLabel(_s.Presets[1]);
-        PresetSharp.Content = PresetLabel(_s.Presets[2]);
+        // The header keeps the names short; the size each one means is in the tooltip and on the start screen.
+        foreach (var (button, p) in new[] { (PresetSmall, _s.Presets[0]), (PresetBalanced, _s.Presets[1]), (PresetSharp, _s.Presets[2]) })
+        {
+            button.Content = Loc.T("Preset." + p.Id);
+            button.ToolTip = Loc.T("Preset." + p.Id) + " · " + Loc.F("Home.PresetSpec", p.LongEdge, p.BudgetKB);
+            AutomationProperties.SetHelpText(button, Loc.F("Home.PresetSpec", p.LongEdge, p.BudgetKB));
+        }
+        HomeSmall.Content = PresetCard(_s.Presets[0]);
+        HomeBalanced.Content = PresetCard(_s.Presets[1]);
+        HomeSharp.Content = PresetCard(_s.Presets[2]);
+        RenderHome();
         foreach (var item in Items) item.Refresh();
         RenderUpdate();
         UpdateCounts();
@@ -617,13 +709,100 @@ public partial class MainWindow : Window
         UpdatePreview();
     }
 
-    private static string PresetLabel(Preset p) => Loc.F("Preset.Label", Loc.T("Preset." + p.Id), p.LongEdge);
+    /// <summary>A preset card on the start screen: the name, and what it means in pixels and kilobytes.</summary>
+    private static StackPanel PresetCard(Preset p)
+    {
+        var spec = new TextBlock { Text = Loc.F("Home.PresetSpec", p.LongEdge, p.BudgetKB), FontSize = 12, TextWrapping = TextWrapping.Wrap };
+        spec.SetResourceReference(TextBlock.ForegroundProperty, "TextFillColorSecondaryBrush");
+        return new StackPanel
+        {
+            Children = { new TextBlock { Text = Loc.T("Preset." + p.Id), FontSize = 14, FontWeight = FontWeights.SemiBold }, spec },
+        };
+    }
+
+    /// <summary>True while the list is empty and the start screen (files or a whole Google Doc) is shown.</summary>
+    public bool HomeVisible => HomePanel.Visibility == Visibility.Visible;
+
+    /// <summary>The start screen's texts that depend on settings: where copies go, the Google steps and the last Doc.</summary>
+    private void RenderHome()
+    {
+        HomeSafeWhere.Text = Loc.F("Home.SafeBody", FolderName(_s.OutputFolder));
+        HomeSteps.Children.Clear();
+        string[] steps = { "Home.Step1", "Home.Step2", _s.GoogleIntoCopy ? "Home.Step3" : "Home.Step3Doc" };
+        for (int i = 0; i < steps.Length; i++)
+        {
+            var number = new TextBlock { Text = (i + 1).ToString(Loc.Instance.Culture), FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+            var dot = new Border { Style = (Style)FindResource("StepDot"), Child = number };
+            var text = new TextBlock { Text = Loc.T(steps[i]), FontSize = 14, TextWrapping = TextWrapping.Wrap, VerticalAlignment = VerticalAlignment.Center };
+            var row = new DockPanel { Margin = new Thickness(0, 0, 0, 10) };
+            DockPanel.SetDock(dot, Dock.Left);
+            row.Children.Add(dot);
+            row.Children.Add(text);
+            AutomationProperties.SetName(row, $"{i + 1}. {text.Text}");
+            HomeSteps.Children.Add(row);
+        }
+
+        var last = _s.GoogleRecent.FirstOrDefault();
+        LastTimeBox.Visibility = last is null ? Visibility.Collapsed : Visibility.Visible;
+        LastTimeText.Inlines.Clear();
+        if (last is null) return;
+        LastTimeText.Inlines.Add(new Run(Loc.T("Home.LastTime") + " "));
+        LastTimeText.Inlines.Add(new Bold(new Run(last.Title)));
+        LastTimeText.Inlines.Add(new Run($" · {Loc.Bytes(last.BytesBefore)} → {Loc.Bytes(last.BytesAfter)}"));
+        AutomationProperties.SetName(LastTimeText, Loc.T("Home.LastTime") + " " + last.Title + ", " + Loc.F("Tile.SizeLine", Loc.Bytes(last.BytesBefore), Loc.Bytes(last.BytesAfter)));
+        AutomationProperties.SetName(LastTimeOpen, Loc.T("Gd.Open") + " " + last.Title);
+    }
+
+    /// <summary>"Pictures › Docs-Ready": the folder and its parent, enough to recognise it.</summary>
+    public static string FolderName(string folder)
+    {
+        string trimmed = folder.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        string name = Path.GetFileName(trimmed);
+        string? parent = Path.GetFileName(Path.GetDirectoryName(trimmed) ?? "");
+        return string.IsNullOrEmpty(parent) ? (name.Length > 0 ? name : trimmed) : parent + " › " + name;
+    }
+
+    private void OpenFolder_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Directory.CreateDirectory(_s.OutputFolder);
+            GoogleUi.OpenFolder(_s.OutputFolder);
+        }
+        catch (Exception ex)
+        {
+            App.Log(ex);
+        }
+    }
+
+    private void LastTimeOpen_Click(object sender, RoutedEventArgs e)
+    {
+        if (_s.GoogleRecent.FirstOrDefault() is { } last) GoogleUi.OpenDoc(last.DocId);
+    }
 
     private void UpdateCounts()
     {
         int n = Items.Count;
         CountRun.Text = n == 0 ? "" : " · " + (n == 1 ? Loc.T("List.Count1") : Loc.F("List.CountN", n));
-        EmptyState.Visibility = n == 0 ? Visibility.Visible : Visibility.Collapsed;
+        var show = n == 0 ? Visibility.Visible : Visibility.Collapsed;
+        HomePanel.Visibility = show;
+        Tagline.Visibility = show;
+        ContentGrid.Visibility = n == 0 ? Visibility.Collapsed : Visibility.Visible;
+        ActionsPanel.Visibility = ContentGrid.Visibility;
+
+        int ok = Items.Count(i => i.IsOk), kept = Items.Count(i => i.IsKept), bad = Items.Count(i => i.IsError);
+        ChipShrunkText.Text = Loc.F("Main.ChipShrunk", ok);
+        ChipShrunk.Visibility = ok > 0 ? Visibility.Visible : Visibility.Collapsed;
+        ChipKeptText.Text = Loc.F(kept == 1 ? "Main.ChipKept1" : "Main.ChipKeptN", kept);
+        ChipKept.Visibility = kept > 0 ? Visibility.Visible : Visibility.Collapsed;
+        ChipErrorText.Text = Loc.F(bad == 1 ? "Main.ChipError1" : "Main.ChipErrorN", bad);
+        ChipError.Visibility = bad > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        long before = Items.Where(i => i.IsOk || i.IsKept).Sum(i => i.Result!.OriginalBytes);
+        long after = Items.Where(i => i.IsOk || i.IsKept).Sum(i => i.IsOk ? i.Result!.OutputBytes : i.Result!.OriginalBytes);
+        TotalText.Text = ok > 0 ? $"{Loc.Bytes(before)} → {Loc.Bytes(after)}" : "";
+        AutomationProperties.SetName(TotalText, ok > 0 ? Loc.F("Tile.SizeLine", Loc.Bytes(before), Loc.Bytes(after)) : "");
+        ApplyLayout();
     }
 
     private void UpdateSavings() => SavingsText.Text = Loc.F("Footer.Savings", Loc.Bytes(_s.MonthSavings()));
@@ -639,6 +818,31 @@ public partial class MainWindow : Window
         PreviewPanel.Width = narrow ? double.NaN : 380;
         PreviewPanel.MaxHeight = narrow ? 320 : double.PositiveInfinity;
         PreviewPanel.Margin = narrow ? new Thickness(0, 12, 0, 0) : new Thickness(16, 0, 0, 0);
+
+        // Header: the language, options and help move to their own line.
+        Grid.SetRow(GlobalPanel, narrow ? 1 : 0);
+        Grid.SetColumn(GlobalPanel, narrow ? 0 : 2);
+        Grid.SetColumnSpan(GlobalPanel, narrow ? 3 : 1);
+        GlobalPanel.HorizontalAlignment = narrow ? HorizontalAlignment.Left : HorizontalAlignment.Stretch;
+        Grid.SetRow(ActionsPanel, 0);
+        Grid.SetColumn(ActionsPanel, narrow ? 0 : 1);
+        Grid.SetColumnSpan(ActionsPanel, narrow ? 3 : 1);
+        if (narrow) Grid.SetRow(ActionsPanel, 2);
+
+        // Results summary: the preview button goes under the chips, the total is left out.
+        DockPanel.SetDock(PreviewToggle, narrow ? Dock.Bottom : Dock.Right);
+        PreviewToggle.HorizontalAlignment = narrow ? HorizontalAlignment.Left : HorizontalAlignment.Stretch;
+        PreviewToggle.Margin = narrow ? new Thickness(0, 8, 0, 0) : new Thickness(8, 0, 0, 0);
+        TotalText.Visibility = narrow ? Visibility.Collapsed : Visibility.Visible;
+
+        // Start screen: the two cards stack.
+        Grid.SetRow(GoogleCard, narrow ? 2 : 1);
+        Grid.SetColumn(GoogleCard, narrow ? 0 : 1);
+        Grid.SetColumnSpan(GoogleCard, narrow ? 2 : 1);
+        Grid.SetColumnSpan(FilesCard, narrow ? 2 : 1);
+        HomeGrid.RowDefinitions[1].Height = narrow ? GridLength.Auto : new GridLength(1, GridUnitType.Star);
+        FilesCard.Margin = narrow ? new Thickness(16, 12, 16, 0) : new Thickness(24, 16, 8, 16);
+        GoogleCard.Margin = narrow ? new Thickness(16, 12, 16, 16) : new Thickness(8, 16, 24, 16);
     }
 
     private void UpdatePreview()
